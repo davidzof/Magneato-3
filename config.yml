@@ -1,0 +1,45 @@
+logging:
+  level: INFO
+  loggers:
+    org.magneato: DEBUG
+
+#Server configuration.
+server:
+    applicationConnectors:
+        - type: http
+          port: 8080
+
+server:
+  type:
+    jettyauthserver
+
+# Default Administrator User, update the password before putting into production
+login: admin
+password: secure
+
+# External Resources
+assets:
+  mappings:
+    /assets: /library
+  # http://localhost:8080/library/images/logo.png
+  overrides:
+    /library/images: "/home/david/src/dropwizard/DWGettingStarted/assets"
+
+#
+# Available edit and display templates
+#
+templates:
+  - name: users
+    description: _users
+    fields:
+      - id
+      - email
+      - created_at
+  - name: orders
+    description: _orders
+    fields:
+      - id
+      - total
+      - quantity
+
+
