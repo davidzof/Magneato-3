@@ -1,7 +1,7 @@
 logging:
   level: INFO
   loggers:
-    org.magneato: DEBUG
+    "org.magneato": DEBUG
 
 #Server configuration.
 server:
@@ -29,17 +29,14 @@ assets:
 # Available edit and display templates
 #
 templates:
-  - name: users
-    description: _users
-    fields:
-      - id
-      - email
-      - created_at
-  - name: orders
-    description: _orders
-    fields:
-      - id
-      - total
-      - quantity
+  - name: simple
+    description: simple page template containing title, edit box and attachments
+    views:
+      - simple
+  - name: trip_report
+    description: A template for creating trip reports, can attach jpegs and gpx files
+    views:
+      - ski_tour
+      - mtb
 
 

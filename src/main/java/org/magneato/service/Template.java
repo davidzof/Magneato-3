@@ -15,7 +15,7 @@ public class Template {
 
     @NotEmpty // should match name
     @JsonProperty
-    private List<String> fields;
+    private List<String> views;
 
     public String getName() {
         return name;
@@ -25,8 +25,8 @@ public class Template {
         return description;
     }
 
-    public List<String> getFields() {
-        return fields;
+    public List<String> getViews() {
+        return views;
     }
 
 }

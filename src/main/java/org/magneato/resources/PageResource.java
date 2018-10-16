@@ -1,8 +1,19 @@
 package org.magneato.resources;
 
 import io.dropwizard.views.View;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.magneato.service.Template;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.awt.Image;
+import javax.annotation.security.RolesAllowed;
+import javax.imageio.ImageIO;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.SecurityContext;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -13,22 +24,6 @@ import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.annotation.security.RolesAllowed;
-import javax.imageio.ImageIO;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.SecurityContext;
-
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.magneato.service.Template;
-
 // https://github.com/wdawson/dropwizard-auth-example/blob/master/pom.xml
 /*
  * Basic CRUD stuff READ (, WRITE, DELETE, UPDATE (PUT)
@@ -38,35 +33,52 @@ import org.magneato.service.Template;
 public class PageResource {
 	List<Template> templates;
 
+	final Logger log = LoggerFactory.getLogger(this.getClass().getName());
+
 	public PageResource(List<Template> replicates) {
 		this.templates = replicates;
 	}
 
 	HashMap<String, String> pageStore = new HashMap<String, String>();
 
+//	  How do we handle home (default) web page? - I think we'll simply force the ID to 0 or something
+	@GET
+	@Path("")
+	@Produces(MediaType.TEXT_HTML)
+	public View getDefault( @Context SecurityContext security) {
+	    return get ("null", security);
+    }
+
 	/**
 	 * Display a normal web page
-	 * 
-	 * @param uri
-	 * @param security
-	 * @return
+	 *
+	 * @param uri - name of resource to be displayed
+	 * @param security - security context
+	 * @return Freemarker view
 	 */
 	@GET
-	@Path("{uri}.htm")
+	@Path("{uri}")
 	@Produces(MediaType.TEXT_HTML)
-	public View getAsset(@PathParam("uri") String uri,
+	public View get(@PathParam("uri") String uri,
 			@Context SecurityContext security) {
-		System.out.println(uri);
 
-	    for (Template r:  templates) {
-	        System.out.println("desitrnateion " + r.getDescription());
-	    }
+		log.debug("get " + uri);
 
+		if (uri == null || uri.isEmpty()) {
+		    log.debug("default page");
+			// default page?
+		}
+
+
+
+
+	    // TODO: tests remove this
 		Principal principal = security.getUserPrincipal();
 		if (principal != null) {
 			System.out.println(security.getUserPrincipal().getName());
 		}
 
+		// TODO: use Elastic
 		String body = pageStore.get(uri);
 		if (body == null) {
 			// no contents, create page instead
@@ -77,24 +89,32 @@ public class PageResource {
 	}
 	
 	/**
-	 * Create a new page, displays a form where you can enter title, edit and display template to use, page name is optional but must not exist
+	 * Create a new page, displays a form where you can select the edit and display template to use
 	 * 
 	 * - you need to be an editor to do this
-	 * - you tell say which template to use
-	 * - can supply page name to create
-	 * /create/{name}.htm/<template>
-	 * /create/<template>
-	 * @param uri
-	 * @param security
-	 * @return
+     * - editTemplate can be specified, in this case default (first) display template is used
+	 * - displayTemplate can be specified
+	 *
+	 * If the editTemplate and/or displayTemplate are specified we pass directly to the edit page
 	 */
 	@GET
 	@Path("create")
 	@Produces(MediaType.TEXT_HTML)
-	public View create(@PathParam("uri") String uri,
+	public View create(
+			@QueryParam("editTemplate") String editTemplate,
+			@QueryParam("displayTemplate") String displayTemplate,
 			@Context SecurityContext security) {
-		
-		return new PageView(body);
+		log.debug("create " + editTemplate);
+
+		for (Template r:  templates) {
+			System.out.println("template" + r.getDescription());
+			System.out.println("description" + r.getName());
+			for (String view :r.getViews()) {
+				System.out.println("display " + view);
+			}
+		}
+
+		return new CreatePageView(templates);
 	}
 
 	
@@ -112,8 +132,13 @@ public class PageResource {
 		return new FormView(uri, body);
 	}
 
+	/**
+     * @param uri
+	 * @param body
+	 * @return
+	 */
 	@POST
-	@Path("{uri}.htm")
+	@Path("/save{uri : (/uri)?}")
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public String saveAsset(@PathParam("uri") String uri, String body) {
@@ -122,6 +147,7 @@ public class PageResource {
 		pageStore.put(uri, body);
 		return uri;
 	}
+
 
 	// https://gitlab.com/zloster/dropwizard-static
     //https://github.com/dropwizard-bundles/dropwizard-configurable-assets-bundle

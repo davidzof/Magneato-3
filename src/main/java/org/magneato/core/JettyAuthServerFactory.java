@@ -1,12 +1,11 @@
 package org.magneato.core;
 
+import com.codahale.metrics.MetricRegistry;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.jetty.MutableServletContextHandler;
 import io.dropwizard.server.DefaultServerFactory;
-
-import javax.servlet.Servlet;
-import javax.validation.Validator;
-
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.security.UserStore;
@@ -18,9 +17,8 @@ import org.eclipse.jetty.util.security.Constraint;
 import org.eclipse.jetty.util.security.Password;
 import org.magneato.MagneatoConfiguration;
 
-import com.codahale.metrics.MetricRegistry;
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.servlet.Servlet;
+import javax.validation.Validator;
 
 @JsonTypeName("jettyauthserver")
 public class JettyAuthServerFactory extends DefaultServerFactory {

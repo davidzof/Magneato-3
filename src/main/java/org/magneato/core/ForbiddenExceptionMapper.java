@@ -1,6 +1,6 @@
 package org.magneato.core;
 
-import java.net.URI;
+import org.eclipse.jetty.security.authentication.FormAuthenticator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.ForbiddenException;
@@ -8,8 +8,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ExceptionMapper;
-
-import org.eclipse.jetty.security.authentication.FormAuthenticator;
+import java.net.URI;
 
 public class ForbiddenExceptionMapper implements ExceptionMapper<ForbiddenException> {
 	

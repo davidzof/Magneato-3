@@ -5,7 +5,6 @@ import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
-
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.magneato.core.ForbiddenExceptionMapper;
@@ -15,6 +14,7 @@ import org.magneato.resources.LoginResource;
 import org.magneato.resources.LogoutResource;
 import org.magneato.resources.PageResource;
 
+// https://github.com/spinscale/dropwizard-blog-sample/tree/master/src/main/java/services
 public class MagneatoApplication extends Application<MagneatoConfiguration> {
 
     public static void main(final String[] args) throws Exception {

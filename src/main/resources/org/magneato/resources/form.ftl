@@ -1,4 +1,3 @@
-<#-- @ftlvariable name="" type="com.javaeeeee.dwstart.resources.FormView" -->
 <!doctype html>
 <html lang="en">
 <head>

@@ -1,8 +1,9 @@
 package org.magneato.resources;
 
+import io.dropwizard.views.View;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import io.dropwizard.views.View;
 
 // http://blog.locrian.uk/post/jetty-form-auth-dropwizard/
 // https://www.dropwizard.io/0.7.1/docs/manual/views.html

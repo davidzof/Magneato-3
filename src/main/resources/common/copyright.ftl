@@ -1,6 +1,6 @@
 <div class="container">
   <div class="row">
-    Copyright 2017-2018 <br>
+    Copyright 2018 Magneato Corp<br>
     All rights reserved.
   </div>
 </div>
