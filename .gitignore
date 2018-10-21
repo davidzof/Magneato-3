@@ -2,3 +2,7 @@
 Magneato.iml
 run.sh
 .idea
+.settings
+.classpath
+.project
+assets
