@@ -2,18 +2,24 @@ package org.magneato.resources;
 
 import io.dropwizard.views.View;
 
-public class FormView extends View {
-	String url;
+public class EditView extends View {
+	String url = null;
 	String body;
 	
-    public FormView(String url) {
-    	super("form.ftl");
+    public EditView(String url) {
+    	super("edit.ftl");
     	this.url = url;
         
     }
+
+    public EditView(String url, String editTemplate, String displayTemplate) {
+    	super("edit.ftl");
+    	this.url = url;
+    }
     
-    public FormView(String url, String body) {
-    	super("form.ftl");
+    
+    public EditView(String url, String body) {
+    	super("edit.ftl");
     	this.url = url;
     	this.body = body;
         

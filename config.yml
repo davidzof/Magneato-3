@@ -23,7 +23,8 @@ assets:
     /assets: /library
   # http://localhost:8080/library/images/logo.png
   overrides:
-    /library/images: "/home/david/src/dropwizard/DWGettingStarted/assets"
+    /library/images: "/home/david/src/dropwizard/Magneato3/assets"
+    /library/templates: "/home/david/src/dropwizard/Magneato3/templates"
 
 #
 # Available edit and display templates

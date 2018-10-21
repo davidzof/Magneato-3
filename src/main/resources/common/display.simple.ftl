@@ -5,7 +5,7 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Page</title>
+    <title>${json.title.asText()}</title>
     
     <!-- jquery -->
         <script type="text/javascript" src="//code.jquery.com/jquery-1.11.1.min.js"></script>
@@ -17,7 +17,7 @@
 <div class="container">
   <div class="row">
     <div class="col-sm-4">
-      Name: ${json.name.asText()}
+      <h1>${json.title.asText()}</h1>
     </div>
   </div>    
   <div class="row">
