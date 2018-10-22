@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.security.Principal;
@@ -133,7 +134,8 @@ public class PageResource {
 
 	@RolesAllowed("ADMIN")
 	@GET
-	@Produces(MediaType.TEXT_HTML)
+	//@Produces(MediaType.TEXT_HTML + "; charset=utf-8")
+			@Produces(MediaType.TEXT_HTML)
 	@Path("edit/{uri}")
 	public View edit(@PathParam("uri") String uri) {
 		log.debug("edit " + uri);
@@ -143,21 +145,21 @@ public class PageResource {
 			// create page
 			return create(uri, null, null);
 		}
-		System.out.println("data " + body);
+		log.debug(">>> edit returning " + body);
 		return new EditView(uri, body);
 	}
 
 	/**
-	 * @param uri
-	 * @param body
+	 * @param uri - lower case alphanumeric
+	 * @param body - json form data to be saved
 	 * @return
 	 */
 	@POST
-	@Path("/save{uri : (/uri)?}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
+	@Path("/save{p:/?}{uri:([a-z\\-0-9]*)}")
 	public String saveAsset(@PathParam("uri") String uri, String body) {
-		log.debug("Saving " + uri + " " + body);
+		log.debug(">>> Saving " + uri + " " + body);
 		String data = null;
 
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -165,11 +167,11 @@ public class PageResource {
 		try {
 			JsonNode jsonNode = objectMapper.readTree(body);
 			String pageTitle = jsonNode.get("title").asText();
-pageTitle = toSlug(pageTitle);
+			pageTitle = toSlug(pageTitle);
 
 			pageStore.put(pageTitle, body);
 
-			data = "{\"url\":\"" + pageTitle + "\"}";
+			data = "{\"url\":\"/" + pageTitle + "\"}";
 			log.debug("returning " + data);
 
 		} catch (IOException e) {
@@ -193,10 +195,10 @@ pageTitle = toSlug(pageTitle);
 		String fileName = contentDispositionHeader.getFileName();
 		log.debug("filename " + fileName);
 
-		String name = "/home/david/src/dropwizard/Magneato3/assets/" + fileName;
+		String name = "/Users/TBSL1730/src/Magneato-3/assets/" + fileName;
 		// TODO get from config
 		java.nio.file.Path outputPath = FileSystems.getDefault().getPath(
-				"/home/david/src/dropwizard/Magneato3/assets", fileName);
+				"/Users/TBSL1730/src/Magneato-3/assets", fileName);
 		System.out.println("output path " + outputPath.getFileName());
 
 		try {
@@ -208,11 +210,11 @@ pageTitle = toSlug(pageTitle);
 					ImageIO.read(new File(name)).getScaledInstance(100, 100,
 							Image.SCALE_SMOOTH), 0, 0, null);
 
-			String thumbName = "/home/david/src/dropwizard/Magneato3/assets/thumb_"
+			String thumbName = "/Users/TBSL1730/src/Magneato-3/assets/thumb_"
 					+ fileName;
 			ImageIO.write(img, "jpg", new File(thumbName));
 		} catch (IOException e) {
-			e.printStackTrace();
+		    log.warn("upload " e.getMessage());
 		}
 
 		String url = "http://localhost:8080/library/images/" + fileName;

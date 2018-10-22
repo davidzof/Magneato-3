@@ -62,5 +62,6 @@ public class MagneatoApplication extends Application<MagneatoConfiguration> {
 
         //If you want to use @Auth to inject a custom Principal type into your resource
         //environment.jersey().register(new AuthValueFactoryProvider.Binder<>(User.class));
+
     }
 }
