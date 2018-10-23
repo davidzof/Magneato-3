@@ -7,11 +7,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.text.Normalizer;
 import java.util.HashMap;
@@ -50,17 +47,33 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Path("/")
 public class PageResource {
-	List<Template> templates;
+	private final List<Template> templates;
 
-	final Logger log = LoggerFactory.getLogger(this.getClass().getName());
+	private final Logger log = LoggerFactory.getLogger(this.getClass()
+			.getName());
+
+	private final static String IMAGEPATH = "/library/images";
+	private String imageDir = null;
 
 	public PageResource(MagneatoConfiguration configuration) {
 		this.templates = configuration.getTemplates();
-		Map<String, String> uriMappings = configuration.getAssetsConfiguration().getResourcePathToUriMappings();
+
+		log.debug("configuration");
+
+		Map<String, String> uriMappings = configuration
+				.getAssetsConfiguration().getResourcePathToUriMappings();
 		for (Map.Entry<String, String> entry : uriMappings.entrySet()) {
-			System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+			System.out.println("Key = " + entry.getKey() + ", Value = "
+					+ entry.getValue());
 		}
 
+		Map<String, String> overrides = configuration.getAssetsConfiguration()
+				.getOverrides();
+		for (Map.Entry<String, String> entry : overrides.entrySet()) {
+			if (IMAGEPATH.equals(entry.getKey())) {
+				imageDir = entry.getValue() + "/";
+			}
+		}// for
 	}
 
 	HashMap<String, String> pageStore = new HashMap<String, String>();
@@ -95,7 +108,6 @@ public class PageResource {
 			log.debug("default page");
 			// default page?
 		}
-
 
 		// TODO: use Elastic
 		String body = pageStore.get(uri);
@@ -154,15 +166,18 @@ public class PageResource {
 	}
 
 	/**
-	 * @param uri - lower case alphanumeric
-	 * @param body - json form data to be saved
+	 * @param uri
+	 *            - lower case alphanumeric
+	 * @param body
+	 *            - json form data to be saved
 	 * @return
 	 */
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("/save{p:/?}{uri:([a-z\\-\\.0-9]*)}")
-	public String saveAsset(@PathParam("uri") String uri, String body,  @Context SecurityContext security) {
+	public String saveAsset(@PathParam("uri") String uri, String body,
+			@Context SecurityContext security) {
 		log.debug(">>> Saving " + uri + " " + body);
 		String data = null;
 
@@ -180,7 +195,7 @@ public class PageResource {
 			pageTitle = toSlug(pageTitle);
 
 			if (uri.isEmpty()) {
-			    // TODO replace with Elastic
+				// TODO replace with Elastic
 				pageTitle = pageTitle + "." + System.currentTimeMillis();
 				pageStore.put(pageTitle, body);
 				data = "{\"url\":\"/" + pageTitle + "\"}";
@@ -192,7 +207,7 @@ public class PageResource {
 			log.debug("returning " + data);
 
 		} catch (IOException e) {
-		    log.error(e.getMessage());
+			log.error(e.getMessage());
 			data = "{\"error\":\"" + e.getMessage() + "\"}";
 		}
 
@@ -209,33 +224,36 @@ public class PageResource {
 			@FormDataParam("files") final InputStream fileInputStream,
 			@FormDataParam("files") final FormDataContentDisposition contentDispositionHeader) {
 		String fileName = contentDispositionHeader.getFileName();
-		log.debug("filename " + fileName);
+		log.debug("filename " + fileName + " imageDir " + imageDir);
+		
 
-		String name = "/Users/TBSL1730/src/Magneato-3/assets/" + fileName;
-		// TODO get from config
+		if (imageDir == null) {
+			log.warn("image directory not configured in config.yml");
+			return null;
+		}
+
 		java.nio.file.Path outputPath = FileSystems.getDefault().getPath(
-				"/Users/TBSL1730/src/Magneato-3/assets", fileName);
+				imageDir, fileName);
 		System.out.println("output path " + outputPath.getFileName());
 
+		// create a thumbnail
 		try {
 			Files.copy(fileInputStream, outputPath);
-			// create thumbnail
+			String name = imageDir + fileName;
 			BufferedImage img = new BufferedImage(100, 100,
 					BufferedImage.TYPE_INT_RGB);
 			img.createGraphics().drawImage(
 					ImageIO.read(new File(name)).getScaledInstance(100, 100,
 							Image.SCALE_SMOOTH), 0, 0, null);
 
-			String thumbName = "/Users/TBSL1730/src/Magneato-3/assets/thumb_"
-					+ fileName;
+			String thumbName = imageDir + "thumb_" + fileName;
 			ImageIO.write(img, "jpg", new File(thumbName));
 		} catch (IOException e) {
-		    log.warn("upload " + e.getMessage());
+			log.warn("upload " + e.getMessage());
 		}
 
-		String url = "/library/images/" + fileName;
-		String thumbUrl = "/library/images/thumb_"
-				+ fileName;
+		String url = IMAGEPATH + "/" + fileName;
+		String thumbUrl = IMAGEPATH + "/thumb_" + fileName;
 
 		return "{\"files\":[{\"url\":\""
 				+ url
@@ -246,18 +264,18 @@ public class PageResource {
 				+ "\",\"size\":\"12345\",\"type\":\"image/png\",\"deleteUrl\":\"delete/"
 				+ fileName + "\",\"deleteType\":\"DELETE\"}]}";
 	}
-	
-	
-	//https://github.com/slugify/slugify
+
+	// https://github.com/slugify/slugify
 	private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
 	private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
 	private static final Pattern EDGESDHASHES = Pattern.compile("(^-|-$)");
 
 	public static String toSlug(String input) {
-	    String nowhitespace = WHITESPACE.matcher(input).replaceAll("-");
-	    String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFD);
-	    String slug = NONLATIN.matcher(normalized).replaceAll("");
-	    slug = EDGESDHASHES.matcher(slug).replaceAll("");
-	    return slug.toLowerCase(Locale.ENGLISH);
+		String nowhitespace = WHITESPACE.matcher(input).replaceAll("-");
+		String normalized = Normalizer.normalize(nowhitespace,
+				Normalizer.Form.NFD);
+		String slug = NONLATIN.matcher(normalized).replaceAll("");
+		slug = EDGESDHASHES.matcher(slug).replaceAll("");
+		return slug.toLowerCase(Locale.ENGLISH);
 	}
 }

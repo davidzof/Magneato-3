@@ -1,0 +1,26 @@
+package org.magneato.service;
+
+import java.util.ArrayList;
+
+/**
+ * Content MetaData
+ * 
+ * @author David George
+ */
+public class MetaData {
+	private String owner;
+	private String group;
+	private long perms;
+	private ArrayList<String> relations;
+	private String content;
+
+	public enum Status {
+		DRAFT, REVIEW, PUBLISHED
+	}
+
+	private Status status;
+	private long createDate;
+	private String editTemplate;
+	private String viewTemplate;
+	private String ipAddr;
+}
