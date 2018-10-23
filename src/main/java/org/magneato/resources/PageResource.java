@@ -10,11 +10,14 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.text.Normalizer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.annotation.security.RolesAllowed;
@@ -32,6 +35,7 @@ import javax.ws.rs.core.SecurityContext;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.magneato.MagneatoConfiguration;
 import org.magneato.service.Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,8 +54,13 @@ public class PageResource {
 
 	final Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
-	public PageResource(List<Template> replicates) {
-		this.templates = replicates;
+	public PageResource(MagneatoConfiguration configuration) {
+		this.templates = configuration.getTemplates();
+		Map<String, String> uriMappings = configuration.getAssetsConfiguration().getResourcePathToUriMappings();
+		for (Map.Entry<String, String> entry : uriMappings.entrySet()) {
+			System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+		}
+
 	}
 
 	HashMap<String, String> pageStore = new HashMap<String, String>();
@@ -87,11 +96,6 @@ public class PageResource {
 			// default page?
 		}
 
-		// TODO: tests remove this
-		Principal principal = security.getUserPrincipal();
-		if (principal != null) {
-			System.out.println(security.getUserPrincipal().getName());
-		}
 
 		// TODO: use Elastic
 		String body = pageStore.get(uri);
@@ -114,6 +118,7 @@ public class PageResource {
 	 * If the editTemplate and/or displayTemplate are specified we pass directly
 	 * to the edit page
 	 */
+	@RolesAllowed("ADMIN")
 	@GET
 	@Path("create{uri : (/uri)?}")
 	@Produces(MediaType.TEXT_HTML)
@@ -134,8 +139,7 @@ public class PageResource {
 
 	@RolesAllowed("ADMIN")
 	@GET
-	//@Produces(MediaType.TEXT_HTML + "; charset=utf-8")
-			@Produces(MediaType.TEXT_HTML)
+	@Produces(MediaType.TEXT_HTML)
 	@Path("edit/{uri}")
 	public View edit(@PathParam("uri") String uri) {
 		log.debug("edit " + uri);
@@ -157,27 +161,39 @@ public class PageResource {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Path("/save{p:/?}{uri:([a-z\\-0-9]*)}")
-	public String saveAsset(@PathParam("uri") String uri, String body) {
+	@Path("/save{p:/?}{uri:([a-z\\-\\.0-9]*)}")
+	public String saveAsset(@PathParam("uri") String uri, String body,  @Context SecurityContext security) {
 		log.debug(">>> Saving " + uri + " " + body);
 		String data = null;
 
 		ObjectMapper objectMapper = new ObjectMapper();
+
+		// TODO: tests remove this
+		Principal principal = security.getUserPrincipal();
+		if (principal != null) {
+			System.out.println(security.getUserPrincipal().getName());
+		}
 
 		try {
 			JsonNode jsonNode = objectMapper.readTree(body);
 			String pageTitle = jsonNode.get("title").asText();
 			pageTitle = toSlug(pageTitle);
 
-			pageStore.put(pageTitle, body);
+			if (uri.isEmpty()) {
+			    // TODO replace with Elastic
+				pageTitle = pageTitle + "." + System.currentTimeMillis();
+				pageStore.put(pageTitle, body);
+				data = "{\"url\":\"/" + pageTitle + "\"}";
+			} else {
+				pageStore.put(uri, body);
+				data = "{\"url\":\"/" + uri + "\"}";
+			}
 
-			data = "{\"url\":\"/" + pageTitle + "\"}";
 			log.debug("returning " + data);
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		    log.error(e.getMessage());
 			data = "{\"error\":\"" + e.getMessage() + "\"}";
-
 		}
 
 		return data;
@@ -214,11 +230,11 @@ public class PageResource {
 					+ fileName;
 			ImageIO.write(img, "jpg", new File(thumbName));
 		} catch (IOException e) {
-		    log.warn("upload " e.getMessage());
+		    log.warn("upload " + e.getMessage());
 		}
 
-		String url = "http://localhost:8080/library/images/" + fileName;
-		String thumbUrl = "http://localhost:8080/library/images/thumb_"
+		String url = "/library/images/" + fileName;
+		String thumbUrl = "/library/images/thumb_"
 				+ fileName;
 
 		return "{\"files\":[{\"url\":\""

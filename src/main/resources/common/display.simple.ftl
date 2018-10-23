@@ -16,36 +16,39 @@
 <body> 
 <div class="container">
   <div class="row">
-    <div class="col-sm-4">
+    <div class="col-sm-8">
       <h1>${json.title.asText()}</h1>
     </div>
   </div>    
   <div class="row">
-    <div class="col-sm-4">
-      Feedback: ${json.feedback.asText()}
+    <div class="col-sm-8">
+      ${json.feedback.asText()}
     </div>
   </div>
   <div class="row">
-      <div class="col-sm-4">
+      <div class="col-sm-8">
         Ranking: ${json.ranking.asText()}
       </div>
   </div>
   
   
   <div class="row">
-    <div class="col-sm-4">
+    <div class="col-sm-8">
       <h2>Attachments</h2>
       <#assign size = json.files.size() - 1 >
       <#list 0..size as x>
-        ${x}
   	    <#assign node = json.files.get(x) >
   	    <a href="${node.url.asText()}" title=""${node.name.asText()}"><img src="${node.thumbnailUrl.asText()}" /></a>
       </#list>
     </div>
   </div>
-</div>
 
-         
-<#include "/common/copyright.ftl">
+
+    <div class="row">
+     <div class="col-sm-8">
+        <#include "/common/copyright.ftl">
+     </div>
+    </div>
+    </div>
 </body>
 </html>
