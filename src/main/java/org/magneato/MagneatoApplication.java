@@ -42,7 +42,7 @@ public class MagneatoApplication extends Application<MagneatoConfiguration> {
     	// Register custom exception mapper to redirect 403 errors to the login page
     	environment.jersey().register(ForbiddenExceptionMapper.class);
 
-    	environment.jersey().register(new PageResource(configuration.getTemplates()));
+    	environment.jersey().register(new PageResource(configuration));
     	environment.jersey().register(new HelloResource());
         environment.jersey().register(new LoginResource());
         environment.jersey().register(new LogoutResource());
@@ -62,5 +62,6 @@ public class MagneatoApplication extends Application<MagneatoConfiguration> {
 
         //If you want to use @Auth to inject a custom Principal type into your resource
         //environment.jersey().register(new AuthValueFactoryProvider.Binder<>(User.class));
+
     }
 }

@@ -5,13 +5,10 @@ logging:
 
 #Server configuration.
 server:
-    applicationConnectors:
-        - type: http
-          port: 8080
-
-server:
-  type:
-    jettyauthserver
+  type: jettyauthserver
+  applicationConnectors:
+    - type: http
+      port: 9090
 
 # Default Administrator User, update the password before putting into production
 login: admin
@@ -23,8 +20,8 @@ assets:
     /assets: /library
   # http://localhost:8080/library/images/logo.png
   overrides:
-    /library/images: "/home/david/src/dropwizard/Magneato3/assets"
-    /library/templates: "/home/david/src/dropwizard/Magneato3/templates"
+    /library/images/: "/Users/TBSL1730/src/Magneato-3/assets"
+    /library/templates/: "/Users/TBSL1730/src/Magneato-3/assets"
 
 #
 # Available edit and display templates

@@ -29,6 +29,7 @@ public class MagneatoConfiguration extends Configuration implements AssetsBundle
     }
 
 
+
     @NotEmpty
     @JsonProperty
     private List<Template> templates;

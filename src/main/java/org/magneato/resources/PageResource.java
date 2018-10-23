@@ -7,13 +7,17 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.text.Normalizer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.annotation.security.RolesAllowed;
@@ -31,6 +35,7 @@ import javax.ws.rs.core.SecurityContext;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.magneato.MagneatoConfiguration;
 import org.magneato.service.Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +54,13 @@ public class PageResource {
 
 	final Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
-	public PageResource(List<Template> replicates) {
-		this.templates = replicates;
+	public PageResource(MagneatoConfiguration configuration) {
+		this.templates = configuration.getTemplates();
+		Map<String, String> uriMappings = configuration.getAssetsConfiguration().getResourcePathToUriMappings();
+		for (Map.Entry<String, String> entry : uriMappings.entrySet()) {
+			System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+		}
+
 	}
 
 	HashMap<String, String> pageStore = new HashMap<String, String>();
@@ -86,11 +96,6 @@ public class PageResource {
 			// default page?
 		}
 
-		// TODO: tests remove this
-		Principal principal = security.getUserPrincipal();
-		if (principal != null) {
-			System.out.println(security.getUserPrincipal().getName());
-		}
 
 		// TODO: use Elastic
 		String body = pageStore.get(uri);
@@ -113,6 +118,7 @@ public class PageResource {
 	 * If the editTemplate and/or displayTemplate are specified we pass directly
 	 * to the edit page
 	 */
+	@RolesAllowed("ADMIN")
 	@GET
 	@Path("create{uri : (/uri)?}")
 	@Produces(MediaType.TEXT_HTML)
@@ -143,39 +149,51 @@ public class PageResource {
 			// create page
 			return create(uri, null, null);
 		}
-		System.out.println("data " + body);
+		log.debug(">>> edit returning " + body);
 		return new EditView(uri, body);
 	}
 
 	/**
-	 * @param uri
-	 * @param body
+	 * @param uri - lower case alphanumeric
+	 * @param body - json form data to be saved
 	 * @return
 	 */
 	@POST
-	@Path("/save{uri : (/uri)?}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public String saveAsset(@PathParam("uri") String uri, String body) {
-		log.debug("Saving " + uri + " " + body);
+	@Path("/save{p:/?}{uri:([a-z\\-\\.0-9]*)}")
+	public String saveAsset(@PathParam("uri") String uri, String body,  @Context SecurityContext security) {
+		log.debug(">>> Saving " + uri + " " + body);
 		String data = null;
 
 		ObjectMapper objectMapper = new ObjectMapper();
 
+		// TODO: tests remove this
+		Principal principal = security.getUserPrincipal();
+		if (principal != null) {
+			System.out.println(security.getUserPrincipal().getName());
+		}
+
 		try {
 			JsonNode jsonNode = objectMapper.readTree(body);
 			String pageTitle = jsonNode.get("title").asText();
-pageTitle = toSlug(pageTitle);
+			pageTitle = toSlug(pageTitle);
 
-			pageStore.put(pageTitle, body);
+			if (uri.isEmpty()) {
+			    // TODO replace with Elastic
+				pageTitle = pageTitle + "." + System.currentTimeMillis();
+				pageStore.put(pageTitle, body);
+				data = "{\"url\":\"/" + pageTitle + "\"}";
+			} else {
+				pageStore.put(uri, body);
+				data = "{\"url\":\"/" + uri + "\"}";
+			}
 
-			data = "{\"url\":\"" + pageTitle + "\"}";
 			log.debug("returning " + data);
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		    log.error(e.getMessage());
 			data = "{\"error\":\"" + e.getMessage() + "\"}";
-
 		}
 
 		return data;
@@ -193,10 +211,10 @@ pageTitle = toSlug(pageTitle);
 		String fileName = contentDispositionHeader.getFileName();
 		log.debug("filename " + fileName);
 
-		String name = "/home/david/src/dropwizard/Magneato3/assets/" + fileName;
+		String name = "/Users/TBSL1730/src/Magneato-3/assets/" + fileName;
 		// TODO get from config
 		java.nio.file.Path outputPath = FileSystems.getDefault().getPath(
-				"/home/david/src/dropwizard/Magneato3/assets", fileName);
+				"/Users/TBSL1730/src/Magneato-3/assets", fileName);
 		System.out.println("output path " + outputPath.getFileName());
 
 		try {
@@ -208,15 +226,15 @@ pageTitle = toSlug(pageTitle);
 					ImageIO.read(new File(name)).getScaledInstance(100, 100,
 							Image.SCALE_SMOOTH), 0, 0, null);
 
-			String thumbName = "/home/david/src/dropwizard/Magneato3/assets/thumb_"
+			String thumbName = "/Users/TBSL1730/src/Magneato-3/assets/thumb_"
 					+ fileName;
 			ImageIO.write(img, "jpg", new File(thumbName));
 		} catch (IOException e) {
-			e.printStackTrace();
+		    log.warn("upload " + e.getMessage());
 		}
 
-		String url = "http://localhost:8080/library/images/" + fileName;
-		String thumbUrl = "http://localhost:8080/library/images/thumb_"
+		String url = "/library/images/" + fileName;
+		String thumbUrl = "/library/images/thumb_"
 				+ fileName;
 
 		return "{\"files\":[{\"url\":\""

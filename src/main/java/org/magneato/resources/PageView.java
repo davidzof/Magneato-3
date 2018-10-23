@@ -7,13 +7,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class PageView extends View {
 	JsonNode jsonNode = null;
 	final Logger log = LoggerFactory.getLogger(this.getClass().getName());
 
     public PageView(String json, String templateName) {
-    	super("/common/" + templateName + ".ftl");
+    	super("/common/" + templateName + ".ftl", StandardCharsets.UTF_8);
 	    ObjectMapper objectMapper = new ObjectMapper();
 	    try {
 		    System.out.println("read josn " + json);
