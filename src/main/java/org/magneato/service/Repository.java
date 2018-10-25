@@ -4,11 +4,13 @@ import org.apache.http.HttpHost;
 import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryAction;
@@ -16,6 +18,8 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -24,227 +28,219 @@ import java.net.UnknownHostException;
 import java.util.Map;
 
 public class Repository {
-    public Repository() {
-    }
-    /**
-     * Implemented Singleton pattern here
-     * so that there is just one connection at a time.
-     * @return RestHighLevelClient
-     */
-    /*
-    private static synchronized RestHighLevelClient makeConnection() {
+	private final Logger log = LoggerFactory.getLogger(this.getClass()
+			.getName());
 
-        if(restHighLevelClient == null) {
-            restHighLevelClient = new RestHighLevelClient(
-                    RestClient.builder(
-                            new HttpHost(HOST, PORT_ONE, SCHEME),
-                            new HttpHost(HOST, PORT_TWO, SCHEME)));
-        }
+	public Repository() {
+	}
 
-        return restHighLevelClient;
+	/**
+	 * Implemented Singleton pattern here so that there is just one connection
+	 * at a time.
+	 * 
+	 * @return RestHighLevelClient
+	 */
+	/*
+	 * private static synchronized RestHighLevelClient makeConnection() {
+	 * 
+	 * if(restHighLevelClient == null) { restHighLevelClient = new
+	 * RestHighLevelClient( RestClient.builder( new HttpHost(HOST, PORT_ONE,
+	 * SCHEME), new HttpHost(HOST, PORT_TWO, SCHEME))); }
+	 * 
+	 * return restHighLevelClient;
+	 * 
+	 * }
+	 */
 
-    }
-    */
+	PreBuiltTransportClient client = null;
 
-    PreBuiltTransportClient client = null;
-    //https://tutorial-academy.com/elasticsearch-6-create-index-bulk-insert-delete-java-api/
+	// https://tutorial-academy.com/elasticsearch-6-create-index-bulk-insert-delete-java-api/
 
-    public Repository( String clusterName, String clusterIp, int clusterPort ) throws UnknownHostException {
+	public Repository(String clusterName, String clusterIp, int clusterPort)
+			throws UnknownHostException {
 
-        Settings settings = Settings.builder()
-                .put( "cluster.name", clusterName )
-                .put( "client.transport.ignore_cluster_name", true )
-                .put( "client.transport.sniff", true )
-                .build();
+		Settings settings = Settings.builder().put("cluster.name", clusterName)
+				.put("client.transport.ignore_cluster_name", true)
+				.put("client.transport.sniff", true).build();
 
-        // create connection
-        client = new PreBuiltTransportClient( settings );
-        client.addTransportAddress( new TransportAddress( InetAddress.getByName( clusterIp ), clusterPort) );
+		// create connection
+		client = new PreBuiltTransportClient(settings);
+		client.addTransportAddress(new TransportAddress(InetAddress
+				.getByName(clusterIp), clusterPort));
 
-    }
+	}
 
-    public void close() {
-        if (client != null) {
-            client.close();
-        }
+	public void close() {
+		if (client != null) {
+			client.close();
+		}
 
-    }
+	}
 
-    public boolean isHealthy() {
+	public boolean isHealthy() {
 
-        final ClusterHealthResponse response = client
-                .admin()
-                .cluster()
-                .prepareHealth()
-                .setWaitForGreenStatus()
-                .setTimeout( TimeValue.timeValueSeconds( 2 ) )
-                .execute()
-                .actionGet();
+		final ClusterHealthResponse response = client.admin().cluster()
+				.prepareHealth().setWaitForGreenStatus()
+				.setTimeout(TimeValue.timeValueSeconds(2)).execute()
+				.actionGet();
 
-        if ( response.isTimedOut() ) {
-            return false;
-        }
+		if (response.isTimedOut()) {
+			return false;
+		}
 
-        return true;
-    }
+		return true;
+	}
 
+	public boolean isIndexRegistered(String indexName) {
+		// check if index already exists
+		final IndicesExistsResponse ieResponse = client.admin().indices()
+				.prepareExists(indexName).get(TimeValue.timeValueSeconds(1));
 
-    public boolean isIndexRegistered( String indexName ) {
-        // check if index already exists
-        final IndicesExistsResponse ieResponse = client
-                .admin()
-                .indices()
-                .prepareExists( indexName )
-                .get( TimeValue.timeValueSeconds( 1 ) );
+		// index not there
+		if (!ieResponse.isExists()) {
+			return false;
+		}
 
-        // index not there
-        if ( !ieResponse.isExists() ) {
-            return false;
-        }
+		return true;
+	}
 
-        return true;
-    }
+	public boolean createIndex(String indexName, String numberOfShards,
+			String numberOfReplicas) {
+		CreateIndexResponse createIndexResponse = client
+				.admin()
+				.indices()
+				.prepareCreate(indexName)
+				.setSettings(
+						Settings.builder()
+								.put("index.number_of_shards", numberOfShards)
+								.put("index.number_of_replicas",
+										numberOfReplicas)).get();
 
+		if (createIndexResponse.isAcknowledged()) {
+			return true;
+		}
 
-    public boolean createIndex( String indexName, String numberOfShards, String numberOfReplicas ) {
-        CreateIndexResponse createIndexResponse =
-                client.admin().indices().prepareCreate( indexName )
-                        .setSettings( Settings.builder()
-                                .put("index.number_of_shards", numberOfShards )
-                                .put("index.number_of_replicas", numberOfReplicas )
-                        )
-                        .get();
+		return false;
+	}
 
-        if( createIndexResponse.isAcknowledged() ) {
-            return true;
-        }
+	public SearchResponse queryResultsWithAgeFilter(String indexName, int from, int to) {
+		SearchResponse scrollResp = client
+				.prepareSearch(indexName)
+				// sort order
+				.addSort(FieldSortBuilder.DOC_FIELD_NAME, SortOrder.ASC)
+				// keep results for 60 seconds
+				.setScroll(new TimeValue(60000))
+				// filter for age
+				.setPostFilter(
+						QueryBuilders.rangeQuery("age").from(from).to(to))
+				// maximum of 100 hits will be returned for each scroll
+				.setSize(100).get();
 
-        return false;
-    }
+		return scrollResp;
+		
+		
+	}
 
+	public long delete(String indexName, String key, String value) {
+		BulkByScrollResponse response = DeleteByQueryAction.INSTANCE
+				.newRequestBuilder(client)
+				.filter(QueryBuilders.matchQuery(key, value)).source(indexName)
+				.refresh(true).get();
 
+		log.info("Deleted " + response.getDeleted() + " element(s)!");
 
-    public void queryResultsWithAgeFilter( String indexName, int from, int to ) {
-        SearchResponse scrollResp =
-                client.prepareSearch( indexName )
-                        // sort order
-                        .addSort( FieldSortBuilder.DOC_FIELD_NAME, SortOrder.ASC )
-                        // keep results for 60 seconds
-                        .setScroll( new TimeValue( 60000 ) )
-                        // filter for age
-                        .setPostFilter( QueryBuilders.rangeQuery( "age" ).from( from ).to( to ) )
-                        // maximum of 100 hits will be returned for each scroll
-                        .setSize( 100 ).get();
+		return response.getDeleted();
+	}
 
-        // scroll until no hits are returned
-        do {
-            int count = 1;
-            for ( SearchHit hit : scrollResp.getHits().getHits() ) {
-                Map<String,Object> res = hit.getSourceAsMap();
+	public String insert(String indexName, String indexType, String json) {
 
-                // print results
-                for( Map.Entry<String,Object> entry : res.entrySet() ) {
-                    //logger.info( "[" + count + "] " + entry.getKey() + " --> " + entry.getValue() );
-                }
-                count++;
-            }
+		IndexResponse response = client.prepareIndex(indexName, indexType)
+				.setSource(json, XContentType.JSON).get();
 
-            scrollResp = client.prepareSearchScroll( scrollResp.getScrollId() ).setScroll( new TimeValue(60000) ).execute().actionGet();
-            // zero hits mark the end of the scroll and the while loop.
-        } while( scrollResp.getHits().getHits().length != 0 );
-    }
+		String id = response.getId();
+		log.info("id " + id);
+		return id;
+	}
 
+	public static void main(String[] args) {
 
-    icsearch behavior.
+		{
+			// read properties
+			Repository es = null;
 
+			try {
 
-    public long delete( String indexName, String key, String value ) {
-        BulkByScrollResponse response =
-                DeleteByQueryAction.INSTANCE.newRequestBuilder( client )
-                        .filter( QueryBuilders.matchQuery( key, value ) )
-                        .source( indexName )
-                        .refresh( true )
-                        .get();
+				String numberOfShards = "1";
+				String numberOfReplicas = "0";
 
-        logger.info( "Deleted " + response.getDeleted() + " element(s)!" );
+				String clusterName = "elastic-cluster";
 
-        return response.getDeleted();
-    }
+				String indexName = "my-index";
+				String indexType = "user";
 
-    public long delete( String indexName, String key, String value ) {
-        BulkByScrollResponse response =
-                DeleteByQueryAction.INSTANCE.newRequestBuilder( client )
-                        .filter( QueryBuilders.matchQuery( key, value ) )
-                        .source( indexName )
-                        .refresh( true )
-                        .get();
+				es = new Repository("myCluster", "localhost", 9300);
 
+				// check if elastic search cluster is healthy
+				es.isHealthy();
 
-        return response.getDeleted();
-    }
+				// check if index already existing
+				if (!es.isIndexRegistered(indexName)) {
+					// create index if not already existing
+					es.createIndex(indexName, numberOfShards, numberOfReplicas);
+					// manually insert some test data
+					// es.bulkInsert( indexName, indexType );
+					// insert some test data (from JSON file)
+					// es.bulkInsert( indexName, indexType,
+					// getRelativeResourcePath( "data.json" ) );
+				}
 
+				String json = "{" + "\"name\":\"Peter Pan\"," + "\"age\":23,"
+						+ "\"postDate\":\"2013-01-30\","
+						+ "\"message\":\"trying out Elasticsearch\"" + "}";
+				String id = es.insert(indexName, indexType, json);
 
-    public static void main(String [] args) {
+				json = "{" + "\"name\":\"Janis Joplin\"," + "\"age\":47,"
+						+ "\"postDate\":\"2015-01-30\","
+						+ "\"message\":\"Yeah baby\"" + "}";
+				id = es.insert(indexName, indexType, json);
 
-        {
-            // read properties
-            PropertyReader properties = null;
-            Repository es = null;
+				// retrieve elements from the user data where age is in between
+				// 15 ad 50
+				SearchResponse scrollResp = es.queryResultsWithAgeFilter(indexName, 15, 45);
+				// scroll until no hits are returned
+				//do {
+					int count = 1;
+					for (SearchHit hit : scrollResp.getHits().getHits()) {
+						Map<String, Object> res = hit.getSourceAsMap();
 
-            try {
-                //properties = new PropertyReader( getRelativeResourcePath( "config.properties" ) );
+						// print results
+						for (Map.Entry<String, Object> entry : res.entrySet()) {
+							System.out.println( "[" + count + "] " + entry.getKey() +
+							 " --> " + entry.getValue() );
+							
+						}
+						count++;
+					}
 
-                String numberOfShards  	= 1;
-                String numberOfReplicas	= 1;
+					//scrollResp = client.prepareSearchScroll(scrollResp.getScrollId())
+					//		.setScroll(new TimeValue(60000)).execute().actionGet();
+					// zero hits mark the end of the scroll and the while loop.
+				//} while (scrollResp.getHits().getHits().length != 0);
 
-                String clusterName 		= properties.read( CLUSTER_NAME );
+				es.delete(indexName, "name", "Peter Pan");
+			}
 
-                String indexName 		= properties.read( INDEX_NAME );
-                String indexType 		= properties.read( INDEX_TYPE );
+			catch (UnknownHostException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 
-                String ip 				= properties.read( IP );
-                int    port				= Integer.parseInt( properties.read( PORT ) );
-
-                Repository es = new Repository("myCluster", "localhost", 9200);
-
-                // check if elastic search cluster is healthy
-                es.isHealthy();
-
-                // check if index already existing
-                if( !es.isIndexRegistered( indexName ) ) {
-                    // create index if not already existing
-                    es.createIndex( indexName, numberOfShards, numberOfReplicas );
-                    // manually insert some test data
-                    //es.bulkInsert( indexName, indexType );
-                    // insert some test data (from JSON file)
-                    //				es.bulkInsert( indexName, indexType, getRelativeResourcePath( "data.json" ) );
-                }
-
-                // retrieve elements from the user data where age is in between 15 ad 50
-                es.queryResultsWithAgeFilter( indexName, 15, 50 );
-
-                es.delete( indexName, "name", "Peter Pan" );
-
-                // retrieve elements from the user data where age is in between 15 ad 50
-                es.queryResultsWithAgeFilter( indexName, 15, 50 );
-            }
-            catch ( FileNotFoundException e ) {
-                e.printStackTrace();
-            }
-            catch ( UnknownHostException e ) {
-                e.printStackTrace();
-            }
-            catch ( IOException e ) {
-                e.printStackTrace();
-            }
-            // required when parsing JSON
-            //		catch ( ParseException e ) {
-            //			e.printStackTrace();
-            //		}
-            finally {
-                if (es!=null) {
-                    es.close();
-                }
-            }
-    }
+			finally {
+				if (es != null) {
+					es.close();
+				}
+			}
+		}
+	}
 }
