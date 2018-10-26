@@ -5,6 +5,7 @@ import io.dropwizard.Configuration;
 import io.dropwizard.bundles.assets.AssetsBundleConfiguration;
 import io.dropwizard.bundles.assets.AssetsConfiguration;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.magneato.service.ElasticSearch;
 import org.magneato.service.Template;
 
 import javax.validation.Valid;
@@ -28,8 +29,6 @@ public class MagneatoConfiguration extends Configuration implements AssetsBundle
         return assets;
     }
 
-
-
     @NotEmpty
     @JsonProperty
     private List<Template> templates;
@@ -38,6 +37,10 @@ public class MagneatoConfiguration extends Configuration implements AssetsBundle
         return templates;
     }
 
+    @JsonProperty
+    private ElasticSearch elasticSearch;
+
+    public ElasticSearch getElasticSearch() { return elasticSearch; }
 
 
     @JsonProperty

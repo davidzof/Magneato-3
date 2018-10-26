@@ -20,8 +20,9 @@ assets:
     /assets: /library
   # http://localhost:8080/library/images/logo.png
   overrides:
-    /library/images: "/home/david/src/dropwizard/Magneato3/assets"
-    /library/templates: "/home/david/src/dropwizard/Magneato3/templates"
+#    /library/images: "/home/david/src/dropwizard/Magneato3/assets"
+     /library/images: "/Users/TBSL1730/src/Magneato-3/assets"
+#    /library/templates: "/home/david/src/dropwizard/Magneato3/templates"
 
 #
 # Available edit and display templates
@@ -37,4 +38,10 @@ templates:
       - ski_tour
       - mtb
 
-
+elasticSearch:
+  numberOfShards: 1
+  numberOfReplicas: 0
+  clusterName: elastic-cluster
+  indexName: my-index
+  hostname: localhost
+  port: 9300

@@ -33,6 +33,7 @@ import javax.ws.rs.core.SecurityContext;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.magneato.MagneatoConfiguration;
+import org.magneato.service.Repository;
 import org.magneato.service.Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Path("/")
 public class PageResource {
 	private final List<Template> templates;
+	private Repository repository;
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass()
 			.getName());
@@ -55,8 +57,9 @@ public class PageResource {
 	private final static String IMAGEPATH = "/library/images";
 	private String imageDir = null;
 
-	public PageResource(MagneatoConfiguration configuration) {
+	public PageResource(MagneatoConfiguration configuration, Repository repository) {
 		this.templates = configuration.getTemplates();
+		this.repository = repository;
 
 		log.debug("configuration");
 
@@ -75,8 +78,6 @@ public class PageResource {
 			}
 		}// for
 	}
-
-	HashMap<String, String> pageStore = new HashMap<String, String>();
 
 	// How do we handle home (default) web page? - I think we'll simply force
 	// the ID to 0 or something
@@ -110,7 +111,7 @@ public class PageResource {
 		}
 
 		// TODO: use Elastic
-		String body = pageStore.get(uri);
+		String body = repository.get(uri);
 		if (body == null) {
 			// no contents, create page instead
 			return new ErrorView("404-error", uri);
@@ -155,7 +156,7 @@ public class PageResource {
 	@Path("edit/{uri}")
 	public View edit(@PathParam("uri") String uri) {
 		log.debug("edit " + uri);
-		String body = pageStore.get(uri);
+		String body = repository.get(uri);
 		if (body == null) {
 			// this can't work because we don't know display template - call
 			// create page
@@ -175,7 +176,7 @@ public class PageResource {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Path("/save{p:/?}{uri:([a-z\\-\\.0-9]*)}")
+	@Path("/save{p:/?}{uri:([a-zA-Z\\-\\.0-9]*)}")
 	public String saveAsset(@PathParam("uri") String uri, String body,
 			@Context SecurityContext security) {
 		log.debug(">>> Saving " + uri + " " + body);
@@ -195,12 +196,11 @@ public class PageResource {
 			pageTitle = toSlug(pageTitle);
 
 			if (uri.isEmpty()) {
-				// TODO replace with Elastic
-				pageTitle = pageTitle + "." + System.currentTimeMillis();
-				pageStore.put(pageTitle, body);
+				String id = repository.insert(body);
+				pageTitle = pageTitle + "." + id;
 				data = "{\"url\":\"/" + pageTitle + "\"}";
 			} else {
-				pageStore.put(uri, body);
+				repository.insert(uri, body);
 				data = "{\"url\":\"/" + uri + "\"}";
 			}
 
