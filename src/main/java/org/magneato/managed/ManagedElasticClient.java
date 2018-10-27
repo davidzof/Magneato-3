@@ -1,8 +1,11 @@
-package org.magneato.service;
+package org.magneato.managed;
 
-import org.elasticsearch.action.admin.cluster.health.ClusterHealthResponse;
+import io.dropwizard.lifecycle.Managed;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
@@ -13,60 +16,39 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryAction;
-import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.magneato.service.ElasticSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Map;
-
-public class Repository {
-    private static final String INDEXTYPE = "_doc";
+public class ManagedElasticClient implements Managed {
+	private static final String INDEXTYPE = "_doc";
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass()
 			.getName());
 
-	/**
-	 * Implemented Singleton pattern here so that there is just one connection
-	 * at a time.
-	 * 
-	 * @return RestHighLevelClient
-	 */
-	/*
-	 * private static synchronized RestHighLevelClient makeConnection() {
-	 * 
-	 * if(restHighLevelClient == null) { restHighLevelClient = new
-	 * RestHighLevelClient( RestClient.builder( new HttpHost(HOST, PORT_ONE,
-	 * SCHEME), new HttpHost(HOST, PORT_TWO, SCHEME))); }
-	 * 
-	 * return restHighLevelClient;
-	 * 
-	 * }
-	 */
-
 	PreBuiltTransportClient client = null;
 
-	// https://tutorial-academy.com/elasticsearch-6-create-index-bulk-insert-delete-java-api/
-
-	public Repository(String clusterName, String clusterIp, int clusterPort)
+	public ManagedElasticClient(ElasticSearch configuration)
 			throws UnknownHostException {
 
-		Settings settings = Settings.builder().put("cluster.name", clusterName)
+		Settings settings = Settings.builder()
+				.put("cluster.name", configuration.getClusterName())
 				.put("client.transport.ignore_cluster_name", true)
 				.put("client.transport.sniff", true).build();
 
-		log.debug("Creating connection to Elastic on " + clusterIp + " port: " +clusterPort);
 		// create connection
 		client = new PreBuiltTransportClient(settings);
 		client.addTransportAddress(new TransportAddress(InetAddress
-				.getByName(clusterIp), clusterPort));
+				.getByName(configuration.getHostname()), configuration
+				.getPort()));
 
+	}
+
+	public PreBuiltTransportClient getClient() {
+		return client;
 	}
 
 	public void close() {
@@ -76,38 +58,9 @@ public class Repository {
 
 	}
 
-	public boolean isHealthy() {
-	/*	final ClusterHealthResponse response = client.admin().cluster()
-				.prepareHealth().setWaitForGreenStatus()
-				.setTimeout(TimeValue.timeValueSeconds(2)).execute()
-				.actionGet();
-
-		if (response.isTimedOut()) {
-			log.error("Elastic Search Health Check Timeout");
-			return false;
-		}
-		*/
-
-		return true;
-	}
-
-	public boolean isIndexRegistered(String indexName) {
-		// check if index already exists
-		log.debug("is index registered " +indexName);
-		final IndicesExistsResponse ieResponse = client.admin().indices()
-				.prepareExists(indexName).get(TimeValue.timeValueSeconds(1));
-
-		// index not there
-		if (!ieResponse.isExists()) {
-			return false;
-		}
-
-		return true;
-	}
-
 	public boolean createIndex(String indexName, String numberOfShards,
 			String numberOfReplicas) {
-		log.debug("create index " +indexName);
+		log.debug("create index " + indexName);
 
 		CreateIndexResponse createIndexResponse = client
 				.admin()
@@ -126,7 +79,8 @@ public class Repository {
 		return false;
 	}
 
-	public SearchResponse queryResultsWithAgeFilter(String indexName, int from, int to) {
+	public SearchResponse queryResultsWithAgeFilter(String indexName, int from,
+			int to) {
 		SearchResponse scrollResp = client
 				.prepareSearch(indexName)
 				// sort order
@@ -140,8 +94,7 @@ public class Repository {
 				.setSize(100).get();
 
 		return scrollResp;
-		
-		
+
 	}
 
 	public long delete(String indexName, String key, String value) {
@@ -165,7 +118,7 @@ public class Repository {
 	}
 
 	public String insert(String uri, String json) {
-		String id = uri.substring(uri.lastIndexOf('.')+1);
+		String id = uri.substring(uri.lastIndexOf('.') + 1);
 		log.info("id " + id);
 		IndexResponse response = client.prepareIndex("my-index", INDEXTYPE, id)
 				.setSource(json, XContentType.JSON).get();
@@ -174,9 +127,21 @@ public class Repository {
 	}
 
 	public String get(String uri) {
-		String id = uri.substring(uri.lastIndexOf('.')+1);
+		String id = uri.substring(uri.lastIndexOf('.') + 1);
 		log.info("id " + id);
 		GetResponse response = client.prepareGet("my-index", "_doc", id).get();
 		return response.getSourceAsString();
+	}
+
+	@Override
+	public void start() throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void stop() throws Exception {
+		this.close();
+
 	}
 }

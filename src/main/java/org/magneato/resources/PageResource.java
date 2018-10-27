@@ -33,7 +33,7 @@ import javax.ws.rs.core.SecurityContext;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.magneato.MagneatoConfiguration;
-import org.magneato.service.Repository;
+import org.magneato.managed.ManagedElasticClient;
 import org.magneato.service.Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +49,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Path("/")
 public class PageResource {
 	private final List<Template> templates;
-	private Repository repository;
+	private ManagedElasticClient repository;
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass()
 			.getName());
@@ -57,7 +57,7 @@ public class PageResource {
 	private final static String IMAGEPATH = "/library/images";
 	private String imageDir = null;
 
-	public PageResource(MagneatoConfiguration configuration, Repository repository) {
+	public PageResource(MagneatoConfiguration configuration, ManagedElasticClient repository) {
 		this.templates = configuration.getTemplates();
 		this.repository = repository;
 
