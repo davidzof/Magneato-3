@@ -22,12 +22,12 @@
   </div>    
   <div class="row">
     <div class="col-sm-8">
-      ${json.feedback.asText()}
+      ${json.feedback.asText()?no_esc}
     </div>
   </div>
   <div class="row">
       <div class="col-sm-8">
-        Ranking: ${json.ranking.asText()}
+        Ranking: ${json.tags.asText()}
       </div>
   </div>
   

@@ -168,7 +168,7 @@ public class PageResource {
 
 	/**
 	 * @param uri
-	 *            - lower case alphanumeric
+	 *            - Mixed case alphanumeric plus -
 	 * @param body
 	 *            - json form data to be saved
 	 * @return
@@ -179,8 +179,12 @@ public class PageResource {
 	@Path("/save{p:/?}{uri:([a-zA-Z\\-\\.0-9]*)}")
 	public String saveAsset(@PathParam("uri") String uri, String body,
 			@Context SecurityContext security) {
-		log.debug(">>> Saving " + uri + " " + body);
+		log.debug("Saving " + uri + " " + body);
+		// permissions: ADMIN, MODORATOR, EDITOR, if page exists already, page owner - needs meta data
+		// meta data is: create date, owner, editTemplate, displayTemplate
+		// Security.canCreate(uri);
 		String data = null;
+
 
 		ObjectMapper objectMapper = new ObjectMapper();
 
@@ -196,6 +200,7 @@ public class PageResource {
 			pageTitle = toSlug(pageTitle);
 
 			if (uri.isEmpty()) {
+				// creating a new page
 				String id = repository.insert(body);
 				pageTitle = pageTitle + "." + id;
 				data = "{\"url\":\"/" + pageTitle + "\"}";

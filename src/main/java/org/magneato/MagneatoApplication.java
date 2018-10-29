@@ -1,6 +1,7 @@
 package org.magneato;
 
 import io.dropwizard.Application;
+import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -44,6 +45,7 @@ public class MagneatoApplication extends Application<MagneatoConfiguration> {
 		// /assets/${1}.
 		bootstrap.addBundle(new ConfiguredAssetsBundle());
 		bootstrap.addBundle(new ViewBundle());
+		bootstrap.addBundle(new AssetsBundle("/assets/js", "/assets/js", null, "assets/js"));
 	}
 
 	@Override
@@ -66,10 +68,7 @@ public class MagneatoApplication extends Application<MagneatoConfiguration> {
 								.getElasticSearch().getIndexName());
 				if (!indexCheck.isExist()) {
 					// create index if not already existing
-					managedClient.createIndex(configuration.getElasticSearch()
-							.getIndexName(), configuration.getElasticSearch()
-							.getNumberOfShards(), configuration
-							.getElasticSearch().getNumberOfReplicas());
+					managedClient.createIndex();
 				}
 
 				// Enable the Jersey security annotations on resources

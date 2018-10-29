@@ -60,10 +60,8 @@ public class EsClusterHealthCheck extends HealthCheck {
 	 */
 	@Override
 	protected Result check() throws Exception {
-		System.out.println("do health check ");
 		final ClusterHealthStatus status = client.admin().cluster()
 				.prepareHealth().get().getStatus();
-		System.out.println("health check " + status);
 		if (status == ClusterHealthStatus.RED
 				|| (failOnYellow && status == ClusterHealthStatus.YELLOW)) {
 			return Result.unhealthy("Last status: %s", status.name());

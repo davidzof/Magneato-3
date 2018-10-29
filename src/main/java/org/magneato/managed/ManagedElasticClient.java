@@ -24,7 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ManagedElasticClient implements Managed {
-	private static final String INDEXTYPE = "_doc";
+	private static final String INDEXTYPE = "_doc"; // from ES 6.* always _doc
+	private final ElasticSearch configuration;
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass()
 			.getName());
@@ -33,6 +34,7 @@ public class ManagedElasticClient implements Managed {
 
 	public ManagedElasticClient(ElasticSearch configuration)
 			throws UnknownHostException {
+		this.configuration = configuration;
 
 		Settings settings = Settings.builder()
 				.put("cluster.name", configuration.getClusterName())
@@ -58,19 +60,18 @@ public class ManagedElasticClient implements Managed {
 
 	}
 
-	public boolean createIndex(String indexName, String numberOfShards,
-			String numberOfReplicas) {
-		log.debug("create index " + indexName);
+	public boolean createIndex() {
+		log.info("Create ES Index " + configuration.getIndexName());
 
 		CreateIndexResponse createIndexResponse = client
 				.admin()
 				.indices()
-				.prepareCreate(indexName)
+				.prepareCreate(configuration.getIndexName())
 				.setSettings(
 						Settings.builder()
-								.put("index.number_of_shards", numberOfShards)
+								.put("index.number_of_shards", configuration.getNumberOfShards())
 								.put("index.number_of_replicas",
-										numberOfReplicas)).get();
+										configuration.getNumberOfReplicas())).get();
 
 		if (createIndexResponse.isAcknowledged()) {
 			return true;
@@ -79,10 +80,10 @@ public class ManagedElasticClient implements Managed {
 		return false;
 	}
 
-	public SearchResponse queryResultsWithAgeFilter(String indexName, int from,
+	public SearchResponse queryResultsWithAgeFilter(int from,
 			int to) {
 		SearchResponse scrollResp = client
-				.prepareSearch(indexName)
+				.prepareSearch(configuration.getIndexName())
 				// sort order
 				.addSort(FieldSortBuilder.DOC_FIELD_NAME, SortOrder.ASC)
 				// keep results for 60 seconds
@@ -97,10 +98,10 @@ public class ManagedElasticClient implements Managed {
 
 	}
 
-	public long delete(String indexName, String key, String value) {
+	public long delete(String key, String value) {
 		BulkByScrollResponse response = DeleteByQueryAction.INSTANCE
 				.newRequestBuilder(client)
-				.filter(QueryBuilders.matchQuery(key, value)).source(indexName)
+				.filter(QueryBuilders.matchQuery(key, value)).source(configuration.getIndexName())
 				.refresh(true).get();
 
 		log.info("Deleted " + response.getDeleted() + " element(s)!");
@@ -109,7 +110,7 @@ public class ManagedElasticClient implements Managed {
 	}
 
 	public String insert(String json) {
-		IndexResponse response = client.prepareIndex("my-index", INDEXTYPE)
+		IndexResponse response = client.prepareIndex(configuration.getIndexName(), INDEXTYPE)
 				.setSource(json, XContentType.JSON).get();
 
 		String id = response.getId();
@@ -120,7 +121,7 @@ public class ManagedElasticClient implements Managed {
 	public String insert(String uri, String json) {
 		String id = uri.substring(uri.lastIndexOf('.') + 1);
 		log.info("id " + id);
-		IndexResponse response = client.prepareIndex("my-index", INDEXTYPE, id)
+		IndexResponse response = client.prepareIndex(configuration.getIndexName(), INDEXTYPE, id)
 				.setSource(json, XContentType.JSON).get();
 
 		return id;
@@ -129,19 +130,17 @@ public class ManagedElasticClient implements Managed {
 	public String get(String uri) {
 		String id = uri.substring(uri.lastIndexOf('.') + 1);
 		log.info("id " + id);
-		GetResponse response = client.prepareGet("my-index", "_doc", id).get();
+		GetResponse response = client.prepareGet(configuration.getIndexName(), "_doc", id).get();
 		return response.getSourceAsString();
 	}
 
 	@Override
 	public void start() throws Exception {
-		// TODO Auto-generated method stub
-
+	    // NO OP
 	}
 
 	@Override
 	public void stop() throws Exception {
 		this.close();
-
 	}
 }

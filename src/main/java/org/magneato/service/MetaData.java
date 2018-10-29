@@ -12,13 +12,8 @@ public class MetaData {
 	private String group;
 	private long perms;
 	private ArrayList<String> relations;
-	private String content;
 
-	public enum Status {
-		DRAFT, REVIEW, PUBLISHED
-	}
-
-	private Status status;
+	private int status;
 	private long createDate;
 	private String editTemplate;
 	private String viewTemplate;

@@ -57,6 +57,14 @@
             <version>${dropwizard.version}</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/io.dropwizard/dropwizard-assets -->
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-assets</artifactId>
+            <version>${dropwizard.version}</version>
+        </dependency>
+
+
 
         <!-- https://mvnrepository.com/artifact/io.dropwizard/dropwizard-assets -->
         <!-- dependency>

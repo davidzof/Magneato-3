@@ -1,114 +1,154 @@
-<script type="text/javascript">
-$(document).ready(function() {
-  $("#form").alpaca({
+<!-- tinymce (for the tinymce field) -->
+<script src="https://cloud.tinymce.com/stable/tinymce.min.js"></script>
 
-    "data":
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#form").alpaca({
+
+        "data":
     <#if body ??>
-      ${body?no_esc}
+        ${body?no_esc}
     <#else>
     {
-      "title": "The Page Title",
-      "feedback": "Very impressive.",
-      "ranking": "excellent"
+        "title": "The Page Title",
+        "feedback": "Type your content here...",
+        "tags": "",
+        "metadata": { "edit_template" : "simple"}
     }
-    </#if> 
-                      ,
-    "schema": {
-      "title":"Simple Edit Page",
-      "description":"This is an example of a basic page with Title, Edit Field and Attachments",
-      "type":"object",
-      "properties": {
-        "title": {
-          "type":"string",
-          "title":"title",
-          "required":true
-        },
-        "feedback": {
-          "type":"string",
-          "title":"Feedback"
-        },
-                            "ranking": {
-                                "type":"string",
-                                "title":"Ranking",
-                                "enum":['excellent','ok','so so'],
-                                "required":true
-                            },
-                            "files": {
-                                "type": "array",
-                                "title": "Files",
-                                "required": true
-                            }
-            
-                            
-                            
-                        }
-                                     
+    </#if>
+            ,
+            "schema": {
+                "title": "Simple Edit Page",
+                "description": "This is an example of a basic page with Title, Editor Field and Attachments",
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "title": "title",
+                        "required": true
                     },
-                    "options": {
-                        "form":{
-                            "buttons":{
-                                "submit":{
-                                    "title": "Send Form Data",
-                                    "click": function() {
-                                        var data = this.getValue();
-                                        $.ajax({
-											contentType: 'application/json',
-											data: JSON.stringify(data),
-											dataType: 'JSON',
-											type: 'POST',
-											url: '/save/${url}',
-											success:  function(data) { afterSuccess(data) }
-										})
+                    "feedback": {
+                        "type": "string",
+                        "title": "Feedback"
+                    },
+                    "tags": {
+                        "type": "string",
+                        "title": "Tags",
+                        "required": false
+                    },
+                    "files": {
+                        "type": "array",
+                        "title": "Files",
+                        "required": true
+                    },
+                    "metadata": {
+                        "type": "object",
+                        "required": false,
+                        "properties": {
+                            "edit_template": {
+                                "type": "string",
+                                "required": false,
+                                "properties": {}
+                            }
+                        }
+                    }
+                }
+            },
+            "options": {
+                "form": {
+                    "buttons": {
+                        "submit": {
+                            "title": "Send Form Data",
+                            "click": function () {
+                                var data = this.getValue();
+                                $.ajax({
+                                    contentType: 'application/json',
+                                    data: JSON.stringify(data),
+                                    dataType: 'JSON',
+                                    type: 'POST',
+                                    url: '/save/${url}',
+                                    success: function (data) {
+                                        afterSuccess(data)
                                     }
-                                }
+                                })
                             }
+                        }
+                    }
+                },
+                "helper": "Tell us what you think about Alpaca!",
+                "fields": {
+                    "files": {
+                        "type": "upload",
+                        "maxFileSize": 25000000,
+                        "maxNumberOfFiles": 3,
+                        "fileTypes": "(\.|\/)(gif|jpe?g|png)$",
+                        "upload": {
+                            "url": "/upload",
+                            "autoUpload": true
                         },
-                        "helper": "Tell us what you think about Alpaca!",
+                        "name": "files"
+                    },
+                    "title": {
+                        "size": 20,
+                        "helper": "Please enter the page title."
+                    },
+                    "feedback": {
+                        "type": "tinymce",
+                        "name": "your_feedback",
+                        "rows": 5,
+                        "cols": 40,
+                        "helper": "Please enter your feedback."
+                    },
+                    "tags": {
+                        "type": "tag",
+                        "helper": "Enter some tags."
+                    },
+                    "metadata": {
+                        "type": "object",
+                        "label": "Meta Data",
+                        "helpers": [],
+                        "helpersPosition": "below",
+                        "validate": true,
+                        "disabled": true,
+                        "readonly": true,
+                        "showMessages": true,
+                        "collapsible": false,
+                        "legendStyle": "button",
                         "fields": {
-                          "files": {
-                            "type": "upload",
-                            "maxFileSize": 25000000,
-                            "maxNumberOfFiles": 3,
-                            "fileTypes": "(\.|\/)(gif|jpe?g|png)$",
-                            "upload": {
-                              "url": "/upload",
-                              "autoUpload": true
-                            },
-                            "name": "files"
-                          },
-                          "title": {
-                            "size": 20,
-                            "helper": "Please enter the page title."
-                          },
-                          "feedback" : {
-                                "type": "textarea",
-                                "name": "your_feedback",
-                                "rows": 5,
-                                "cols": 40,
-                                "helper": "Please enter your feedback."
-                          },
-                          "ranking": {
-                                "type": "select",
-                                "helper": "Select your ranking.",
-                                "optionLabels": ["Awesome!",
-                                    "It's Ok",
-                                    "Hmm..."]
+                            "edit_template": {
+                                "type": "text",
+                                "label": "Edit Template",
+                                "helpers": [],
+                                "helpersPosition": "below",
+                                "validate": true,
+                                "disabled": false,
+                                "showMessages": true,
+                                "renderButtons": true,
+                                "data": {},
+                                "attributes": {},
+                                "allowOptionalEmpty": true,
+                                "autocomplete": false,
+                                "disallowEmptySpaces": false,
+                                "disallowOnlyEmptySpaces": false,
+                                "fields": {}
                             }
-                        }   
-      },
-                    "view" : "bootstrap-edit",
-                    "postRender": function(control) {
-                        control.childrenByPropertyId["title"].getFieldEl().css("background-color", "lightgreen");                  
-      }
+                        }
+                    }
+                }
+            },
+            "view": "bootstrap-edit",
+            "postRender": function (control) {
+                control.childrenByPropertyId["title"].getFieldEl().css("background-color", "lightgreen");
+            }
+        });
     });
-  });
-            
-  function afterSuccess(data) {
-  
-  var obj = $.parseJSON(JSON.stringify(data));
-  
-  <!-- we need this url from server -->
-  console.log(obj.url);
-    window.location.replace(obj.url);
-  }
+
+    function afterSuccess(data) {
+
+        var obj = $.parseJSON(JSON.stringify(data));
+
+        <!-- we need this url from server -->
+        console.log(obj.url);
+        window.location.replace(obj.url);
+    }
 </script>
