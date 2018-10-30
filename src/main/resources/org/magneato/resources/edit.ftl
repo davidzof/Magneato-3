@@ -13,11 +13,11 @@
     <!-- fileupload control (for UploadField) -->
     <link rel="stylesheet" type="text/css" href="http://www.alpacajs.org//lib/blueimp-file-upload/css/jquery.fileupload.css"/>
     <link rel="stylesheet" type="text/css" href="http://www.alpacajs.org//lib/blueimp-file-upload/css/jquery.fileupload-ui.css"/>
-    <script src="http://www.alpacajs.org//lib/blueimp-file-upload/js/vendor/jquery.ui.widget.js"></script>
-    <script src="http://www.alpacajs.org//lib/blueimp-file-upload/js/jquery.iframe-transport.js"></script>
-    <script src="http://www.alpacajs.org//lib/blueimp-file-upload/js/jquery.fileupload.js"></script>
-    <script src="http://www.alpacajs.org//lib/blueimp-file-upload/js/jquery.fileupload-process.js"></script>
-    <script src="http://www.alpacajs.org//lib/blueimp-file-upload/js/jquery.fileupload-ui.js"></script>
+    <script src="http://www.alpacajs.org/lib/blueimp-file-upload/js/vendor/jquery.ui.widget.js"></script>
+    <script src="http://www.alpacajs.org/lib/blueimp-file-upload/js/jquery.iframe-transport.js"></script>
+    <script src="http://www.alpacajs.org/lib/blueimp-file-upload/js/jquery.fileupload.js"></script>
+    <script src="http://www.alpacajs.org/lib/blueimp-file-upload/js/jquery.fileupload-process.js"></script>
+    <script src="http://www.alpacajs.org/lib/blueimp-file-upload/js/jquery.fileupload-ui.js"></script>
 
  
     <!-- bootstrap -->

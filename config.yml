@@ -29,13 +29,13 @@ assets:
 #
 templates:
   - name: simple
-    description: simple page template containing title, edit box and attachments
+    description: Simple page template containing title, edit box and attachments
     views:
       - simple
-  - name: trip_report
-    description: A template for creating trip reports, can attach jpegs and gpx files
+  - name: tripreport
+    description: Create trip reports, can attach jpegs and gpx files
     views:
-      - ski_tour
+      - skitour
       - mtb
 
 elasticSearch:

@@ -17,7 +17,6 @@
     {
         "title": "The Page Title",
         "feedback": "Type your content here...",
-        "category": "Technology",
         "metadata": { "edit_template" : "simple", "display_template" : "" }
     }
     </#if>
@@ -40,14 +39,6 @@
                         "type": "array",
                         "title": "Files"
                     },
-                    "category": {
-                        "title": "Category",
-                        "enum": [
-                            "Home News",
-                            "Technology",
-                            "World News"
-                        ]
-                    },
                     "metadata": {
                         "type": "object",
                         "required": false,
@@ -67,9 +58,6 @@
                             }
                         }
                     }
-                },
-                "dependencies": {
-                    "feedback": ["category"]
                 }
             },
             "options": {
@@ -115,20 +103,7 @@
                         "name": "your_feedback",
                         "rows": 5,
                         "cols": 40,
-                        "helper": "Please enter your feedback.",
-                        "dependencies" : {
-                            "category" : ["Home News", "Technology","World News"]
-                        }
-
-                    },
-                    "category": {
-                       "type": "select",
-                       "label": "New select",
-                        "optionLabels": [
-                            "Home News",
-                            "Technology",
-                            "World News"
-                        ]
+                        "helper": "Please enter your feedback."
                     },
                     "metadata": {
                         "type": "object",
@@ -173,9 +148,7 @@
             },
             "view": "bootstrap-edit",
             "postRender": function (control) {
-                // check for gpx and fill in values, need ajax call
-                var nameField = control.childrenByPropertyId["title"];
-                console.log("Welcome aboard, " +  nameField.getValue());
+                control.childrenByPropertyId["title"].getFieldEl().css("background-color", "lightgreen");
             }
         });
     });

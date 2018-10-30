@@ -25,13 +25,7 @@
       ${json.feedback.asText()?no_esc}
     </div>
   </div>
-  <div class="row">
-      <div class="col-sm-8">
-        Ranking: ${json.tags.asText()}
-      </div>
-  </div>
-  
-  
+
   <div class="row">
     <div class="col-sm-8">
       <h2>Attachments</h2>

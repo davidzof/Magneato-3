@@ -267,7 +267,8 @@ public class PageResource {
 				+ "\",\"name\":\""
 				+ fileName
 				+ "\",\"size\":\"12345\",\"type\":\"image/png\",\"deleteUrl\":\"delete/"
-				+ fileName + "\",\"deleteType\":\"DELETE\"}]}";
+				+ fileName + "\",\"deleteType\":\"DELETE\"}],"
+				+ "\"metadata\":\"my meta data\"}";
 	}
 
 	// https://github.com/slugify/slugify
