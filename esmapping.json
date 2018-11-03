@@ -1,0 +1,35 @@
+{
+  "_doc": {
+    "properties": {
+      "title": {
+        "type": "text",
+        "boost": 5,
+        "index": true,
+        "analyzer": "english"
+      },
+      "files": {	
+        "properties": {	
+          "deleteType": {
+            "type": "text",
+            "index": false
+          },
+          "deleteUrl": {
+            "type": "text",
+            "index": false
+          }	
+        }
+      },
+      "metadata": {
+        "properties": {
+          "edit_template": {
+            "type": "keyword"
+          },
+          "create_date": {
+            "type": "date",
+			"format": "YYYY-MM-DD HH:mm:ss"
+          }
+        }
+      }
+    }
+  }
+}

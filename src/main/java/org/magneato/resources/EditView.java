@@ -4,14 +4,18 @@ import io.dropwizard.views.View;
 
 import java.nio.charset.StandardCharsets;
 
+import org.magneato.service.MetaData;
+
 public class EditView extends View {
-	String url = null;
-	String body;
+	private String url = null;
+	private MetaData metaData;
+	private String body;
+	private static final String EDITTEMPLATE = "edit.ftl";
 	
-    public EditView(String url) {
-    	super("edit.ftl", StandardCharsets.UTF_8);
+    public EditView(String url, MetaData metaData) {
+    	super(EDITTEMPLATE, StandardCharsets.UTF_8);
     	this.url = url;
-        
+        this.metaData = metaData;
     }
 
     public EditView(String url, String editTemplate, String displayTemplate) {
@@ -33,5 +37,9 @@ public class EditView extends View {
     
     public String getBody() {
     	return body;
+    }
+    
+    public String getMetaData() {
+    	return metaData.toJson();
     }
 }

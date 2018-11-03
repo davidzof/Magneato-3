@@ -9,7 +9,6 @@
 <script type="text/javascript">
     $(document).ready(function () {
         $("#form").alpaca({
-
         "data":
     <#if body ??>
         ${body?no_esc}
@@ -18,7 +17,7 @@
         "title": "The Page Title",
         "feedback": "Type your content here...",
         "category": "Technology",
-        "metadata": { "edit_template" : "simple", "display_template" : "" }
+        "metadata": ${metaData?no_esc}
     }
     </#if>
             ,
@@ -153,6 +152,7 @@
                             },
                             "create_date": {
                                 "type": "datetime",
+                                "readonly": true,
                                 "label": "Create Date",
                                 "picker": {
                                     "useCurrent": false,

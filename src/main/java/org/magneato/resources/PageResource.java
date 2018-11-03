@@ -7,11 +7,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.security.Principal;
 import java.text.Normalizer;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -28,12 +28,15 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriBuilder;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.magneato.MagneatoConfiguration;
 import org.magneato.managed.ManagedElasticClient;
+import org.magneato.service.MetaData;
 import org.magneato.service.Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +60,8 @@ public class PageResource {
 	private final static String IMAGEPATH = "/library/images";
 	private String imageDir = null;
 
-	public PageResource(MagneatoConfiguration configuration, ManagedElasticClient repository) {
+	public PageResource(MagneatoConfiguration configuration,
+			ManagedElasticClient repository) {
 		this.templates = configuration.getTemplates();
 		this.repository = repository;
 
@@ -79,15 +83,6 @@ public class PageResource {
 		}// for
 	}
 
-	// How do we handle home (default) web page? - I think we'll simply force
-	// the ID to 0 or something
-	@GET
-	@Path("")
-	@Produces(MediaType.TEXT_HTML)
-	public View getDefault(@Context SecurityContext security) {
-		return get("null", security);
-	}
-
 	/**
 	 * Display a normal web page
 	 * 
@@ -100,8 +95,8 @@ public class PageResource {
 	@GET
 	@Path("{uri}")
 	@Produces(MediaType.TEXT_HTML)
-	public View get(@PathParam("uri") String uri,
-			@Context SecurityContext security) {
+	public Object get(@PathParam("uri") String uri,
+			@Context SecurityContext security) throws IOException {
 
 		log.debug("get " + uri);
 
@@ -110,14 +105,38 @@ public class PageResource {
 			// default page?
 		}
 
-		// TODO: use Elastic
 		String body = repository.get(uri);
 		if (body == null) {
 			// no contents, create page instead
 			return new ErrorView("404-error", uri);
 		}
 
-		return new PageView(body, "display.simple");
+		log.debug("get " + body);
+
+		// check url is canonical and issue a 301 if not
+		ObjectMapper objectMapper = new ObjectMapper();
+		JsonNode jsonNode;
+
+		jsonNode = objectMapper.readTree(body);
+		String pageTitle = jsonNode.get("title").asText();
+
+		pageTitle = toSlug(pageTitle);
+
+		String stem = uri.substring(0, uri.lastIndexOf('.'));
+		System.out.println("pageTitle " + pageTitle + " stem " + stem);
+
+		if (!pageTitle.equals(stem)) {
+			// redirect to canonical url
+			URI redirectUrl = UriBuilder.fromUri(
+					pageTitle + "." + uri.substring(uri.lastIndexOf('.') + 1))
+					.build();
+			return Response.seeOther(redirectUrl).build();
+		}
+
+		String viewTemplate = jsonNode.get("metadata").get("display_template")
+				.asText();
+		System.out.println("display template " + viewTemplate);
+		return new PageView(body, "display." + viewTemplate, repository);
 	}
 
 	/**
@@ -145,8 +164,12 @@ public class PageResource {
 			if (displayTemplate == null) {
 				displayTemplate = editTemplate;
 			}
-			return new EditView(uri);
+			// we know enough about the page to go straight into editing
+			MetaData md = new MetaData().setEditTemplate(editTemplate)
+					.setViewTemplate(displayTemplate);
+			return new EditView(uri, md);
 		}
+
 		return new CreatePageView(templates);
 	}
 
@@ -180,11 +203,11 @@ public class PageResource {
 	public String saveAsset(@PathParam("uri") String uri, String body,
 			@Context SecurityContext security) {
 		log.debug("Saving " + uri + " " + body);
-		// permissions: ADMIN, MODORATOR, EDITOR, if page exists already, page owner - needs meta data
+		// permissions: ADMIN, MODORATOR, EDITOR, if page exists already, page
+		// owner - needs meta data
 		// meta data is: create date, owner, editTemplate, displayTemplate
 		// Security.canCreate(uri);
 		String data = null;
-
 
 		ObjectMapper objectMapper = new ObjectMapper();
 
@@ -230,7 +253,6 @@ public class PageResource {
 			@FormDataParam("files") final FormDataContentDisposition contentDispositionHeader) {
 		String fileName = contentDispositionHeader.getFileName();
 		log.debug("filename " + fileName + " imageDir " + imageDir);
-		
 
 		if (imageDir == null) {
 			log.warn("image directory not configured in config.yml");
@@ -267,8 +289,7 @@ public class PageResource {
 				+ "\",\"name\":\""
 				+ fileName
 				+ "\",\"size\":\"12345\",\"type\":\"image/png\",\"deleteUrl\":\"delete/"
-				+ fileName + "\",\"deleteType\":\"DELETE\"}],"
-				+ "\"metadata\":\"my meta data\"}";
+				+ fileName + "\",\"deleteType\":\"DELETE\"}]}";
 	}
 
 	// https://github.com/slugify/slugify
