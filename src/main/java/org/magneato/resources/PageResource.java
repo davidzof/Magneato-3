@@ -53,6 +53,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class PageResource {
 	private final List<Template> templates;
 	private ManagedElasticClient repository;
+	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass()
 			.getName());
@@ -65,14 +66,12 @@ public class PageResource {
 		this.templates = configuration.getTemplates();
 		this.repository = repository;
 
-		log.debug("configuration");
-
 		Map<String, String> uriMappings = configuration
 				.getAssetsConfiguration().getResourcePathToUriMappings();
 		for (Map.Entry<String, String> entry : uriMappings.entrySet()) {
 			System.out.println("Key = " + entry.getKey() + ", Value = "
 					+ entry.getValue());
-		}
+		}// TODO remove this
 
 		Map<String, String> overrides = configuration.getAssetsConfiguration()
 				.getOverrides();
@@ -84,20 +83,19 @@ public class PageResource {
 	}
 
 	/**
-	 * Display a normal web page
+	 * Display a normal web page. The response should be cached.
 	 * 
 	 * @param uri
 	 *            - name of resource to be displayed
 	 * @param security
 	 *            - security context
-	 * @return Freemarker view
+	 * @return Redirect object or Freemarker view
 	 */
 	@GET
 	@Path("{uri}")
 	@Produces(MediaType.TEXT_HTML)
 	public Object get(@PathParam("uri") String uri,
 			@Context SecurityContext security) throws IOException {
-
 		log.debug("get " + uri);
 
 		if (uri == null || uri.isEmpty()) {
@@ -105,7 +103,8 @@ public class PageResource {
 			// default page?
 		}
 
-		String body = repository.get(uri);
+		String id = uri.substring(uri.lastIndexOf('.') + 1);
+		String body = repository.get(id);
 		if (body == null) {
 			// no contents, create page instead
 			return new ErrorView("404-error", uri);
@@ -114,21 +113,14 @@ public class PageResource {
 		log.debug("get " + body);
 
 		// check url is canonical and issue a 301 if not
-		ObjectMapper objectMapper = new ObjectMapper();
-		JsonNode jsonNode;
-
-		jsonNode = objectMapper.readTree(body);
+		JsonNode jsonNode = objectMapper.readTree(body);
 		String pageTitle = jsonNode.get("title").asText();
-
 		pageTitle = toSlug(pageTitle);
-
 		String stem = uri.substring(0, uri.lastIndexOf('.'));
-		System.out.println("pageTitle " + pageTitle + " stem " + stem);
-
 		if (!pageTitle.equals(stem)) {
 			// redirect to canonical url
 			URI redirectUrl = UriBuilder.fromUri(
-					pageTitle + "." + uri.substring(uri.lastIndexOf('.') + 1))
+					pageTitle + "." + id)
 					.build();
 			return Response.seeOther(redirectUrl).build();
 		}
@@ -139,6 +131,7 @@ public class PageResource {
 		return new PageView(body, "display." + viewTemplate, repository);
 	}
 
+	
 	/**
 	 * Create a new page, displays a form where you can select the edit and
 	 * display template to use
@@ -208,8 +201,6 @@ public class PageResource {
 		// meta data is: create date, owner, editTemplate, displayTemplate
 		// Security.canCreate(uri);
 		String data = null;
-
-		ObjectMapper objectMapper = new ObjectMapper();
 
 		// TODO: tests remove this
 		Principal principal = security.getUserPrincipal();

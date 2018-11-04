@@ -66,7 +66,8 @@
     <div class="row">
      <div class="col-sm-8">
      <#list search(0,10,null) as row>
-     	${row}
+     	<#assign node = toJsonNode(row)>
+     	<p>${node.title.asText()}</p>
      	</#list>
      </div>
      </div>

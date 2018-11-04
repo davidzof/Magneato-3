@@ -168,6 +168,7 @@ public class ManagedElasticClient implements Managed {
 		ArrayList<String> docs = new ArrayList<String>();
 		SearchHits searchHits = response.getHits();
 		for (SearchHit hit : searchHits) {
+			hit.getId(); // need to return this
 			docs.add(hit.getSourceAsString());
 		}
 
@@ -206,8 +207,7 @@ public class ManagedElasticClient implements Managed {
 		return id;
 	}
 
-	public String get(String uri) {
-		String id = uri.substring(uri.lastIndexOf('.') + 1);
+	public String get(String id) {
 		log.info("id " + id);
 		GetResponse response = client.prepareGet(configuration.getIndexName(),
 				"_doc", id).get();
