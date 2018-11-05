@@ -1,5 +1,6 @@
 package org.magneato.resources;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.dropwizard.views.View;
 
 import java.awt.Image;
@@ -172,7 +173,8 @@ public class PageResource {
 	@Path("edit/{uri}")
 	public View edit(@PathParam("uri") String uri) {
 		log.debug("edit " + uri);
-		String body = repository.get(uri);
+		String id = uri.substring(uri.lastIndexOf('.') + 1);
+		String body = repository.get(id);
 		if (body == null) {
 			// this can't work because we don't know display template - call
 			// create page
@@ -193,28 +195,34 @@ public class PageResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("/save{p:/?}{uri:([a-zA-Z\\-\\.0-9]*)}")
-	public String saveAsset(@PathParam("uri") String uri, String body,
+	public String save(@PathParam("uri") String uri, String body,
 			@Context SecurityContext security) {
 		log.debug("Saving " + uri + " " + body);
-		// permissions: ADMIN, MODORATOR, EDITOR, if page exists already, page
+
+		// permissions: ADMIN, MODARATOR, EDITOR, if page exists already, page
 		// owner - needs meta data
 		// meta data is: create date, owner, editTemplate, displayTemplate
 		// Security.canCreate(uri);
-		String data = null;
 
-		// TODO: tests remove this
-		Principal principal = security.getUserPrincipal();
-		if (principal != null) {
-			System.out.println(security.getUserPrincipal().getName());
-		}
+		String data = null;
 
 		try {
 			JsonNode jsonNode = objectMapper.readTree(body);
 			String pageTitle = jsonNode.get("title").asText();
 			pageTitle = toSlug(pageTitle);
+            ((ObjectNode) jsonNode).set("metadata", objectMapper.readTree(new MetaData().toJson()));
+
+            System.out.println(">>>> node " + jsonNode);
 
 			if (uri.isEmpty()) {
 				// creating a new page
+
+                /*
+                we need to update the metadata here, if admin accept that which is returned but add a canonicalURL based on the slug
+               if not admin we need to create a metadata object and insert the data here.
+                 */
+
+
 				String id = repository.insert(body);
 				pageTitle = pageTitle + "." + id;
 				data = "{\"url\":\"/" + pageTitle + "\"}";
