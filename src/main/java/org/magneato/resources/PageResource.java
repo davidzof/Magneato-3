@@ -1,6 +1,5 @@
 package org.magneato.resources;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.dropwizard.views.View;
 
 import java.awt.Image;
@@ -11,7 +10,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.security.Principal;
 import java.text.Normalizer;
 import java.util.List;
 import java.util.Locale;
@@ -23,6 +21,7 @@ import javax.imageio.ImageIO;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -44,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 // https://github.com/wdawson/dropwizard-auth-example/blob/master/pom.xml
 /*
@@ -184,6 +184,17 @@ public class PageResource {
 		return new EditView(uri, body);
 	}
 
+	@PUT
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Path("/save{p:/?}{uri:([a-zA-Z\\-\\.0-9]*)}")
+	public String update(@PathParam("uri") String uri, String body,
+			@Context SecurityContext security) {
+		log.debug("Updating " + uri + " " + body);
+		
+		return this.save(uri, body, security);
+	}
+	
 	/**
 	 * @param uri
 	 *            - Mixed case alphanumeric plus -
@@ -199,7 +210,7 @@ public class PageResource {
 			@Context SecurityContext security) {
 		log.debug("Saving " + uri + " " + body);
 
-		// permissions: ADMIN, MODARATOR, EDITOR, if page exists already, page
+		// permissions: ADMIN, MODERATOR, EDITOR, if page exists already, page
 		// owner - needs meta data
 		// meta data is: create date, owner, editTemplate, displayTemplate
 		// Security.canCreate(uri);
@@ -207,6 +218,13 @@ public class PageResource {
 		String data = null;
 
 		try {
+			/*
+			 * metadata, can only be set by admin
+			 * for other users dupe what is in repo
+			 */
+			if (security.isUserInRole("admin")) {
+				System.out.println("************ >>> admin can update meta data");
+			}
 			JsonNode jsonNode = objectMapper.readTree(body);
 			String pageTitle = jsonNode.get("title").asText();
 			pageTitle = toSlug(pageTitle);
@@ -215,8 +233,7 @@ public class PageResource {
             System.out.println(">>>> node " + jsonNode);
 
 			if (uri.isEmpty()) {
-				// creating a new page
-
+				// page doesn't exist yet, create new one.
                 /*
                 we need to update the metadata here, if admin accept that which is returned but add a canonicalURL based on the slug
                if not admin we need to create a metadata object and insert the data here.

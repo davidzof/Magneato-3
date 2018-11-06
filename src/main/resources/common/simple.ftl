@@ -62,7 +62,7 @@
                             "create_date": {
                                 "type": "string",
                                 "required": false,
-                                "formate": "date"
+                                "format": "date"
                             }
                         }
                     }
@@ -82,8 +82,14 @@
                                     contentType: 'application/json',
                                     data: JSON.stringify(data),
                                     dataType: 'JSON',
-                                    type: 'POST',
-                                    url: '/save/${url}',
+                                    <#if url?has_content >
+                                    	type: 'PUT',
+                                    	url: '/save/${url}',
+                                    <#else>
+                                    	type: 'POST',
+                                    	url: '/save',
+                                    </#if>
+                                    
                                     success: function (data) {
                                         afterSuccess(data)
                                     }
