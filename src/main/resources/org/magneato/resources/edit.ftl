@@ -33,7 +33,21 @@
 </head>
 <body>
      <div id="form"></div>
-     <#include "/common/simple.ftl">
+     <#include "/common/${editTemplate}.ftl">
      <#include "/common/copyright.ftl">
 </body>
+<script>
+    function afterSuccess(data) {
+
+        var obj = $.parseJSON(JSON.stringify(data));
+
+        <!-- we need this url from server -->
+        if (typeof obj.error === 'undefined') {
+            window.location.replace(obj.url);
+            console.log(obj.url);
+        } else {
+            alert(obj.error);
+        }
+    }
+</script>
 </html>

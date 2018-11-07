@@ -19,7 +19,7 @@ public class EditView extends View {
     }
 
     public EditView(String url, String editTemplate, String displayTemplate) {
-    	super("edit.ftl", StandardCharsets.UTF_8);
+    	super(EDITTEMPLATE, StandardCharsets.UTF_8);
     	this.url = url;
     }
     
@@ -41,5 +41,9 @@ public class EditView extends View {
     
     public String getMetaData() {
     	return metaData.toJson();
+    }
+
+	public String getEditTemplate() {
+    	return metaData.getEditTemplate();
     }
 }

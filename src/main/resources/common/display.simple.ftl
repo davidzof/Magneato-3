@@ -1,4 +1,4 @@
-<#-- @ftlvariable name="" type="com.javaeeeee.dwstart.resources.PageView" -->
+<#-- @ftlvariable name="" type="org.magneato.resources.PageView" -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
     <title>${json.title.asText()}</title>
 
     <!-- jquery -->
-    <script type="text/javascript" src="" https://ajax.googleapis.com/ajax/libs/jquery/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <!-- bootstrap -->
     <link type = "text/css" rel = "stylesheet" href="https://getbootstrap.com/docs/3.3/dist/css/bootstrap.min.css" />
     <script type="text/javascript" src = "https://getbootstrap.com/docs/3.3/dist/js/bootstrap.min.js" ></script>
@@ -39,7 +39,7 @@
             <ul class="nav navbar-nav">
                 <li class="active"><a href="#">Home</a></li>
                 <li class="divider"></li>
-                <li><a href="#about">About</a></li>
+                <li><a href="">Edit</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
 
@@ -76,7 +76,7 @@
         <h2>Related articles</h2>
         <#list search(0,10,null) as row>
             <#assign node = toJsonNode(row)>
-            <p>${node.title.asText()}</p>
+            <a href="fred.${node._id.asText()}">${node._source.title.asText()}</a><br/>
         </#list>
     </div>
 

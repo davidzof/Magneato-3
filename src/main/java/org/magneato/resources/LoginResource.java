@@ -18,11 +18,6 @@ import org.slf4j.LoggerFactory;
 // https://www.dropwizard.io/0.7.1/docs/manual/views.html
 @Path("/login")
 public class LoginResource {
-	 private final Logger log = LoggerFactory.getLogger(this.getClass()
-				.getName());
-
-	 
-	 
     @GET
     public View login() {
         return new LoginView();

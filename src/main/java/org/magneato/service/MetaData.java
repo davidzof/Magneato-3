@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 /**
- * Content MetaData
+ * Asset MetaData
  * 
  * @author David George
  */
@@ -29,11 +29,26 @@ public class MetaData {
 	};
 
 	public MetaData() {
-
+		createDate = System.currentTimeMillis();
 	}
 
 	public MetaData setEditTemplate(String editTemplate) {
 		this.editTemplate = editTemplate;
+		return this;
+	}
+
+	public String getEditTemplate() {
+		return this.editTemplate;
+	}
+
+
+	public MetaData setIPAddr(String ipAddr) {
+		this.ipAddr = ipAddr;
+		return this;
+	}
+
+	public MetaData setOwner(String userName) {
+		this.owner = userName;
 		return this;
 	}
 
@@ -45,7 +60,9 @@ public class MetaData {
 	public String toJson() {
 		return "{ \"edit_template\": \"" + editTemplate + "\","
 				+ "\"display_template\" : \"" + viewTemplate + "\","
+				+ "\"ip_addr\" : \"" + ipAddr + "\","
+				+ "\"owner\" : \"" + owner + "\","
 				+ "\"create_date\": \""
-				+ sdf.get().format(new Date()) + "\"}";
+				+ sdf.get().format(new Date(createDate)) + "\"}";
 	}
 }

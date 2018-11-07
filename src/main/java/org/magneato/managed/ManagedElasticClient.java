@@ -40,7 +40,7 @@ public class ManagedElasticClient implements Managed {
 	private final Logger log = LoggerFactory.getLogger(this.getClass()
 			.getName());
 
-	PreBuiltTransportClient client = null;
+	private PreBuiltTransportClient client;
 
 	public ManagedElasticClient(ElasticSearch configuration)
 			throws UnknownHostException {
@@ -90,7 +90,7 @@ public class ManagedElasticClient implements Managed {
 
 	// http://localhost:9200/my-index/_mappings/_doc
 	public void createMapping() {
-		File file = null;
+		File file;
 		BufferedReader reader = null;
 
 		try {
@@ -134,10 +134,7 @@ public class ManagedElasticClient implements Managed {
 	 * @param size
 	 * @param query
 	 * @return
-	 * 
-	 *         https
-	 *         ://www.elastic.co/guide/en/elasticsearch/client/java-rest/current
-	 *         /java-rest-high-search.html
+	 * @see <a href="https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/java-rest-high-search.html">ES Search</a>
 	 */
 	// http://localhost:9200/my-index/_search?q=*.*
 	public ArrayList<String> search(int from, int size, String query) {
@@ -169,11 +166,11 @@ public class ManagedElasticClient implements Managed {
 		SearchHits searchHits = response.getHits();
 		for (SearchHit hit : searchHits) {
 			hit.getId(); // need to return this
-			docs.add(hit.getSourceAsString());
+            System.out.println(hit.toString());
+			docs.add(hit.toString());
 		}
 
 		return docs;
-
 	}
 
 	public long delete(String key, String value) {
@@ -203,7 +200,7 @@ public class ManagedElasticClient implements Managed {
 		IndexResponse response = client
 				.prepareIndex(configuration.getIndexName(), INDEXTYPE, id)
 				.setSource(json, XContentType.JSON).get();
-
+//response.status().getStatus();
 		return id;
 	}
 
@@ -215,12 +212,12 @@ public class ManagedElasticClient implements Managed {
 	}
 
 	@Override
-	public void start() throws Exception {
+	public void start() {
 		// NO OP
 	}
 
 	@Override
-	public void stop() throws Exception {
+	public void stop() {
 		this.close();
 	}
 }

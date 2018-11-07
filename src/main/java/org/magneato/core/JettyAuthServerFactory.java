@@ -37,17 +37,18 @@ public class JettyAuthServerFactory extends DefaultServerFactory {
 
     private static void setupJettyAuth(MutableServletContextHandler context) {
     	context.setSessionHandler(new SessionHandler());
-    	
+
+    	/*
     	Constraint constraint = new Constraint();
     	constraint.setName(Constraint.__FORM_AUTH);
     	constraint.setRoles(new String[]{"user","admin","moderator"});
     	constraint.setAuthenticate(true);
+    	*/
 
     	ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
 
     	HashLoginService loginService = new HashLoginService();
 
-    	//userStore.addUser("defaultuser", new Password("defaultpass"), new String[] {"ADMIN", "EDITOR"});
     	loginService.setUserStore(userStore);
  
     	FormAuthenticator authenticator = new FormAuthenticator("/login", "/login/error", false);
@@ -58,8 +59,7 @@ public class JettyAuthServerFactory extends DefaultServerFactory {
     }
     
     public void setConfiguration(MagneatoConfiguration configuration ) {
-    	System.out.println(configuration.getLogin());
-    	
     	userStore.addUser(configuration.getLogin(), new Password(configuration.getPassword()), new String[] {"ADMIN", "EDITOR"});
+	    userStore.addUser("test", new Password("secure"), new String[] {"EDITOR"});
     }
 }

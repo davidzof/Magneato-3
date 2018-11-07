@@ -150,6 +150,7 @@
                         "fields": {
                             "edit_template": {
                                 "type": "text",
+                                "readonly": true,
                                 "label": "Edit Template"
                             },
                             "display_template": {
@@ -185,13 +186,4 @@
             }
         });
     });
-
-    function afterSuccess(data) {
-
-        var obj = $.parseJSON(JSON.stringify(data));
-
-        <!-- we need this url from server -->
-        console.log(obj.url);
-        window.location.replace(obj.url);
-    }
 </script>
