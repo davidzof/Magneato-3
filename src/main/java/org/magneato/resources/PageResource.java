@@ -92,6 +92,7 @@ public class PageResource {
 	 * @param security
 	 *            - security context
 	 * @return Redirect object or Freemarker view
+	 * @throws IOException 
 	 */
 	@GET
 	@Path("{uri}")

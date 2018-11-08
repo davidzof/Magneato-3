@@ -1,10 +1,18 @@
 <!-- tinymce (for the tinymce field) -->
-<script src="https://cloud.tinymce.com/stable/tinymce.min.js"></script>
-        <!-- moment for date and datetime controls -->
-        <script src="http://www.alpacajs.org/lib/moment/min/moment-with-locales.min.js"></script>
-        <!-- bootstrap datetimepicker for date and datetime controls -->
-        <script src="http://www.alpacajs.org/lib/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
-        <link rel="stylesheet" media="screen" href="http://www.alpacajs.org/lib/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css"/>
+<script src="http://www.alpacajs.org/lib/tinymce/tinymce.js"></script>
+
+<!-- summernote editor -->
+<!-- include summernote css/js -->
+<link href="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.9/summernote.css" rel="stylesheet">
+<script src="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.9/summernote.js"></script>
+
+
+<!-- moment for date and datetime controls -->
+<script src="http://www.alpacajs.org/lib/moment/min/moment-with-locales.min.js"></script>
+
+<!-- bootstrap datetimepicker for date and datetime controls -->
+<script src="http://www.alpacajs.org/lib/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
+<link rel="stylesheet" media="screen" href="http://www.alpacajs.org/lib/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css"/>
 
 <script type="text/javascript">
     $(document).ready(function () {
@@ -131,7 +139,7 @@
                         "helper": "Please enter the page title."
                     },
                     "feedback": {
-                        "type": "tinymce",
+                        "type": "summernote",
                         "name": "your_feedback",
                         "rows": 5,
                         "cols": 40,
@@ -220,7 +228,7 @@
             			
             			console.log("title " + control.childrenByPropertyId["title"].getValue()); // get / set a field behind the scenes, not visible
             			//set an input field value, will be visible to end user
-            			//$('input[name="title"]').val('some value')
+            			//$('input[name="title"]').val('some value');
             			
             		}	
         		});
