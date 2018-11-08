@@ -72,11 +72,15 @@
             <#assign node = json.files.get(x) >
   	        <a href="${node.url.asText()}" title=""${node.name.asText()}"><img src="${node.thumbnailUrl.asText()}"/></a>
         </#list>
-        
-    </div>
 
-    <a href="/edit/${uri}">Edit</a><br/>
-    <a href="/create?clone=true">Add New Child Page</a><br/>
+		<a href="/edit/${uri}">Edit</a><br/>
+        
+        <h2>Related articles</h2>
+        <#list search(0,10,null) as row>
+            <#assign node = toJsonNode(row)>
+            <a href="${node._source.metadata.canonical_url.asText()}.${node._id.asText()}">${node._source.title.asText()}</a><br/>
+        </#list>
+    </div>
 
     <div class="row">
         <div class="col-sm-8">

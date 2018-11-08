@@ -41,10 +41,8 @@ public class MagneatoApplication extends Application<MagneatoConfiguration> {
 
 	@Override
 	public void initialize(final Bootstrap<MagneatoConfiguration> bootstrap) {
-		// Map requests to /dashboard/${1} to be found in the class path at
-		// /assets/${1}.
 		bootstrap.addBundle(new ConfiguredAssetsBundle());
-		bootstrap.addBundle(new ViewBundle());
+		bootstrap.addBundle(new ViewBundle()); // ?? what does this do?
 		bootstrap.addBundle(new AssetsBundle("/assets/js", "/assets/js", null, "assets/js"));
 	}
 

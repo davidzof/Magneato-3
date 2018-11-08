@@ -9,6 +9,7 @@ import org.magneato.service.MetaData;
 public class EditView extends View {
 	private String url = null;
 	private MetaData metaData;
+	private String editTemplate;
 	private String body;
 	private static final String EDITTEMPLATE = "edit.ftl";
 	
@@ -16,18 +17,15 @@ public class EditView extends View {
     	super(EDITTEMPLATE, StandardCharsets.UTF_8);
     	this.url = url;
         this.metaData = metaData;
+        this.editTemplate = metaData.getEditTemplate();
     }
-
-    public EditView(String url, String editTemplate, String displayTemplate) {
+    
+    
+    public EditView(String url, String body, String editTemplate) {
     	super(EDITTEMPLATE, StandardCharsets.UTF_8);
     	this.url = url;
-    }
-    
-    
-    public EditView(String url, String body) {
-    	super("edit.ftl", StandardCharsets.UTF_8);
-    	this.url = url;
     	this.body = body;
+    	this.editTemplate = editTemplate;
         
     }
     
@@ -44,6 +42,6 @@ public class EditView extends View {
     }
 
 	public String getEditTemplate() {
-    	return metaData.getEditTemplate();
+    	return editTemplate;
     }
 }

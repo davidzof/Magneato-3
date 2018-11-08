@@ -20,6 +20,7 @@ public class MetaData {
 	private String editTemplate;
 	private String viewTemplate;
 	private String ipAddr;
+	private String canonicalUrl;
 
 	static ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
 		@Override
@@ -46,6 +47,11 @@ public class MetaData {
 		this.ipAddr = ipAddr;
 		return this;
 	}
+	
+	public MetaData setCanonicalURL(String url) {
+		this.canonicalUrl = url;
+		return this;
+	}
 
 	public MetaData setOwner(String userName) {
 		this.owner = userName;
@@ -61,7 +67,8 @@ public class MetaData {
 		return "{ \"edit_template\": \"" + editTemplate + "\","
 				+ "\"display_template\" : \"" + viewTemplate + "\","
 				+ "\"ip_addr\" : \"" + ipAddr + "\","
-				+ "\"owner\" : \"" + owner + "\","
+				+ "\"owner\" : \"" + this.owner + "\","
+				+ "\"canonical_url\" : \"" + this.canonicalUrl + "\","
 				+ "\"create_date\": \""
 				+ sdf.get().format(new Date(createDate)) + "\"}";
 	}

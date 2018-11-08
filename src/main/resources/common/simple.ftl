@@ -53,16 +53,28 @@
                         "properties": {
                             "edit_template": {
                                 "type": "string",
-                                "required": false
+                                "required": true
                             },
                             "display_template": {
                                 "type": "string",
-                                "required": false
+                                "required": true
                             },
                             "create_date": {
                                 "type": "string",
-                                "required": false,
+                                "required": true,
                                 "format": "date"
+                            },
+                            "ip_addr": {
+                                "type": "string",
+                                "required": false
+                            },
+                            "owner": {
+                                "type": "string",
+                                "required": false
+                            },
+                            "canonical_url": {
+                                "type": "string",
+                                "required": false
                             }
                         }
                     }
@@ -109,6 +121,9 @@
                             "url": "/upload",
                             "autoUpload": true
                         },
+                        done: function(e,data){
+                        alert("here");
+        			    },
                         "name": "files"
                     },
                     "title": {
@@ -157,6 +172,18 @@
                                 "type": "text",
                                 "label": "Display Template"
                             },
+                            "owner": {
+                                "type": "text",
+                                "label": "Owner"
+                            },
+                            "ip_addr": {
+                                "type": "text",
+                                "label": "IP Address"
+                            },
+                            "canonical_url": {
+                                "type": "text",
+                                "label": "Canonical URL"
+                            },
                             "create_date": {
                                 "type": "datetime",
                                 "readonly": true,
@@ -180,9 +207,23 @@
             },
             "view": "bootstrap-edit",
             "postRender": function (control) {
-                // check for gpx and fill in values, need ajax call
-                var nameField = control.childrenByPropertyId["title"];
-                console.log("Welcome aboard, " +  nameField.getValue());
+                control.childrenByPropertyId["files"].on("change", function() {
+                
+                	// intercept file uploads and do some post processing, for example get EXIF file data
+					let files = this.getValue();
+					
+            		console.log(files.length);
+            		if (files.length > 0) {
+            			let last = files[files.length -1];
+            			let type = last.name.split('.').pop()
+            			console.log("last uploaded file type " + type);
+            			
+            			console.log("title " + control.childrenByPropertyId["title"].getValue()); // get / set a field behind the scenes, not visible
+            			//set an input field value, will be visible to end user
+            			//$('input[name="title"]').val('some value')
+            			
+            		}	
+        		});
             }
         });
     });

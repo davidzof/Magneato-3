@@ -16,11 +16,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class PageView extends View {
 	private JsonNode jsonNode = null;
 	private ManagedElasticClient esClient;
+	private String uri;
 	private final Logger log = LoggerFactory.getLogger(this.getClass().getName());
 private final ObjectMapper objectMapper = new ObjectMapper();
 
 	public PageView(String json, String templateName,
-			ManagedElasticClient esClient) {
+			ManagedElasticClient esClient, String uri) {
 
 		super("/common/" + templateName + ".ftl", StandardCharsets.UTF_8);
 		
@@ -30,6 +31,7 @@ private final ObjectMapper objectMapper = new ObjectMapper();
 			log.error("Something went wrong reading json " + e.getMessage()
 					+ " " + json);
 		}
+		this.uri = uri;
 		this.esClient = esClient;
 	}
 
@@ -37,6 +39,10 @@ private final ObjectMapper objectMapper = new ObjectMapper();
 		return jsonNode;
 	}
 
+	public String getUri() {
+		return uri;
+	}
+	
 	public ArrayList<String> search(int from, int size, String query) {
 		return esClient.search(from, size, query);
 	}
