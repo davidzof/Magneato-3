@@ -3,6 +3,7 @@ package org.magneato.service;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Asset MetaData
@@ -61,6 +62,14 @@ public class MetaData {
 	public MetaData setViewTemplate(String viewTemplate) {
 		this.viewTemplate = viewTemplate;
 		return this;
+	}
+	
+	public void addRelation(String relation) {
+		relations.add(relation);
+	}
+	
+	public List<String> getRelations() {
+		return relations;
 	}
 
 	public String toJson() {

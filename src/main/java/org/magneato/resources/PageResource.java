@@ -7,7 +7,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.text.Normalizer;
@@ -33,6 +35,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 
+import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.magneato.MagneatoConfiguration;
@@ -152,15 +155,43 @@ public class PageResource {
 			@QueryParam("editTemplate") String editTemplate,
 			@QueryParam("displayTemplate") String displayTemplate,
 			@QueryParam("clone") boolean clone,
+			@QueryParam("child") boolean child,
 			@Context HttpServletRequest request,
 			@Context SecurityContext security) {
 		log.debug("create(" + uri + ", " + editTemplate + ", "
 				+ displayTemplate + ", " + clone + ")");
+		
+		String current = request.getRequestURL().toString();
+		String referrer = request.getHeader("referer");
+		URL url;
+		try {
+			url = new URL(current);
+			String protocol = url.getProtocol();
+			String authority = url.getAuthority();
+			current = String.format("%s://%s", protocol, authority);
+			if (referrer.startsWith(current)) {
+				log.debug("*** Own Domain");
+				// ok here we can check for an id
+				// page could be:
+				// index <- do we allow this case?
+				// index.1
+				// index.BYzeHmcBsZHloJKdriPu
+			}
+		} catch (MalformedURLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		
 
+		}
+		
+		log.debug("cloning " + referrer + " , " + current); // e.g. http://localhost:9090/cima-delle-rossette-versant-ouest.BYzeHmcBsZHloJKdriPu
+		String id = referrer.substring(referrer.lastIndexOf('.') + 1);
+		
 		if (clone) {
-			String referrer = request.getHeader("referer");
+			// clone is always a child page
+			
 			log.debug("cloning " + referrer);
-			String id = referrer.substring(referrer.lastIndexOf('.') + 1);
+			id = referrer.substring(referrer.lastIndexOf('.') + 1);
 			log.debug("parent " + id);
 			String body = repository.get(id);
 			if (body != null) {
@@ -179,6 +210,11 @@ public class PageResource {
 				return new EditView("", body, editTemplate);
 			}
 
+		} else if (child) {
+			 id = referrer.substring(referrer.lastIndexOf('.') + 1);
+			log.debug("parent " + id); // we should probably check it exists in the repo ?
+		
+			
 		}
 
 		if (editTemplate != null && !editTemplate.isEmpty()) {
@@ -210,7 +246,7 @@ public class PageResource {
 			// this can't work because we don't know display template - call
 			// create page
 
-			return create(uri, null, null, false, null, null);
+			return create(uri, null, null, false, false, null, null);
 		}
 
 		String editTemplate = null;
@@ -275,6 +311,7 @@ public class PageResource {
 			@Context SecurityContext security) {
 		log.debug("Saving " + body);
 
+		
 		if (!security.isUserInRole("EDITOR")) {
 			log.warn("Not logged in or not editor");
 			return "{\"error\":\"You are not logged in or don't have editor permissions, see your sysadmin\"}";
@@ -318,6 +355,7 @@ public class PageResource {
 
 	// https://gitlab.com/zloster/dropwizard-static
 	// https://github.com/dropwizard-bundles/dropwizard-configurable-assets-bundle
+	// TODO - what if image not jpg, thumb will be wrong format !
 	@POST
 	@Path("upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -325,6 +363,7 @@ public class PageResource {
 	public String upload(
 			@FormDataParam("files") final InputStream fileInputStream,
 			@FormDataParam("files") final FormDataContentDisposition contentDispositionHeader) {
+		
 		String fileName = contentDispositionHeader.getFileName();
 		log.debug("filename " + fileName + " imageDir " + imageDir);
 
@@ -332,29 +371,40 @@ public class PageResource {
 			log.warn("image directory not configured in config.yml");
 			return null;
 		}
-
+		
+		// store images in a subdir based on up to the first x letters of the filename, avoids putting too many files in one directory
+		String subDir = FilenameUtils.getBaseName(fileName);
+		// TODO make configurable for big sites
+		if (subDir.length() > 3) {
+				subDir = fileName.substring(0,3) + "/";
+		}
+		
 		java.nio.file.Path outputPath = FileSystems.getDefault().getPath(
-				imageDir, fileName);
-		System.out.println("output path " + outputPath.getFileName());
-
+				imageDir + subDir, fileName);
+		
 		// create a thumbnail
+		long len = 0;
 		try {
-			Files.copy(fileInputStream, outputPath);
-			String name = imageDir + fileName;
+			// make the directory, if it doesn't exist
+			Files.createDirectories(outputPath.getParent());
+			
+			len = Files.copy(fileInputStream, outputPath);
+			String name = imageDir + subDir + fileName;
 			BufferedImage img = new BufferedImage(100, 100,
 					BufferedImage.TYPE_INT_RGB);
 			img.createGraphics().drawImage(
+					// TODO, thumbs always square???
 					ImageIO.read(new File(name)).getScaledInstance(100, 100,
 							Image.SCALE_SMOOTH), 0, 0, null);
 
-			String thumbName = imageDir + "thumb_" + fileName;
-			ImageIO.write(img, "jpg", new File(thumbName));
+			String thumbName = imageDir + subDir + "thumb_" + fileName;
+			ImageIO.write(img, "jpg", new File(thumbName)); // thumbs always jgps... this won't work for other types
 		} catch (IOException e) {
 			log.warn("upload " + e.getMessage());
 		}
 
-		String url = IMAGEPATH + "/" + fileName;
-		String thumbUrl = IMAGEPATH + "/thumb_" + fileName;
+		String url = IMAGEPATH + "/" + subDir + fileName;
+		String thumbUrl = IMAGEPATH + "/" + subDir + "thumb_" + fileName;
 
 		return "{\"files\":[{\"url\":\""
 				+ url
@@ -362,7 +412,7 @@ public class PageResource {
 				+ thumbUrl
 				+ "\",\"name\":\""
 				+ fileName
-				+ "\",\"size\":\"12345\",\"type\":\"image/png\",\"deleteUrl\":\"delete/"
+				+ "\",\"size\":\""+len+"\",\"type\":\"image/png\",\"deleteUrl\":\"delete/"
 				+ fileName + "\",\"deleteType\":\"DELETE\"}]}";
 	}
 
