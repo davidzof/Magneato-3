@@ -32,9 +32,11 @@
     <script type="text/javascript" src="//code.cloudcms.com/alpaca/1.5.24/bootstrap/alpaca.min.js"></script>
 </head>
 <body>
+<div class="container">
      <div id="form"></div>
      <#include "/common/${editTemplate}.ftl">
      <#include "/common/copyright.ftl">
+</div>
 </body>
 <script>
     function afterSuccess(data) {
