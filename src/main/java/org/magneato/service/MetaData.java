@@ -14,7 +14,7 @@ public class MetaData {
 	private String owner;
 	private String group;
 	private long perms;
-	private ArrayList<String> relations;
+	private ArrayList<String> relations = new ArrayList<String>();
 
 	private int status;
 	private long createDate;
@@ -64,8 +64,9 @@ public class MetaData {
 		return this;
 	}
 	
-	public void addRelation(String relation) {
+	public MetaData addRelation(String relation) {
 		relations.add(relation);
+		return this;
 	}
 	
 	public List<String> getRelations() {

@@ -76,7 +76,9 @@
     </div>
 
     <a href="/edit/${uri}">Edit</a><br/>
-    <a href="/create?clone=true">Add New Child Page</a><br/>
+    <a href="/create/clone">Add New  Page</a><br/>
+    <a href="/create/clone">Add New Cloned Page</a><br/>
+	<a href="/create/child">Add New Child Page</a><br/>
 
     <div class="row">
         <div class="col-sm-8">
