@@ -7,9 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.text.Normalizer;
@@ -159,67 +157,60 @@ public class PageResource {
 		log.debug("create(" + action + ", " + editTemplate + ", "
 				+ displayTemplate + ")");
 
-		// referrer must not be null and must be part of our domain - or should
-		// be skip this and just test !=null with id equal to a local page?
-		// No-one else would call with clone/child param from foreing page
-		String current = request.getRequestURL().toString();
-		String referrer = request.getHeader("referer");
-		URL url;
-		try {
-			url = new URL(current);
-			String protocol = url.getProtocol();
-			String authority = url.getAuthority();
-			current = String.format("%s://%s", protocol, authority);
-			// referrer could be null here, if there is no referrer so ignore
-			// child/clone request.
-			log.debug(referrer + " " + current);
-			if (referrer.startsWith(current)) {
-				log.debug("*** Own Domain");
-				// ok here we can check for an id
-				// page could be:
-				// index <- do we allow this case?
-				// index.1
-				// index.BYzeHmcBsZHloJKdriPu
-			}
-		} catch (MalformedURLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		if ("/clone".equals(action) || "/child".equals(action)) {
+			String referrer = request.getHeader("referer");
+			
+			log.debug("referrer " + referrer);
+			if (referrer != null) {
+				
+				int sep = referrer.lastIndexOf('.');
+				log.debug("separator " + sep);
+				if (sep > 0 && sep + 1 < referrer.length()) {
 
-		}
+					String id = referrer.substring(sep + 1);
+					log.debug("parent " + id);
+					String body = repository.get(id);
+					if (body != null) {
 
-		log.debug("cloning " + referrer + " , " + current); // e.g.
-															// http://localhost:9090/cima-delle-rossette-versant-ouest.BYzeHmcBsZHloJKdriPu
-		String id = referrer.substring(referrer.lastIndexOf('.') + 1);
+						// clone is always a child page
+						try {
+							// try and clone, don't clone any attachments, or
+							// children,
+							// only clone edit/display template, not title, this
+							// needs improving
+							JsonNode jsonNode = objectMapper.readTree(body);
+							editTemplate = jsonNode.get("metadata")
+									.get("edit_template").asText();
+							displayTemplate = jsonNode.get("metadata")
+									.get("display_template").asText();
 
-		if ("clone".equals(action)) {
-			// clone is always a child page
+						} catch (IOException e) {
+							log.error(e.getMessage());
+							return new ErrorView("404-error");
+						}
 
-			log.debug("cloning " + referrer);
-			id = referrer.substring(referrer.lastIndexOf('.') + 1);
-			log.debug("parent " + id);
-			String body = repository.get(id);
-			if (body != null) {
-				try {
-					// try and clone, don't clone any attachments, or children,
-					// only clone edit/display template, not title
-					JsonNode jsonNode = objectMapper.readTree(body);
-					editTemplate = jsonNode.get("metadata")
-							.get("edit_template").asText();
-				} catch (IOException e) {
-					log.error(e.getMessage());
-					return new ErrorView("404-error");
+						if ("/clone".equals(action)) {
+							// we need to set meta data here
+							log.debug("cloned page, returning " + body);
+							return new EditView(body, editTemplate);
+						}
+						
+				
+						log.debug("parent " + id);
+						// child page inherits
+						// edit_template/display template plus sets parent
+						// relation
+						MetaData metaData = new MetaData()
+								.setEditTemplate(editTemplate)
+								.setViewTemplate(displayTemplate)
+								.setIPAddr(request.getRemoteAddr())
+								.addRelation(id)
+								.setOwner(security.getUserPrincipal().getName());
 
+						return new EditView(metaData);
+					}
 				}
-
-				log.debug("cloned page, returning " + body);
-				return new EditView(body, editTemplate);
 			}
-
-		} else if ("child".equals(action)) {
-			id = referrer.substring(referrer.lastIndexOf('.') + 1);
-			log.debug("parent " + id); // we should probably check it exists in
-										// the repo ?
-
 		}
 
 		if (editTemplate != null && !editTemplate.isEmpty()) {
