@@ -1,6 +1,3 @@
-<!-- tinymce (for the tinymce field) -->
-<script src="http://www.alpacajs.org/lib/tinymce/tinymce.js"></script>
-
 <!-- summernote editor -->
 <!-- include summernote css/js -->
 <link href="http://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.9/summernote.css" rel="stylesheet">
