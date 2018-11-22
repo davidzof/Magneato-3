@@ -26,7 +26,6 @@ public class Page implements Serializable {
 	/**
 	 * increment this value every time you change class variables
 	 */
-
 	private static final long serialVersionUID = 1L;
 
 	public final static String ROOT = "-";

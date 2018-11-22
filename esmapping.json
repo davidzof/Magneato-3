@@ -9,11 +9,19 @@
       },
       "files": {	
         "properties": {	
+          "name": {
+            "type": "text",
+            "index": false
+          },
           "deleteType": {
             "type": "text",
             "index": false
           },
           "deleteUrl": {
+            "type": "text",
+            "index": false
+          },
+          "thumbnailUrl": {
             "type": "text",
             "index": false
           }	
@@ -22,6 +30,15 @@
       "metadata": {
         "properties": {
           "edit_template": {
+            "type": "keyword"
+          },
+          "display_template": {
+            "type": "keyword"
+          },
+          "relations": {
+            "type": "keyword"
+          },
+          "owner": {
             "type": "keyword"
           },
           "create_date": {
@@ -33,3 +50,5 @@
     }
   }
 }
+
+"technical_c":{"imperial":false,"max":2905,"distance":9.8,"climb":2080,"latitude":45.1,"longitude":6.2

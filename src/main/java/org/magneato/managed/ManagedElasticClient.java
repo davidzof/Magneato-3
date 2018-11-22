@@ -138,6 +138,7 @@ public class ManagedElasticClient implements Managed {
 	 */
 	// http://localhost:9200/my-index/_search?q=*.*
 	public ArrayList<String> search(int from, int size, String query) {
+		log.debug("search " + query);
 		SearchRequestBuilder searchBuilder = client
 				.prepareSearch(configuration.getIndexName())
 				.setTypes(INDEXTYPE)
@@ -154,8 +155,9 @@ public class ManagedElasticClient implements Managed {
 				if (index != -1) {
 					String field = token.substring(0, index);
 					String value = token.substring(index + 1);
+					System.out.println("field " + field + " value " + value);
 					searchBuilder.setQuery(QueryBuilders
-							.termQuery(field, value));
+							.matchQuery(field, value));
 				}
 			}
 		}
@@ -194,8 +196,8 @@ public class ManagedElasticClient implements Managed {
 		return id;
 	}
 
-	public String insert(String uri, String json) {
-		String id = uri.substring(uri.lastIndexOf('.') + 1);
+	public String insert(String id, String json) {
+
 		log.info("id " + id);
 		IndexResponse response = client
 				.prepareIndex(configuration.getIndexName(), INDEXTYPE, id)

@@ -42,6 +42,11 @@ private final ObjectMapper objectMapper = new ObjectMapper();
 	public String getUri() {
 		return uri;
 	}
+
+	public String getId() {
+		return uri.substring(0, uri.lastIndexOf('/'));
+	}
+	
 	
 	public ArrayList<String> search(int from, int size, String query) {
 		return esClient.search(from, size, query);

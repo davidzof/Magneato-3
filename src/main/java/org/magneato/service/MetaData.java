@@ -12,9 +12,9 @@ import java.util.List;
  */
 public class MetaData {
 	private String owner;
-	private String group;
-	private long perms;
+	private int perms;
 	private ArrayList<String> relations = new ArrayList<String>();
+	private ArrayList<String> groups = new ArrayList<String>();
 
 	private int status;
 	private long createDate;
@@ -32,6 +32,9 @@ public class MetaData {
 
 	public MetaData() {
 		createDate = System.currentTimeMillis();
+		groups.add("default");
+		perms = 0x644; // rw_r__r__
+		canonicalUrl = "";
 	}
 
 	public MetaData setEditTemplate(String editTemplate) {
@@ -43,12 +46,11 @@ public class MetaData {
 		return this.editTemplate;
 	}
 
-
 	public MetaData setIPAddr(String ipAddr) {
 		this.ipAddr = ipAddr;
 		return this;
 	}
-	
+
 	public MetaData setCanonicalURL(String url) {
 		this.canonicalUrl = url;
 		return this;
@@ -63,23 +65,62 @@ public class MetaData {
 		this.viewTemplate = viewTemplate;
 		return this;
 	}
-	
+
 	public MetaData addRelation(String relation) {
 		relations.add(relation);
 		return this;
 	}
-	
+
 	public List<String> getRelations() {
 		return relations;
+	}
+
+	public String getGroupsAsString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("\"groups\" : [");
+		boolean first = true;
+		for (String relation : groups) {
+			if (first) {
+				sb.append("\"");
+				first = false;
+			} else {
+				sb.append(",\"");
+			}
+			sb.append(relation);
+			sb.append("\"");
+		}
+		sb.append("]");
+
+		return sb.toString();
+	}
+
+	public String getRelationsAsString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("\"relations\" : [");
+		boolean first = true;
+		for (String relation : relations) {
+			if (first) {
+				sb.append("\"");
+				first = false;
+			} else {
+				sb.append(",\"");
+			}
+			sb.append(relation);
+			sb.append("\"");
+		}
+		sb.append("]");
+
+		return sb.toString();
 	}
 
 	public String toJson() {
 		return "{ \"edit_template\": \"" + editTemplate + "\","
 				+ "\"display_template\" : \"" + viewTemplate + "\","
-				+ "\"ip_addr\" : \"" + ipAddr + "\","
-				+ "\"owner\" : \"" + this.owner + "\","
-				+ "\"canonical_url\" : \"" + this.canonicalUrl + "\","
-				+ "\"create_date\": \""
-				+ sdf.get().format(new Date(createDate)) + "\"}";
+				+ "\"ip_addr\" : \"" + ipAddr + "\"," + "\"owner\" : \""
+				+ this.owner + "\"," + "\"canonical_url\" : \""
+				+ this.canonicalUrl + "\"," + "\"create_date\": \""
+				+ sdf.get().format(new Date(createDate)) + "\","
+				+ getGroupsAsString() + ","
+				+ getRelationsAsString() + "}";
 	}
 }

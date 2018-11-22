@@ -83,6 +83,17 @@
                             "canonical_url": {
                                 "type": "string",
                                 "required": false
+                            },
+							"perms": {
+                                "type": "integer"
+                            },
+                            "relations": {
+                            	"title": "Relations",
+                            	"type": "array"
+                            },
+							"groups": {
+                            	"title": "Groups",
+                            	"type": "array"
                             }
                         }
                     }
@@ -95,7 +106,7 @@
                 "form": {
                     "buttons": {
                         "submit": {
-                            "title": "Send Form Data",
+                            "title": "Save",
                             "click": function () {
                                 var data = this.getValue();
                                 $.ajax({
@@ -118,7 +129,6 @@
                         }
                     }
                 },
-                "helper": "Tell us what you think about Alpaca!",
                 "fields": {
                     "files": {
                         "type": "upload",
@@ -161,14 +171,10 @@
                     "metadata": {
                         "type": "object",
                         "label": "Meta Data",
-                        "helpers": [],
-                        "helpersPosition": "below",
                         "validate": true,
                         "disabled": false,
-                        "readonly": false,
                         "hidden": false,
                         "showMessages": true,
-                        "collapsible": false,
                         "legendStyle": "button",
                         "fields": {
                             "edit_template": {
@@ -194,7 +200,6 @@
                             },
                             "create_date": {
                                 "type": "datetime",
-                                "readonly": true,
                                 "label": "Create Date",
                                 "picker": {
                                     "useCurrent": false,
