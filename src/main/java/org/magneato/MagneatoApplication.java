@@ -3,6 +3,7 @@ package org.magneato;
 import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
+import io.dropwizard.bundles.webjars.WebJarBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
@@ -44,6 +45,7 @@ public class MagneatoApplication extends Application<MagneatoConfiguration> {
 		bootstrap.addBundle(new ConfiguredAssetsBundle());
 		bootstrap.addBundle(new ViewBundle()); // ?? what does this do?
 		bootstrap.addBundle(new AssetsBundle("/assets/js", "/assets/js", null, "assets/js"));
+		bootstrap.addBundle(new WebJarBundle());
 	}
 
 	@Override
