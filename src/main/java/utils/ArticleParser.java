@@ -12,55 +12,126 @@
  */
 package utils;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import nu.xom.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
  * Parse old article formats and convert to json
- * 
+ *
  * @author dgeorge
  */
 public class ArticleParser extends org.xml.sax.helpers.DefaultHandler {
 
-	private final Log _logger = LogFactory.getLog(ArticleParser.class);
+    private final Log _logger = LogFactory.getLog(ArticleParser.class);
 
-	public static void main(String[] args) {
-		ArticleParser ap = new ArticleParser();
-		ap.loadFromXML("/home/david/src/dropwizard/Pistehors/backup.xml");
-	}
+    public static void main(String[] args) {
+        Builder parser = new Builder();
+        File file = new File("backup.xml");
+        try {
+            Document doc = parser.build(file);
+            Element root = doc.getRootElement();
+            listChildren(root, 0);
+        } catch (ParsingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-	public void loadFromXML(String fileName) {
+    }
 
-		InputStream is = null;
-		try { // try with resources !!!
-			is = new FileInputStream(fileName);
+    static String element = "";
+    static Page page = null;
 
-			ObjectUnmarshaller<Page> oum = new ObjectUnmarshaller<Page>(is,
-					Page.class);
-			Page page;
-			while ((page = oum.next()) != null) {
-				if (page.getEditTemplate().equals("article")) {
-					System.out.println(page.getContent());
-					System.exit(1);
-				}
-			}
-			oum.close();
-		} catch (Exception e) {
-			_logger.debug(e.getLocalizedMessage());
-		} finally {
-			try {
-				if (is != null) {
-					is.close();
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+    public static void listChildren(Node current, int depth) {
+        String data = "";
+        if (current instanceof Element) {
+            Element temp = (Element) current;
+            element = temp.getQualifiedName();
+            if (element.equals("page")) {
+                if (page != null) {
+                    // parse article etc here
+                    if ("article".equals(page.editTemplate)) {
+                        System.out.println("\n\n" + page);
+                    }
+                }
+                page = new Page();
+            }
+        } else if (current instanceof ProcessingInstruction) {
+            ProcessingInstruction temp = (ProcessingInstruction) current;
+            data = ": " + temp.getTarget();
+        } else if (current instanceof DocType) {
+            DocType temp = (DocType) current;
+            data = ": " + temp.getRootElementName();
+        } else if (current instanceof Text || current instanceof Comment) {
+            // eg. value davidof etc
+            String value = current.getValue();
+            value = value.replace('\n', ' ').trim();
+            if (!value.isEmpty()) {
+                data = current.getValue();
 
-	}
+                switch (element) {
+                case "ipAddr":
+                    //System.out.println("\"ip_addr\": \"" + data + "\"");
+                    page.ipAddr = data;
+                    break;
+                case "author":
+                    page.author = data;
+                    break;
+                case "content":
+                    page.content = data; // one of article, tr, need to parse
+                    // content is xml
+                    /*
+                    try {
+                        // could be xml or text (comment), parse later
+                        Builder parser = new Builder();
+                        Document doc = parser.build(data, null);
+                        Element root = doc.getRootElement();
+                        System.out.println(root.getValue());
+
+                    } catch (ParsingException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    */
+                    break;
+                case "createDate":
+                    break;
+                case "editTemplate":
+                    page.editTemplate = data;
+                    break;
+                case "expiryDate":
+                    break;
+                case "group":
+                    break;
+                case "name":
+                    page.name = data;
+                    break;
+                case "perms":
+                    break;
+                case "startDate":
+                    break;
+                case "status":
+                    break;
+                case "viewTemplate":
+                    page.viewTemplate = data;
+                    break;
+                case "title":
+                    page.title = data;
+                    break;
+                case "contents":
+                }
+            }
+        }
+
+        for (int i = 0; i < current.getChildCount(); i++) {
+            listChildren(current.getChild(i), depth + 1);
+        }
+    }
 }

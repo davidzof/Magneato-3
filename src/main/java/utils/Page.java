@@ -45,8 +45,6 @@ public class Page implements Serializable {
 	}
 
 	public Status status;
-	@XmlElement(name = "uuid", required = true)
-	private final String uuid = UUID.randomUUID().toString();
 	public long createDate;
 	public long startDate;
 	public long expiryDate;
@@ -72,8 +70,7 @@ public class Page implements Serializable {
 	public String toString() {
 		return "Page [name=" + name + ", author=" + author + ", group=" + group
 				+ ", perms=" + perms + ", relations=" + relations
-				+ ", content=" + content + ", status=" + status + ", uuid="
-				+ uuid + ", createDate=" + createDate + ", editTemplate="
+				+ ", content=" + content + ", status=" + status + ", createDate=" + createDate + ", editTemplate="
 				+ editTemplate + ", viewTemplate=" + viewTemplate + ", ipAddr="
 				+ ipAddr + "]";
 	}
