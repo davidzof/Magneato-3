@@ -186,6 +186,10 @@
                                 "type": "text",
                                 "label": "Display Template"
                             },
+                            "perms": {
+                                "type": "integer",
+                                "label": "Permissions"
+                            },
                             "owner": {
                                 "type": "text",
                                 "label": "Owner"
