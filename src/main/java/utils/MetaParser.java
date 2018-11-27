@@ -18,17 +18,18 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * It is assumed that a "page" consists of Meta data and content. This will create a "page" object with the meta data. The page object is responsible for writing in correct Magneato JSON format
- * Note: this is a demo utility and would need adapting
+ * Structure is: <pages<page><meta><meta><contents></contents></page></pages>
+ * Note: this is a demo utility and would need adapting.
  *
  * @author dgeorge
  */
-public class ArticleParser extends org.xml.sax.helpers.DefaultHandler {
+public class MetaParser extends org.xml.sax.helpers.DefaultHandler {
 
-    private final Log _logger = LogFactory.getLog(ArticleParser.class);
+    private final Log _logger = LogFactory.getLog(MetaParser.class);
     String element;
     Page page = null;
 
-    ArticleParser() {
+    MetaParser() {
 
         element = "";
         page = null;

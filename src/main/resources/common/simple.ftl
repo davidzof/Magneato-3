@@ -232,7 +232,7 @@
             		console.log(files.length);
             		if (files.length > 0) {
             			let last = files[files.length -1];
-            			let type = last.name.split('.').pop()
+            			let type = last.name.split('.').pop();
             			console.log("last uploaded file type " + type);
             			
             			console.log("title " + control.childrenByPropertyId["title"].getValue()); // get / set a field behind the scenes, not visible
