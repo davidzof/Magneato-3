@@ -12,16 +12,11 @@
  */
 package utils;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.UUID;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.apache.commons.lang3.StringEscapeUtils;
 
-@XmlRootElement
+import java.io.Serializable;
+import java.util.ArrayList;
+
 public class Page implements Serializable {
 	/**
 	 * increment this value every time you change class variables
@@ -68,9 +63,9 @@ public class Page implements Serializable {
 	
 	@Override
 	public String toString() {
-		return "Page [name=" + name + ", author=" + author + ", group=" + group
+		return "Page [title=" +title + ", name=" + name + ", author=" + author + ", group=" + group
 				+ ", perms=" + perms + ", relations=" + relations
-				+ ", content=" + content + ", status=" + status + ", createDate=" + createDate + ", editTemplate="
+				+ ", status=" + status + ", createDate=" + createDate + ", editTemplate="
 				+ editTemplate + ", viewTemplate=" + viewTemplate + ", ipAddr="
 				+ ipAddr + "]";
 	}

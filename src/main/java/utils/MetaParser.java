@@ -16,6 +16,8 @@ import nu.xom.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.IOException;
+
 /**
  * It is assumed that a "page" consists of Meta data and content. This will create a "page" object with the meta data. The page object is responsible for writing in correct Magneato JSON format
  * Structure is: <pages<page><meta><meta><contents></contents></page></pages>
@@ -45,7 +47,27 @@ public class MetaParser extends org.xml.sax.helpers.DefaultHandler {
 
                     // parse article etc here
                     if ("article".equals(page.editTemplate)) {
+                        // need to parse content
                         System.out.println("\n\n" + page);
+                        // content is xml
+                        try {
+                            // could be xml or text (comment), parse later
+                            Builder parser = new Builder();
+                            Document doc = null;
+                            try {
+                                doc = parser.build(page.content, null);
+                                Element root = doc.getRootElement();
+                                // parse the page meta data
+                                ArticleParser articleParser = new ArticleParser(page);
+                                articleParser.listChildren(root, 0);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            Element root = doc.getRootElement();
+
+                        } catch (ParsingException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
                 page = new Page();
@@ -73,21 +95,6 @@ public class MetaParser extends org.xml.sax.helpers.DefaultHandler {
                     break;
                 case "content":
                     page.content = data; // one of article, tr, need to parse
-                    // content is xml
-                    /*
-                    try {
-                        // could be xml or text (comment), parse later
-                        Builder parser = new Builder();
-                        Document doc = parser.build(data, null);
-                        Element root = doc.getRootElement();
-                        System.out.println(root.getValue());
-
-                    } catch (ParsingException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    */
                     break;
                 case "createDate":
                     break;

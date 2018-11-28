@@ -26,12 +26,12 @@ public class ArticleParser extends org.xml.sax.helpers.DefaultHandler {
 
     private final Log _logger = LogFactory.getLog(ArticleParser.class);
     String element;
-    Page page = null;
+    Page page;
 
-    ArticleParser() {
+    ArticleParser(Page page) {
 
         element = "";
-        page = null;
+        this.page = page;
     }
 
     public void listChildren(Node current, int depth) {
@@ -39,22 +39,13 @@ public class ArticleParser extends org.xml.sax.helpers.DefaultHandler {
         if (current instanceof Element) {
             Element temp = (Element) current;
             element = temp.getQualifiedName();
-            if (element.equals("page")) {
-                if (page != null) {
-
-                    // parse article etc here
-                    if ("article".equals(page.editTemplate)) {
-                        System.out.println("\n\n" + page);
-                    }
-                }
-                page = new Page();
-            }
         } else if (current instanceof ProcessingInstruction) {
             ProcessingInstruction temp = (ProcessingInstruction) current;
             data = ": " + temp.getTarget();
         } else if (current instanceof DocType) {
             DocType temp = (DocType) current;
             data = ": " + temp.getRootElementName();
+            System.out.println("***** " + data);
         } else if (current instanceof Text || current instanceof Comment) {
             // eg. value davidof etc
             String value = current.getValue();
@@ -62,57 +53,37 @@ public class ArticleParser extends org.xml.sax.helpers.DefaultHandler {
             if (!value.isEmpty()) {
                 data = current.getValue();
 
-                switch (element) {
-                case "ipAddr":
-                    //System.out.println("\"ip_addr\": \"" + data + "\"");
-                    page.ipAddr = data;
-                    break;
-                case "author":
-                    page.author = data;
-                    break;
-                case "content":
-                    page.content = data; // one of article, tr, need to parse
-                    // content is xml
-                    /*
-                    try {
-                        // could be xml or text (comment), parse later
-                        Builder parser = new Builder();
-                        Document doc = parser.build(data, null);
-                        Element root = doc.getRootElement();
-                        System.out.println(root.getValue());
-
-                    } catch (ParsingException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                System.out.println(element);
+                if (!data.trim().isEmpty()) {
+                    switch (element) {
+                    case "body":
+                        System.out.println("paragraph : " + data);
+                        break;
+                    case "kicker":
+                        System.out.println("kicker: " + data);
+                        break;
+                    case "attachment":
+                        System.out.println("attachment : " + data);
+                        break;
+                    case "category":
+                        System.out.println("category : " + data);
+                        break;
+                    case "image":
+                        System.out.println("image : " + data);
+                        break;
+                    case "latitude":
+                        System.out.println("latitude : " + data);
+                        break;
+                    case "longitude":
+                        System.out.println("longitude  : " + data);
+                        break;
+                    case "video":
+                        System.out.println("video : " + data);
+                        break;
+                    case "id":
+                        System.out.println("id : " + data);
+                        break;
                     }
-                    */
-                    break;
-                case "createDate":
-                    break;
-                case "editTemplate":
-                    page.editTemplate = data;
-                    break;
-                case "expiryDate":
-                    break;
-                case "group":
-                    break;
-                case "name":
-                    page.name = data;
-                    break;
-                case "perms":
-                    break;
-                case "startDate":
-                    break;
-                case "status":
-                    break;
-                case "viewTemplate":
-                    page.viewTemplate = data;
-                    break;
-                case "title":
-                    page.title = data;
-                    break;
-                case "contents":
                 }
             }
         }
