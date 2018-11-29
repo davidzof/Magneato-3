@@ -19,8 +19,26 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 @XmlRootElement
-public class Article extends Page {
+public class Article  {
+	private MetaData metaData;
+	private StringBuilder contents = new StringBuilder();
+	private String category;
+	
+	Article(MetaData metaData) {
+		this.metaData = metaData;
+	}
+	
+	void addParagraph(String s) {
+		contents.append("<p>");
+		contents.append(s);
+		contents.append("</p>");
+	}
+	
+	void setCategory(String category) {
+		this.category = category;
+	}
+	
 	public String toString() {
-		return  super.toString();
+		return  contents.toString() + ", " +category + ", " + metaData.toString();
 	}
 }

@@ -22,7 +22,7 @@
     <#else>
     {
         "activity": "Alpine Ski",
-        "country": "afg",
+        "child": false,
         "ski_difficulty": {
             "rating": "1.1",
             "bra": 1
@@ -49,15 +49,7 @@
                         "required": true,
                         "title": "Destination"
                     },
-                    "country": {
-                        "required": true,
-                        "title": "Country",
-                        "view": "bootstrap-display"
-                    },
-                    "area": {
-                        "required": true,
-                        "title": "Area"
-                    },
+                    "child": {},
                     "activity": {
                         "title": "Activity",
                         "required": true,
@@ -139,15 +131,19 @@
                                 "minimum": 0,
                                 "maximum": 250000
                             },
-                            "latitude": {
-                                "minimum": -180,
-                                "maximum": 180,
-                                "title": "Start Latitude"
-                            },
-                            "longitude": {
-                                "minimum": -180,
-                                "maximum": 180,
-                                "title": "Start Longitude"
+                            "title": "Start Location",
+                        	"type": "object",
+	                        "properties": {                    
+	                            "lat": {
+	                                "minimum": -180,
+	                                "maximum": 180,
+	                                "title": "Latitude"
+	                            },
+	                            "lon": {
+	                                "minimum": -180,
+	                                "maximum": 180,
+	                                "title": "Longitude"
+	                            }
                             },
                             "orientation": {
                                 "title": "Orientation",
@@ -238,8 +234,8 @@
                     "title": {
                         "helper": "e.g. Col du Tepey, Mount Whitney, Chamonix etc."
                     },
-                    "country": {
-                        "type": "country"
+                    "child": {
+                    	"rightLabel": "Is this the first description of this route? (allows related trip reports to be created)"
                     },
                     "activity": {
                         "hideNone": true,
@@ -259,7 +255,7 @@
                         "helper": "Describe your trip, the route taken etc."
                     },
                     "conditions": {
-                        "type": "textarea",
+                        "type": "summernote",
                         "rows": 5,
                         "cols": 40,
                         "helper": "Describe the conditions (weather, road access, snow or trail, any difficulties you encountered)"
@@ -313,11 +309,13 @@
                                 "type": "number",
                                 "helper": "km or miles",
                             },
-                            "latitude": {
-                                "type": "number"
-                            },
-                            "longitude": {
-                                "type": "number"
+                            "location" : {
+	                            "lat": {
+	                                "type": "number"
+	                            },
+	                            "lon": {
+	                                "type": "number"
+	                            }
                             },
                             "orientation": {
                                 "type": "select",
@@ -391,8 +389,6 @@
                     "template": "threeColumnGridLayout",
                     "bindings": {
                         "title": "column-1",
-                        "country": "column-2",
-                        "area": "column-3",
                         "activity": "column-2",
                         "imperial": "column-3",
                         "date": "column-3",
@@ -402,7 +398,9 @@
                         "conditions": "column-4",
                         "technical_c": "column-2",
                         "files": "column-4",
-                        "metadata": "column-4",
+                        "child": "column-4",
+                        "metadata": "column-4"
+
                     }
                 },
                 "templates": {

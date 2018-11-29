@@ -17,7 +17,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Page implements Serializable {
+public class MetaData implements Serializable {
 	/**
 	 * increment this value every time you change class variables
 	 */
