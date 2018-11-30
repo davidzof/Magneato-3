@@ -12,13 +12,46 @@
  */
 package utils;
 
-import org.apache.commons.lang3.StringEscapeUtils;
+/*
+this is what we are trying to produce
+ {
+    "title" : "Test Page",
+    "feedback" : "<p><b>Type your content here...</b></p><p>another para</p>",
+    "files" : [
+      {
+        "name" : "0abbd5ae7ec118a50fe225065a98b8[1].jpg",
+        "size" : "73695",
+        "url" : "/library/images/0ab/0abbd5ae7ec118a50fe225065a98b8[1].jpg",
+        "thumbnailUrl" : "/library/images/0ab/thumb_0abbd5ae7ec118a50fe225065a98                                                                                                                          b8[1].jpg",
+        "deleteUrl" : "delete/0abbd5ae7ec118a50fe225065a98b8[1].jpg",
+        "deleteType" : "DELETE"
+      },
+      {
+        "name" : "1c3982c8bf9b0db953d02577c13cba[1].jpg",
+        "size" : "50030",
+        "url" : "/library/images/1c3/1c3982c8bf9b0db953d02577c13cba[1].jpg",
+        "thumbnailUrl" : "/library/images/1c3/thumb_1c3982c8bf9b0db953d02577c13c                                                                                                                          ba[1].jpg",
+        "deleteUrl" : "delete/1c3982c8bf9b0db953d02577c13cba[1].jpg",
+        "deleteType" : "DELETE"
+      }
+    ],
+    "category" : "Technology",
+    "metadata" : {
+      "edit_template" : "simple",
+      "display_template" : "simple",
+      "create_date" : "2018-11-30 14:51:20",
+      "ip_addr" : "0:0:0:0:0:0:0:1",
+      "owner" : "admin",
+      "relations" : [
+        "1"
+      ],
+      "groups" : [
+        "default"
+      ],
+      "canonical_url" : "test-page"
+    }
 
-import javax.xml.bind.annotation.XmlRootElement;
-import java.io.Serializable;
-import java.util.ArrayList;
-
-@XmlRootElement
+ */
 public class Article  {
 	private MetaData metaData;
 	private StringBuilder contents = new StringBuilder();
