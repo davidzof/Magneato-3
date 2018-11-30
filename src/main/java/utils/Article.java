@@ -23,22 +23,58 @@ public class Article  {
 	private MetaData metaData;
 	private StringBuilder contents = new StringBuilder();
 	private String category;
-	
+	private String lat;
+	private String lon;
+	private boolean comments;
+	private String videoSite = null;
+	private String videoId = null;
+	private String imageUrl;
+	private String fileName;
+	private String size;
+
 	Article(MetaData metaData) {
 		this.metaData = metaData;
 	}
 	
 	void addParagraph(String s) {
-		contents.append("<p>");
 		contents.append(s);
-		contents.append("</p>");
 	}
 	
 	void setCategory(String category) {
 		this.category = category;
 	}
-	
+
+	void setLongitude(String lon) {
+		this.lon = lon;
+	}
+
+	void setLatitude(String lat) {
+		this.lat = lat;
+	}
+
+	void addImage(String url, String size) {
+		System.out.println("add image" + url + " " +size);
+	}
+
+
+	void setVideoSite(String site) {
+		// youtube, dailymotion, vimeo etc, generate embed code and add to current paragraph
+	// then null site + id
+	}
+
+	void setVideoId(String id) {
+
+	}
+
+	void setComments(String comments) {
+		if ("true".equals(comments)) {
+			this.comments = true;
+		} else {
+			this.comments = false;
+		}
+	}
+
 	public String toString() {
-		return  contents.toString() + ", " +category + ", " + metaData.toString();
+		return  "contents : " + contents.toString() + ", category " +category + ", latitude" + lat + ", longitude : " + lon + metaData.toString();
 	}
 }
