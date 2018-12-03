@@ -54,7 +54,7 @@ this is what we are trying to produce
  */
 public class Article  {
 	private MetaData metaData;
-	private StringBuilder contents = new StringBuilder();
+	private final StringBuilder contents = new StringBuilder();
 	private String category;
 	private String lat;
 	private String lon;
@@ -64,12 +64,15 @@ public class Article  {
 	private String imageUrl;
 	private String fileName;
 	private String size;
+    private final WikiParser wikiParser = new WikiParser();
 
 	Article(MetaData metaData) {
 		this.metaData = metaData;
 	}
 	
 	void addParagraph(String s) {
+		s = wikiParser.parseLinks(s, "Confluence").toString();
+		System.out.println(s);
 		contents.append(s);
 	}
 	

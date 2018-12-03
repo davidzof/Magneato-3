@@ -26,8 +26,7 @@ import java.io.IOException;
  * 
  * @author dgeorge
  */
-public class MetaParser extends org.xml.sax.helpers.DefaultHandler {
-
+public class MetaParser {
 	private final Log _logger = LogFactory.getLog(MetaParser.class);
 	private String element;
 	private MetaData metaData = null;

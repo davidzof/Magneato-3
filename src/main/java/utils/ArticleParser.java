@@ -12,7 +12,13 @@
  */
 package utils;
 
-import nu.xom.*;
+import nu.xom.Attribute;
+import nu.xom.Comment;
+import nu.xom.DocType;
+import nu.xom.Element;
+import nu.xom.Node;
+import nu.xom.ProcessingInstruction;
+import nu.xom.Text;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,16 +31,18 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author dgeorge
  */
-public class ArticleParser extends org.xml.sax.helpers.DefaultHandler {
+public class ArticleParser {
 
     private final Log _logger = LogFactory.getLog(ArticleParser.class);
     String element;
     Article article;
     Element temp;
 
+
     ArticleParser(Article article) {
         element = "";
         this.article = article;
+        
     }
 
     public void listChildren(Node current, int depth) {
@@ -60,11 +68,11 @@ public class ArticleParser extends org.xml.sax.helpers.DefaultHandler {
                 if (!data.trim().isEmpty()) {
                     switch (element) {
                     case "body":
-                        article.addParagraph("<p>" + data + "</p>");
+                        article.addParagraph(data);
                         break;
 
                     case "kicker":
-                        article.addParagraph("<p class=\"kicker\">" + data + "</p>");
+                        article.addParagraph(data);
                         break;
 
                     case "attachment":
