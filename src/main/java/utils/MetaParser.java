@@ -21,9 +21,8 @@ import java.io.IOException;
 /**
  * It is assumed that a "page" consists of Meta data and content. This will
  * create a "page" object with the meta data. The page object is responsible for
- * writing in correct Magneato JSON format Structure is:
- * <pages<page><meta><meta><contents></contents></page></pages> Note: this is a
- * demo utility and would need adapting.
+ * writing in correct Magneato JSON format Note: this is a demo utility and
+ * would need adapting.
  * 
  * @author dgeorge
  */

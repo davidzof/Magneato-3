@@ -21,7 +21,15 @@ import java.util.regex.Pattern;
 import javax.annotation.security.RolesAllowed;
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -29,6 +37,7 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 
 import org.apache.commons.io.FilenameUtils;
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.magneato.MagneatoConfiguration;
@@ -60,36 +69,36 @@ public class PageResource {
 	private String imageDir = null;
 
 	public PageResource(MagneatoConfiguration configuration,
-            ManagedElasticClient repository) {
-        this.templates = configuration.getTemplates();
-        this.repository = repository;
+			ManagedElasticClient repository) {
+		this.templates = configuration.getTemplates();
+		this.repository = repository;
 
-        Map<String, String> uriMappings = configuration
-                .getAssetsConfiguration().getResourcePathToUriMappings();
-        for (Map.Entry<String, String> entry : uriMappings.entrySet()) {
-            System.out.println("Key = " + entry.getKey() + ", Value = "
-                    + entry.getValue());
-        }// TODO remove this
+		Map<String, String> uriMappings = configuration
+				.getAssetsConfiguration().getResourcePathToUriMappings();
+		for (Map.Entry<String, String> entry : uriMappings.entrySet()) {
+			System.out.println("Key = " + entry.getKey() + ", Value = "
+					+ entry.getValue());
+		}// TODO remove this
 
-        Map<String, String> overrides = configuration.getAssetsConfiguration()
-                .getOverrides();
-        for (Map.Entry<String, String> entry : overrides.entrySet()) {
-            if (IMAGEPATH.equals(entry.getKey())) {
-                imageDir = entry.getValue() + "/";
-            }
-        }// for
-        
-        /*
-         * Insert default page if it doesn't exist already
-         */
-        String body = repository.get("1");
-        if (body == null) {
-        	log.info("creating default page");
-        	body = "{\"title\":\"Home Page\",\"feedback\":\"Welcome to Magneato CMS\",\"category\":\"Home Page\",\"metadata\":{\"edit_template\":\"simple\",\"display_template\":\"home\",\"create_date\":\"2018-01-01 00:01:01\",\"ip_addr\":\"127.0.0.1\",\"owner\":\"admin\",\"canonical_url\":\"index\"}}";
-        	repository.insert("1", body);
-        }
+		Map<String, String> overrides = configuration.getAssetsConfiguration()
+				.getOverrides();
+		for (Map.Entry<String, String> entry : overrides.entrySet()) {
+			if (IMAGEPATH.equals(entry.getKey())) {
+				imageDir = entry.getValue() + "/";
+			}
+		}// for
 
-    }
+		/*
+		 * Insert default page if it doesn't exist already
+		 */
+		String body = repository.get("1");
+		if (body == null) {
+			log.info("creating default page");
+			body = "{\"title\":\"Home Page\",\"feedback\":\"Welcome to Magneato CMS\",\"category\":\"Home Page\",\"metadata\":{\"edit_template\":\"simple\",\"display_template\":\"home\",\"create_date\":\"2018-01-01 00:01:01\",\"ip_addr\":\"127.0.0.1\",\"owner\":\"admin\",\"canonical_url\":\"index\"}}";
+			repository.insert("1", body);
+		}
+
+	}
 
 	/** default page, insert this at startup **/
 	@GET
@@ -379,16 +388,22 @@ public class PageResource {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
 	public String upload(
-			@FormDataParam("files") final InputStream fileInputStream,
-			@FormDataParam("files") final FormDataContentDisposition contentDispositionHeader) {
+			@FormDataParam("files") final FormDataBodyPart body,
+			@FormDataParam("files") final InputStream fileInputStream
+			) {
+		
+		final String mimeType = body.getMediaType().toString();
+		String fileName = body.getContentDisposition().getFileName();
 
-		String fileName = contentDispositionHeader.getFileName();
+		//String fileName = contentDispositionHeader.getFileName();
 		log.debug("filename " + fileName + " imageDir " + imageDir);
 
 		if (imageDir == null) {
 			log.warn("image directory not configured in config.yml");
 			return null;
 		}
+
+		System.out.println(">>> " + mimeType);
 
 		// store images in a subdir based on up to the first x letters of the
 		// filename, avoids putting too many files in one directory
@@ -416,6 +431,9 @@ public class PageResource {
 					ImageIO.read(new File(name)).getScaledInstance(100, 100,
 							Image.SCALE_SMOOTH), 0, 0, null);
 
+			// ImageInputStream iis = ImageIO.createImageInputStream(file);
+			// Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+
 			String thumbName = imageDir + subDir + "thumb_" + fileName;
 			ImageIO.write(img, "jpg", new File(thumbName)); // thumbs always
 			// jgps... this
@@ -430,7 +448,7 @@ public class PageResource {
 
 		return "{\"files\":[{\"url\":\"" + url + "\",\"thumbnailUrl\":\""
 				+ thumbUrl + "\",\"name\":\"" + fileName + "\",\"size\":\""
-				+ len + "\",\"type\":\"image/png\",\"deleteUrl\":\"delete/"
+				+ len + "\",\"type\":\"" + mimeType + "\",\"deleteUrl\":\"delete/"
 				+ fileName + "\",\"deleteType\":\"DELETE\"}]}";
 	}
 
