@@ -17,10 +17,7 @@ import org.magneato.core.JettyAuthServerFactory;
 import org.magneato.health.EsClusterHealthCheck;
 import org.magneato.health.EsIndexExistHealthCheck;
 import org.magneato.managed.ManagedElasticClient;
-import org.magneato.resources.LoginResource;
-import org.magneato.resources.LogoutResource;
-import org.magneato.resources.PageResource;
-import org.magneato.resources.SearchResource;
+import org.magneato.resources.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,6 +78,8 @@ public class MagneatoApplication extends Application<MagneatoConfiguration> {
 				environment.jersey().register(ForbiddenExceptionMapper.class);
 				environment.jersey().register(
 						new PageResource(configuration, managedClient));
+				environment.jersey().register(
+						new UploadResource(configuration, managedClient));
 				environment.jersey().register(new SearchResource());
 				environment.jersey().register(new LoginResource());
 				environment.jersey().register(new LogoutResource());

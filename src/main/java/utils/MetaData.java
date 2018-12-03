@@ -23,9 +23,6 @@ public class MetaData implements Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public final static String ROOT = "-";
-
-
 
 	public String name;
 	public String title;

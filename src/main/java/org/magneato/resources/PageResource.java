@@ -2,24 +2,17 @@ package org.magneato.resources;
 
 import io.dropwizard.views.View;
 
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.text.Normalizer;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.annotation.security.RolesAllowed;
-import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -36,9 +29,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 
-import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.magneato.MagneatoConfiguration;
 import org.magneato.managed.ManagedElasticClient;
@@ -73,21 +64,6 @@ public class PageResource {
 		this.templates = configuration.getTemplates();
 		this.repository = repository;
 
-		Map<String, String> uriMappings = configuration
-				.getAssetsConfiguration().getResourcePathToUriMappings();
-		for (Map.Entry<String, String> entry : uriMappings.entrySet()) {
-			System.out.println("Key = " + entry.getKey() + ", Value = "
-					+ entry.getValue());
-		}// TODO remove this
-
-		Map<String, String> overrides = configuration.getAssetsConfiguration()
-				.getOverrides();
-		for (Map.Entry<String, String> entry : overrides.entrySet()) {
-			if (IMAGEPATH.equals(entry.getKey())) {
-				imageDir = entry.getValue() + "/";
-			}
-		}// for
-
 		/*
 		 * Insert default page if it doesn't exist already
 		 */
@@ -102,7 +78,7 @@ public class PageResource {
 
 	/** default page, insert this at startup **/
 	@GET
-	@Path("")
+	//@Path("/")
 	@Produces(MediaType.TEXT_HTML)
 	public Object index() throws IOException {
 		return get("1", "index", null);
@@ -119,7 +95,7 @@ public class PageResource {
 	 * @throws IOException
 	 */
 	@GET
-	@Path("{id}/{uri}")
+	@Path("/{id}/{uri}")
 	@Produces(MediaType.TEXT_HTML)
 	public Object get(@PathParam("id") String id, @PathParam("uri") String uri,
 			@Context SecurityContext security) throws IOException {
@@ -170,7 +146,7 @@ public class PageResource {
 	 */
 	@GET
 	@RolesAllowed({ "ADMIN", "EDITOR" })
-	@Path("create")
+	@Path("/create")
 	@Produces(MediaType.TEXT_HTML)
 	public View create(
 			@DefaultValue("false") @QueryParam("clone") boolean clone,
@@ -264,7 +240,7 @@ public class PageResource {
 	@GET
 	@RolesAllowed("EDITOR")
 	@Produces(MediaType.TEXT_HTML)
-	@Path("edit/{id}/{uri}")
+	@Path("/edit/{id}/{uri}")
 	public View edit(@PathParam("id") String id, @PathParam("uri") String uri) {
 		log.debug("edit " + id + "/" + uri);
 
@@ -380,77 +356,6 @@ public class PageResource {
 		return data;
 	}
 
-	// https://gitlab.com/zloster/dropwizard-static
-	// https://github.com/dropwizard-bundles/dropwizard-configurable-assets-bundle
-	// TODO - what if image not jpg, thumb will be wrong format !
-	@POST
-	@Path("upload")
-	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	@Produces(MediaType.APPLICATION_JSON)
-	public String upload(
-			@FormDataParam("files") final FormDataBodyPart body,
-			@FormDataParam("files") final InputStream fileInputStream
-			) {
-		
-		final String mimeType = body.getMediaType().toString();
-		String fileName = body.getContentDisposition().getFileName();
-
-		//String fileName = contentDispositionHeader.getFileName();
-		log.debug("filename " + fileName + " imageDir " + imageDir);
-
-		if (imageDir == null) {
-			log.warn("image directory not configured in config.yml");
-			return null;
-		}
-
-		System.out.println(">>> " + mimeType);
-
-		// store images in a subdir based on up to the first x letters of the
-		// filename, avoids putting too many files in one directory
-		String subDir = FilenameUtils.getBaseName(fileName);
-		// TODO make configurable for big sites
-		if (subDir.length() > 3) {
-			subDir = fileName.substring(0, 3) + "/";
-		}
-
-		java.nio.file.Path outputPath = FileSystems.getDefault().getPath(
-				imageDir + subDir, fileName);
-
-		// create a thumbnail
-		long len = 0;
-		try {
-			// make the directory, if it doesn't exist
-			Files.createDirectories(outputPath.getParent());
-
-			len = Files.copy(fileInputStream, outputPath);
-			String name = imageDir + subDir + fileName;
-			BufferedImage img = new BufferedImage(100, 100,
-					BufferedImage.TYPE_INT_RGB);
-			img.createGraphics().drawImage(
-			// TODO, thumbs always square???
-					ImageIO.read(new File(name)).getScaledInstance(100, 100,
-							Image.SCALE_SMOOTH), 0, 0, null);
-
-			// ImageInputStream iis = ImageIO.createImageInputStream(file);
-			// Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
-
-			String thumbName = imageDir + subDir + "thumb_" + fileName;
-			ImageIO.write(img, "jpg", new File(thumbName)); // thumbs always
-			// jgps... this
-			// won't work for
-			// other types
-		} catch (IOException e) {
-			log.warn("upload " + e.getMessage());
-		}
-
-		String url = IMAGEPATH + "/" + subDir + fileName;
-		String thumbUrl = IMAGEPATH + "/" + subDir + "thumb_" + fileName;
-
-		return "{\"files\":[{\"url\":\"" + url + "\",\"thumbnailUrl\":\""
-				+ thumbUrl + "\",\"name\":\"" + fileName + "\",\"size\":\""
-				+ len + "\",\"type\":\"" + mimeType + "\",\"deleteUrl\":\"delete/"
-				+ fileName + "\",\"deleteType\":\"DELETE\"}]}";
-	}
 
 	// https://github.com/slugify/slugify
 	private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
@@ -465,4 +370,6 @@ public class PageResource {
 		slug = EDGESDHASHES.matcher(slug).replaceAll("");
 		return slug.toLowerCase(Locale.ENGLISH);
 	}
+
+
 }
