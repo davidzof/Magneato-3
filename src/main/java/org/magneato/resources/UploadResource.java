@@ -88,6 +88,7 @@ public class UploadResource {
 
             len = Files.copy(fileInputStream, outputPath);
             thumbName = UploadHandler.createThumbnail(imageDir + subDir, fileName, mimeType);
+            UploadHandler.getMetaData(imageDir + subDir + fileName);
             log.debug(">>> THUMBNAME " + thumbName);
         } catch (IOException e) {
             log.warn("upload " + e.getMessage());

@@ -10,7 +10,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package utils;
+package utils.legacy;
 
 /*
 this is what we are trying to produce

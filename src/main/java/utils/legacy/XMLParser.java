@@ -10,7 +10,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package utils;
+package utils.legacy;
 
 import nu.xom.*;
 import org.apache.commons.logging.Log;
@@ -25,7 +25,6 @@ import java.io.IOException;
  * @author dgeorge
  */
 public class XMLParser extends org.xml.sax.helpers.DefaultHandler {
-
     private final Log _logger = LogFactory.getLog(XMLParser.class);
 
     public static void main(String[] args) {
