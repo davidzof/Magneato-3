@@ -12,47 +12,53 @@
  */
 package utils.legacy;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.text.StringEscapeUtils;
+
 /*
-this is what we are trying to produce
+ this is what we are trying to produce
  {
-    "title" : "Test Page",
-    "feedback" : "<p><b>Type your content here...</b></p><p>another para</p>",
-    "files" : [
-      {
-        "name" : "0abbd5ae7ec118a50fe225065a98b8[1].jpg",
-        "size" : "73695",
-        "url" : "/library/images/0ab/0abbd5ae7ec118a50fe225065a98b8[1].jpg",
-        "thumbnailUrl" : "/library/images/0ab/thumb_0abbd5ae7ec118a50fe225065a98                                                                                                                          b8[1].jpg",
-        "deleteUrl" : "delete/0abbd5ae7ec118a50fe225065a98b8[1].jpg",
-        "deleteType" : "DELETE"
-      },
-      {
-        "name" : "1c3982c8bf9b0db953d02577c13cba[1].jpg",
-        "size" : "50030",
-        "url" : "/library/images/1c3/1c3982c8bf9b0db953d02577c13cba[1].jpg",
-        "thumbnailUrl" : "/library/images/1c3/thumb_1c3982c8bf9b0db953d02577c13c                                                                                                                          ba[1].jpg",
-        "deleteUrl" : "delete/1c3982c8bf9b0db953d02577c13cba[1].jpg",
-        "deleteType" : "DELETE"
-      }
-    ],
-    "category" : "Technology",
-    "metadata" : {
-      "edit_template" : "simple",
-      "display_template" : "simple",
-      "create_date" : "2018-11-30 14:51:20",
-      "ip_addr" : "0:0:0:0:0:0:0:1",
-      "owner" : "admin",
-      "relations" : [
-        "1"
-      ],
-      "groups" : [
-        "default"
-      ],
-      "canonical_url" : "test-page"
-    }
+ "title" : "Test Page",
+ "content" : "<p><b>Type your content here...</b></p><p>another para</p>",
+ "files" : [
+ {
+ "name" : "0abbd5ae7ec118a50fe225065a98b8[1].jpg",
+ "size" : "73695",
+ "url" : "/library/images/0ab/0abbd5ae7ec118a50fe225065a98b8[1].jpg",
+ "thumbnailUrl" : "/library/images/0ab/thumb_0abbd5ae7ec118a50fe225065a98                                                                                                                          b8[1].jpg",
+ "deleteUrl" : "delete/0abbd5ae7ec118a50fe225065a98b8[1].jpg",
+ "deleteType" : "DELETE"
+ },
+ {
+ "name" : "1c3982c8bf9b0db953d02577c13cba[1].jpg",
+ "size" : "50030",
+ "url" : "/library/images/1c3/1c3982c8bf9b0db953d02577c13cba[1].jpg",
+ "thumbnailUrl" : "/library/images/1c3/thumb_1c3982c8bf9b0db953d02577c13c                                                                                                                          ba[1].jpg",
+ "deleteUrl" : "delete/1c3982c8bf9b0db953d02577c13cba[1].jpg",
+ "deleteType" : "DELETE"
+ }
+ ],
+ "category" : "Technology",
+ "metadata" : {
+ "edit_template" : "simple",
+ "display_template" : "simple",
+ "create_date" : "2018-11-30 14:51:20",
+ "ip_addr" : "0:0:0:0:0:0:0:1",
+ "owner" : "admin",
+ "relations" : [
+ "1"
+ ],
+ "groups" : [
+ "default"
+ ],
+ "canonical_url" : "test-page"
+ }
 
  */
-public class Article  {
+public class Article {
 	private MetaData metaData;
 	private final StringBuilder contents = new StringBuilder();
 	private String category;
@@ -61,21 +67,26 @@ public class Article  {
 	private boolean comments;
 	private String videoSite = null;
 	private String videoId = null;
-	private String imageUrl;
 	private String fileName;
 	private String size;
-    private final WikiParser wikiParser = new WikiParser();
+	private final WikiParser wikiParser = new WikiParser();
+	private final List<String> images = new ArrayList<>();
+	private String title;
 
 	Article(MetaData metaData) {
 		this.metaData = metaData;
+		this.title = metaData.title;
 	}
-	
+
+	void setTitle(String title) {
+		this.title = title;
+	}
+
 	void addParagraph(String s) {
 		s = wikiParser.parseLinks(s, "Confluence").toString();
-		System.out.println(s);
 		contents.append(s);
 	}
-	
+
 	void setCategory(String category) {
 		this.category = category;
 	}
@@ -88,17 +99,43 @@ public class Article  {
 		this.lat = lat;
 	}
 
-	void addImage(String url, String size) {
-		System.out.println("add image" + url + " " +size);
+	void addImage(String path, String size) {
+		StringBuilder sb = new StringBuilder();
+		String basename = FilenameUtils.getBaseName(path);
+		String name = FilenameUtils.getName(path);
+		String filePath = FilenameUtils.getPath(path);
+
+		sb.append("{\"name\":");
+		sb.append("\"" + name + "\",");
+		sb.append("\"size\":");
+		sb.append("\"" + size + "\",");
+		sb.append("\"url\":");
+		sb.append("\"/library" + path + "\",");
+		sb.append("\"thumbnailUrl\":");
+		sb.append("\"/library/" + filePath + "thumb_" + basename + ".jpg\",");
+		sb.append("\"deleteUrl\":");
+		sb.append("\"/delete" + path + "\","); // remove leading directory
+		sb.append("\"deleteType\":");
+		sb.append("\"DELETE\"}");
+
+		images.add(sb.toString());
 	}
 
-
 	void setVideoSite(String site) {
-		// youtube, dailymotion, vimeo etc, generate embed code and add to current paragraph
-	// then null site + id
+		if (videoId != null) {
+			switch (site) {
+			case "youtube":
+				contents.append("<p><iframe src=\"//www.youtube.com/embed/"
+						+ videoId
+						+ "\" class=\"note-video-clip\" width=\"640\" height=\"360\" frameborder=\"0\"></iframe><br></p>");
+
+			}
+			videoId = null;
+		}
 	}
 
 	void setVideoId(String id) {
+		this.videoId = id;
 
 	}
 
@@ -111,6 +148,27 @@ public class Article  {
 	}
 
 	public String toString() {
-		return  "contents : " + contents.toString() + ", category " +category + ", latitude" + lat + ", longitude : " + lon + metaData.toString();
+		StringBuilder sb = new StringBuilder();
+		sb.append("\"title\":\"" + title + "\",\n");
+		sb.append("\"contents\":\""
+				+ StringEscapeUtils.escapeJava(contents.toString()) + "\",\n");
+
+		sb.append("\"category\":" + category + "\",\n");
+		// latitude" + lat + ", longitude : " + lon
+		sb.append("files [\n");
+		boolean first = true;
+		for (String s : images) {
+			if (first) {
+				first = false;
+			} else {
+				sb.append(",\n");
+			}
+			sb.append(s);
+			
+		}
+		sb.append("],\n");
+		sb.append(metaData.toString());
+
+		return sb.toString();
 	}
 }

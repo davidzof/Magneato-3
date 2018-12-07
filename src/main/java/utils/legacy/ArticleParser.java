@@ -56,7 +56,6 @@ public class ArticleParser {
         } else if (current instanceof DocType) {
             DocType temp = (DocType) current;
             data = ": " + temp.getRootElementName();
-            System.out.println("***** " + data);
         } else if (current instanceof Text || current instanceof Comment) {
             // eg. value davidof etc
             String value = current.getValue();
@@ -64,7 +63,6 @@ public class ArticleParser {
             if (!value.isEmpty()) {
                 data = current.getValue();
 
-                System.out.println(element);
                 if (!data.trim().isEmpty()) {
                     switch (element) {
                     case "body":
@@ -74,10 +72,7 @@ public class ArticleParser {
                     case "kicker":
                         article.addParagraph(data);
                         break;
-
-                    case "attachment":
-                        System.out.println("attachment : " + data);
-                        break;
+                        
                     case "category":
                         article.setCategory(data);
                         break;
@@ -88,7 +83,6 @@ public class ArticleParser {
                         String filename = null;
 
                         if (temp != null) {
-                            //<image xsi:type="xs:anyURI" filename="telesiege_sous_les_eaux_3.jpg" mediatype="image/jpeg" size="369513">/images/f2d/a7b/f2d88747-9782-4385-93f1-c09d91a3ba7b_telesiegesousleseaux3.jpg</image>
                             Attribute a = temp.getAttribute("size");
                             if (a != null) {
                                 size = a.getValue();
@@ -111,10 +105,10 @@ public class ArticleParser {
                         break;
 
                     case "site":
-                        System.out.println("site : " + data);
+                    	article.setVideoSite(data);
                         break;
                     case "id":
-                        System.out.println("id : " + data);
+                    	article.setVideoId(data);
                         break;
                     }
                 }

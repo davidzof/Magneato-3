@@ -1,5 +1,22 @@
 package org.magneato.resources;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.util.Map;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.SecurityContext;
+
 import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -7,19 +24,8 @@ import org.magneato.MagneatoConfiguration;
 import org.magneato.managed.ManagedElasticClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import utils.UploadHandler;
 
-import javax.imageio.ImageIO;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.util.Map;
+import utils.UploadHandler;
 
 // https://github.com/wdawson/dropwizard-auth-example/blob/master/pom.xml
 @Path("/")
@@ -88,7 +94,7 @@ public class UploadResource {
 
             len = Files.copy(fileInputStream, outputPath);
             thumbName = UploadHandler.createThumbnail(imageDir + subDir, fileName, mimeType);
-            UploadHandler.getMetaData(imageDir + subDir + fileName);
+            UploadHandler.getMetaData(outputPath.toString());
             log.debug(">>> THUMBNAME " + thumbName);
         } catch (IOException e) {
             log.warn("upload " + e.getMessage());
@@ -101,17 +107,34 @@ public class UploadResource {
 
         return "{\"files\":[{\"url\":\"" + url + "\",\"thumbnailUrl\":\""
                 + thumbUrl + "\",\"name\":\"" + fileName + "\",\"size\":\""
-                + len + "\",\"type\":\"" + mimeType + "\",\"deleteUrl\":\"delete/"
-                + fileName + "\",\"deleteType\":\"DELETE\"}]}";
+                + len + "\",\"type\":\"" + mimeType + "\",\"deleteUrl\":\"/delete/"
+                + subDir + fileName + "\",\"deleteType\":\"DELETE\"}]}";
     }
 
-    @GET
+    @DELETE
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/delete")
-    public String delete(
+    @Path("/delete/{filename : .+}")
+    public String delete( @PathParam("filename") String fileName,
             @Context SecurityContext security) throws IOException {
-        log.debug("delete " );
+        log.debug("delete " + fileName + " imageDir " + imageDir);
 
+        if (imageDir == null) {
+            log.warn("image directory not configured in config.yml");
+            return null;
+        }
+        
+    
+        String path = imageDir + fileName;
+        if (!(new File(path)).delete()) {
+        	log.error("could not delete " + path);
+        }
+        // alway jpg
+        String thumbPath = imageDir + FilenameUtils.getPath(fileName) + "thumb_" + FilenameUtils.getBaseName(fileName) + ".jpg";
+        if (!(new File(thumbPath)).delete()) {
+        	log.error("could not delete " + thumbPath);
+        }
+        log.debug("deleted " + path + " + " + thumbPath);
+        
         return "???";
     }
 }

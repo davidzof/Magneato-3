@@ -39,10 +39,9 @@ public class LinkTagParser extends WikiLinkHandler {
 			url = WikiParser.cleanURLText(url) + ".htm";
 		}
 
-		URL remote = null;
 		try {
-			remote = new URL(url);
-			if (doesURLExist(remote)) {
+			url = doesURLExist(url);
+			if (url != null) {
 				links.add("<a href=\"" + url + "\">" + link + "</a>");
 			} else {
 				links.add(link);
@@ -56,7 +55,46 @@ public class LinkTagParser extends WikiLinkHandler {
 		}
 	}
 
-	public static boolean doesURLExist(URL url) throws IOException {
+	/**
+	 * @param url
+	 * @return url if it is available, null otherwise
+	 * @throws IOException
+	 */
+	public static String doesURLExist(String url) throws IOException {
+
+		URL remote = new URL(url);
+		HttpURLConnection connection = checkURL(remote);
+
+		int response = connection.getResponseCode();
+
+		if (response == HttpURLConnection.HTTP_OK) {
+			System.out.println(">>> " + url);
+			return url;
+		}
+
+		// normally, 3xx is redirect
+		int count = 0;
+		while(response == HttpURLConnection.HTTP_MOVED_TEMP
+				|| response == HttpURLConnection.HTTP_MOVED_PERM
+				|| response == HttpURLConnection.HTTP_SEE_OTHER) {
+			// get redirect url from "location" header field
+			String newUrl = connection.getHeaderField("Location");
+			remote = new URL(newUrl);
+			connection = checkURL(remote);
+			if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+				
+				return newUrl;
+			}
+			
+			if (count++ == 10) {
+				return null;
+			}
+		}
+		return null;
+
+	}
+
+	private static HttpURLConnection checkURL(URL url) throws IOException {
 		// if (true) return true;
 		// We want to check the current URL
 		HttpURLConnection.setFollowRedirects(false);
@@ -73,21 +111,6 @@ public class LinkTagParser extends WikiLinkHandler {
 				.setRequestProperty(
 						"User-Agent",
 						"Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.1.2) Gecko/20090729 Firefox/3.5.2 (.NET CLR 3.5.30729)");
-		int responseCode = httpURLConnection.getResponseCode();
-		System.out.println(">>> " + url + " code " + responseCode);
-
-		// normally, 3xx is redirect
-
-		if (responseCode != HttpURLConnection.HTTP_OK
-				&& (responseCode == HttpURLConnection.HTTP_MOVED_TEMP
-						|| responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_SEE_OTHER)) {
-			// get redirect url from "location" header field
-			String newUrl = httpURLConnection.getHeaderField("Location");
-			System.out.println("Redirect to URL : " + newUrl);
-
-		}
-		// We only accept response code 200
-		return responseCode == HttpURLConnection.HTTP_OK;
-
+		return httpURLConnection;
 	}
 }

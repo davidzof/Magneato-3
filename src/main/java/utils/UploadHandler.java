@@ -38,7 +38,9 @@ public class UploadHandler {
     }
 
     public static String getMetaData(String filePath) throws IOException {
-        try (ImageInputStream iis = ImageIO.createImageInputStream(filePath)) {
+    	System.out.println("filepath " + filePath);
+    	File file = new File( filePath );
+        try (ImageInputStream iis = ImageIO.createImageInputStream(file)) {
             Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
             if(readers.hasNext()) {
                 ImageReader reader = readers.next();
