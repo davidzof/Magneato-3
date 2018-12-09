@@ -1,4 +1,4 @@
-package utils;
+package org.magneato.utils;
 
 import org.apache.commons.io.FilenameUtils;
 import org.w3c.dom.NamedNodeMap;

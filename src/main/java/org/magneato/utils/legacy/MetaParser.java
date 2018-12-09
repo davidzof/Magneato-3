@@ -10,7 +10,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package utils.legacy;
+package org.magneato.utils.legacy;
 
 import nu.xom.*;
 import org.apache.commons.logging.Log;

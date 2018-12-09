@@ -1,4 +1,4 @@
-package utils;
+package org.magneato.utils;
 
 import java.io.InputStream;
 

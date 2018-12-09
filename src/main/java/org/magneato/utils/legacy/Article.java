@@ -10,7 +10,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package utils.legacy;
+package org.magneato.utils.legacy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,42 +20,8 @@ import org.apache.commons.text.StringEscapeUtils;
 
 /*
  this is what we are trying to produce
- {
- "title" : "Test Page",
- "content" : "<p><b>Type your content here...</b></p><p>another para</p>",
- "files" : [
- {
- "name" : "0abbd5ae7ec118a50fe225065a98b8[1].jpg",
- "size" : "73695",
- "url" : "/library/images/0ab/0abbd5ae7ec118a50fe225065a98b8[1].jpg",
- "thumbnailUrl" : "/library/images/0ab/thumb_0abbd5ae7ec118a50fe225065a98                                                                                                                          b8[1].jpg",
- "deleteUrl" : "delete/0abbd5ae7ec118a50fe225065a98b8[1].jpg",
- "deleteType" : "DELETE"
- },
- {
- "name" : "1c3982c8bf9b0db953d02577c13cba[1].jpg",
- "size" : "50030",
- "url" : "/library/images/1c3/1c3982c8bf9b0db953d02577c13cba[1].jpg",
- "thumbnailUrl" : "/library/images/1c3/thumb_1c3982c8bf9b0db953d02577c13c                                                                                                                          ba[1].jpg",
- "deleteUrl" : "delete/1c3982c8bf9b0db953d02577c13cba[1].jpg",
- "deleteType" : "DELETE"
- }
- ],
- "category" : "Technology",
- "metadata" : {
- "edit_template" : "simple",
- "display_template" : "simple",
- "create_date" : "2018-11-30 14:51:20",
- "ip_addr" : "0:0:0:0:0:0:0:1",
- "owner" : "admin",
- "relations" : [
- "1"
- ],
- "groups" : [
- "default"
- ],
- "canonical_url" : "test-page"
- }
+{"_index":"my-index","_type":"_doc","_id":"ZRqdPWcBFZwRcx77qpZv","_score":1,"_source":{"title":"Snowga sucks","feedback":"<p>I think that snowga really sucks donkey balls !</p><p><iframe src=\"//www.youtube.com/embed/PVJunr77pGE\" class=\"note-video-clip\" width=\"640\" height=\"360\" frameborder=\"0\"></iframe><br></p>","files":[],"category":"Technology","metadata":{"edit_template":"simple","display_template":"simple","create_date":"2018-11-22 23:48:52","ip_addr":"127.0.0.1","owner":"admin","canonical_url":"snowga-sucks","relations":["ZBqXPWcBFZwRcx772JZr"],"groups":["default"]}}}
+
 
  */
 public class Article {
@@ -153,20 +119,22 @@ public class Article {
 		sb.append("\"contents\":\""
 				+ StringEscapeUtils.escapeJava(contents.toString()) + "\",\n");
 
-		sb.append("\"category\":" + category + "\",\n");
+		sb.append("\"category\":\"" + category + "\",\n");
 		// latitude" + lat + ", longitude : " + lon
-		sb.append("files [\n");
-		boolean first = true;
-		for (String s : images) {
-			if (first) {
-				first = false;
-			} else {
-				sb.append(",\n");
+		if (!images.isEmpty()) {
+			sb.append("files [\n");
+			boolean first = true;
+			for (String s : images) {
+				if (first) {
+					first = false;
+				} else {
+					sb.append(",\n");
+				}
+				sb.append(s);
+
 			}
-			sb.append(s);
-			
+			sb.append("\n],\n");
 		}
-		sb.append("],\n");
 		sb.append(metaData.toString());
 
 		return sb.toString();

@@ -10,19 +10,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package utils.legacy;
-
-import org.apache.commons.lang3.StringEscapeUtils;
+package org.magneato.utils.legacy;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+
+import org.apache.commons.lang3.StringEscapeUtils;
 
 public class MetaData implements Serializable {
 	/**
 	 * increment this value every time you change class variables
 	 */
 	private static final long serialVersionUID = 1L;
-
 
 	public String name;
 	public String title;
@@ -43,12 +42,11 @@ public class MetaData implements Serializable {
 	public String editTemplate;
 	public String viewTemplate;
 	public String ipAddr;
-	
+
 	public String getEditTemplate() {
 		return editTemplate;
 	}
 
-	
 	public String getEscapedContent() {
 		return StringEscapeUtils.escapeXml(content);
 	}
@@ -57,13 +55,27 @@ public class MetaData implements Serializable {
 		return content;
 	}
 
-	
 	@Override
 	public String toString() {
-		return "Page [title=" +title + ", name=" + name + ", author=" + author + ", group=" + group
-				+ ", perms=" + perms + ", relations=" + relations
-				+ ", status=" + status + ", createDate=" + createDate + ", editTemplate="
-				+ editTemplate + ", viewTemplate=" + viewTemplate + ", ipAddr="
-				+ ipAddr + "]";
+		StringBuilder sb = new StringBuilder();
+		sb.append("\"metadata\" : {\n");
+		sb.append("\"edit_template\":\"" + editTemplate + "\",\n");
+		sb.append("\"display_template\":\"" + viewTemplate + "\",\n");
+		sb.append("\"create_date\":\"" + createDate + "\",\n");
+		sb.append("\"ip_addr\":\"" + ipAddr + "\",\n");
+		sb.append("\"owner\":\"" + author + "\",\n");
+		sb.append("\"groups\":[\"" + group + "\"],\n");
+		
+		if (relations != null) {
+			sb.append("\"relations\":[");
+			for (String relation : relations) {
+				sb.append("\"" + relation + "\",");
+			}
+			sb.append("],\n");
+		}
+		sb.append("}\n");
+		sb.append("\"canonical_url\":[\"" + name.substring(1) + "\"]\n");
+		// + ", perms=" + perms ", status=" + status
+		return sb.toString();
 	}
 }
