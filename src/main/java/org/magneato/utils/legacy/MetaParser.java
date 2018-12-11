@@ -72,7 +72,7 @@ public class MetaParser {
 						}
 
 						// need to parse content
-						System.out.println("\n\n" + article);
+						System.out.println("{\"_index\":\"my-index\",\"_type\":\"_doc\",\"_id\":\"" + article.getId() + "\",\"_score\":1,\"_source\":" + article + "}");
 
 					}
 				}

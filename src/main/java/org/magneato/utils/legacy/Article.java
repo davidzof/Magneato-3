@@ -20,7 +20,19 @@ import org.apache.commons.text.StringEscapeUtils;
 
 /*
  this is what we are trying to produce
-{"_index":"my-index","_type":"_doc","_id":"ZRqdPWcBFZwRcx77qpZv","_score":1,"_source":{"title":"Snowga sucks","feedback":"<p>I think that snowga really sucks donkey balls !</p><p><iframe src=\"//www.youtube.com/embed/PVJunr77pGE\" class=\"note-video-clip\" width=\"640\" height=\"360\" frameborder=\"0\"></iframe><br></p>","files":[],"category":"Technology","metadata":{"edit_template":"simple","display_template":"simple","create_date":"2018-11-22 23:48:52","ip_addr":"127.0.0.1","owner":"admin","canonical_url":"snowga-sucks","relations":["ZBqXPWcBFZwRcx772JZr"],"groups":["default"]}}}
+{"_index":"my-index","_type":"_doc","_id":"ZRqdPWcBFZwRcx77qpZv","_score":1,"_source":
+{"title":"Snowga sucks",
+"feedback":"<p>I think that snowga really sucks donkey balls !</p><p><iframe src=\"//www.youtube.com/embed/PVJunr77pGE\" class=\"note-video-clip\" width=\"640\" height=\"360\" frameborder=\"0\"></iframe><br></p>",
+"files":[],
+"category":"Technology",
+"metadata":{"edit_template":"simple",
+"display_template":"simple",
+"create_date":"2018-11-22 23:48:52",
+"ip_addr":"127.0.0.1",
+"owner":"admin",
+"canonical_url":"snowga-sucks",
+"relations":["ZBqXPWcBFZwRcx772JZr"],
+"groups":["default"]}}}
 
 
  */
@@ -38,6 +50,7 @@ public class Article {
 	private final WikiParser wikiParser = new WikiParser();
 	private final List<String> images = new ArrayList<>();
 	private String title;
+	private String id;
 
 	Article(MetaData metaData) {
 		this.metaData = metaData;
@@ -87,6 +100,7 @@ public class Article {
 		images.add(sb.toString());
 	}
 
+	//
 	void setVideoSite(String site) {
 		if (videoId != null) {
 			switch (site) {
@@ -94,7 +108,11 @@ public class Article {
 				contents.append("<p><iframe src=\"//www.youtube.com/embed/"
 						+ videoId
 						+ "\" class=\"note-video-clip\" width=\"640\" height=\"360\" frameborder=\"0\"></iframe><br></p>");
-
+				break;
+			case "dailymotion":
+			case "vimeo":
+				System.out.println("not done yet !!!");
+				break;
 			}
 			videoId = null;
 		}
@@ -111,6 +129,10 @@ public class Article {
 		} else {
 			this.comments = false;
 		}
+	}
+
+	public String getId() {
+		return metaData.name.substring(metaData.name.lastIndexOf('-')+1);
 	}
 
 	public String toString() {
@@ -135,6 +157,7 @@ public class Article {
 			}
 			sb.append("\n],\n");
 		}
+		sb.append("\"canonical_url\":\"" + metaData.name.substring(1) + "\",\n");
 		sb.append(metaData.toString());
 
 		return sb.toString();

@@ -55,6 +55,7 @@ public class MetaData implements Serializable {
 		return content;
 	}
 
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -74,7 +75,6 @@ public class MetaData implements Serializable {
 			sb.append("],\n");
 		}
 		sb.append("}\n");
-		sb.append("\"canonical_url\":[\"" + name.substring(1) + "\"]\n");
 		// + ", perms=" + perms ", status=" + status
 		return sb.toString();
 	}
