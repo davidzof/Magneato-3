@@ -144,7 +144,7 @@ public class Article {
 		sb.append("\"category\":\"" + category + "\",\n");
 		// latitude" + lat + ", longitude : " + lon
 		if (!images.isEmpty()) {
-			sb.append("files [\n");
+			sb.append("\"files\": [\n");
 			boolean first = true;
 			for (String s : images) {
 				if (first) {
@@ -157,7 +157,7 @@ public class Article {
 			}
 			sb.append("\n],\n");
 		}
-		sb.append("\"canonical_url\":\"" + metaData.name.substring(1) + "\",\n");
+		
 		sb.append(metaData.toString());
 
 		return sb.toString();

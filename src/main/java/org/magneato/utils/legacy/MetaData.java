@@ -36,9 +36,8 @@ public class MetaData implements Serializable {
 	}
 
 	public Status status;
-	public long createDate;
-	public long startDate;
-	public long expiryDate;
+	public String createDate;
+
 	public String editTemplate;
 	public String viewTemplate;
 	public String ipAddr;
@@ -60,6 +59,7 @@ public class MetaData implements Serializable {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\"metadata\" : {\n");
+		sb.append("\"canonical_url\":\"" + name.substring(1,name.lastIndexOf('-')) + "\",\n");
 		sb.append("\"edit_template\":\"" + editTemplate + "\",\n");
 		sb.append("\"display_template\":\"" + viewTemplate + "\",\n");
 		sb.append("\"create_date\":\"" + createDate + "\",\n");
@@ -74,6 +74,7 @@ public class MetaData implements Serializable {
 			}
 			sb.append("],\n");
 		}
+		sb.append("\"perms\":[\"" + perms + "\"]\n");
 		sb.append("}\n");
 		// + ", perms=" + perms ", status=" + status
 		return sb.toString();
