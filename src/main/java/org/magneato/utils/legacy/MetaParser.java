@@ -12,7 +12,10 @@
  */
 package org.magneato.utils.legacy;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -46,11 +49,17 @@ public class MetaParser {
 	// "2018-11-22 23:48:52"
 	// yyyy-mm-dd hh:mm:ss"
 	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	PrintWriter articles;
 
-	MetaParser() {
-
+	MetaParser() throws FileNotFoundException, UnsupportedEncodingException {
 		element = "";
 		metaData = null;
+		articles = new PrintWriter("articles.json", "UTF-8");
+	}
+
+	void close() {
+	    articles.close();
+
 	}
 
 	public void listChildren(Node current, int depth) {
@@ -86,8 +95,7 @@ public class MetaParser {
 							e.printStackTrace();
 						}
 
-						System.out
-								.println("{\"_index\":\"my-index\",\"_type\":\"_doc\",\"_id\":\""
+						articles.println("{\"_index\":\"main-index\",\"_type\":\"_doc\",\"_id\":\""
 										+ article.getId()
 										+ "\",\"_score\":1,\n\"_source\":{"
 										+ article + "}}");

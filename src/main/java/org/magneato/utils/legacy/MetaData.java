@@ -58,25 +58,30 @@ public class MetaData implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("\"metadata\" : {\n");
-		sb.append("\"canonical_url\":\"" + name.substring(1,name.lastIndexOf('-')) + "\",\n");
-		sb.append("\"edit_template\":\"" + editTemplate + "\",\n");
-		sb.append("\"display_template\":\"" + viewTemplate + "\",\n");
-		sb.append("\"create_date\":\"" + createDate + "\",\n");
-		sb.append("\"ip_addr\":\"" + ipAddr + "\",\n");
-		sb.append("\"owner\":\"" + author + "\",\n");
-		sb.append("\"groups\":[\"" + group + "\"],\n");
-		
-		if (relations != null) {
-			sb.append("\"relations\":[");
-			for (String relation : relations) {
-				sb.append("\"" + relation + "\",");
+		try {
+			sb.append("\"metadata\" : {\n");
+			sb.append("\"canonical_url\":\"" + name.substring(1, name.lastIndexOf('-')) + "\",\n");
+			sb.append("\"edit_template\":\"" + editTemplate + "\",\n");
+			sb.append("\"display_template\":\"" + viewTemplate + "\",\n");
+			sb.append("\"create_date\":\"" + createDate + "\",\n");
+			sb.append("\"ip_addr\":\"" + ipAddr + "\",\n");
+			sb.append("\"owner\":\"" + author + "\",\n");
+			sb.append("\"groups\":[\"" + group + "\"],\n");
+
+			if (relations != null) {
+				sb.append("\"relations\":[");
+				for (String relation : relations) {
+					sb.append("\"" + relation + "\",");
+				}
+				sb.append("],\n");
 			}
-			sb.append("],\n");
+			sb.append("\"perms\":" + perms + "\n");
+			sb.append("}\n");
+			// + ", perms=" + perms ", status=" + status
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("name " + name);
 		}
-		sb.append("\"perms\":[\"" + perms + "\"]\n");
-		sb.append("}\n");
-		// + ", perms=" + perms ", status=" + status
 		return sb.toString();
 	}
 }
