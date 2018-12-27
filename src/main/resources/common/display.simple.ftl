@@ -5,7 +5,7 @@
     <div class="starter-template">
         <h1>${json.title.asText()}</h1>
 
-        ${json.feedback.asText()?no_esc}
+        ${json.content.asText()?no_esc}
 
        <#include "/common/attachments.ftl">
         

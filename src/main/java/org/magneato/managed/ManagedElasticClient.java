@@ -87,7 +87,7 @@ public class ManagedElasticClient implements Managed {
 		return response.isAcknowledged();
 	}
 
-	// http://localhost:9200/my-index/_mappings/_doc
+	// http://localhost:9200/main-index/_mappings/_doc
 	public void createMapping() {
 		File file;
 		BufferedReader reader = null;
@@ -135,7 +135,8 @@ public class ManagedElasticClient implements Managed {
 	 * @return
 	 * @see <a href="https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/java-rest-high-search.html">ES Search</a>
 	 */
-	// http://localhost:9200/my-index/_search?q=*.*
+	// http://localhost:9200/main-index/_search?q=*.*
+	// http://localhost:9200/main-index/_search?q=metadata.template=article&sort=metadata.create_date:asc
 	public ArrayList<String> search(int from, int size, String query) {
 		log.debug("search " + query);
 		SearchRequestBuilder searchBuilder = client

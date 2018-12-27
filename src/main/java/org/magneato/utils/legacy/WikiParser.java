@@ -15,6 +15,7 @@ package org.magneato.utils.legacy;
 import java.io.StringWriter;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.StringTokenizer;
 
 import org.eclipse.mylyn.wikitext.core.parser.MarkupParser;
@@ -29,7 +30,6 @@ public class WikiParser {
 	private static String ENDESCAPE = "!]";
 
 	private WikiLinkHandler wikiHandler = new LinkTagParser();
-
 
 	/**
 	 * Takes content and replaces all the Wikilinks
@@ -122,7 +122,7 @@ public class WikiParser {
 		}
 
 		// fall back action, escape HTML and return
-		return /*StringEscapeUtils.escapeHtml(*/buffer.toString();
+		return /* StringEscapeUtils.escapeHtml( */buffer.toString();
 	}
 
 	/*

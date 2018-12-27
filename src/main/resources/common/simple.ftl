@@ -23,8 +23,7 @@
     <#else>
     {
         "title": "The Page Title",
-        "feedback": "Type your content here...",
-        "category": "Technology",
+        "content": "Type your content here...",
         "metadata": ${metaData?no_esc}
     }
     </#if>
@@ -39,21 +38,13 @@
                         "title": "title",
                         "required": true
                     },
-                    "feedback": {
+                    "content": {
                         "type": "string",
-                        "title": "Feedback"
+                        "title": "Content"
                     },
                     "files": {
                         "type": "array",
                         "title": "Files"
-                    },
-                    "category": {
-                        "title": "Category",
-                        "enum": [
-                            "Home News",
-                            "Technology",
-                            "World News"
-                        ]
                     },
                     "metadata": {
                         "type": "object",
@@ -97,9 +88,6 @@
                             }
                         }
                     }
-                },
-                "dependencies": {
-                    "feedback": ["category"]
                 }
             },
             "options": {
@@ -148,26 +136,12 @@
                         "size": 20,
                         "helper": "Please enter the page title."
                     },
-                    "feedback": {
+                    "content": {
                         "type": "summernote",
-                        "name": "your_feedback",
+                        "name": "your_content",
                         "rows": 5,
                         "cols": 40,
-                        "helper": "Please enter your feedback.",
-                        "dependencies" : {
-                            "category" : ["Home News", "Technology","World News"]
-                        }
-
-                    },
-                    "category": {
-                       "type": "select",
-                       "label": "New select",
-                        "optionLabels": [
-                            "Home News",
-                            "Technology",
-                            "World News"
-                        ]
-                    },
+                        "helper": "Please enter your content."                    },
                     "metadata": {
                         "type": "object",
                         "label": "Meta Data",

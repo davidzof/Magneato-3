@@ -53,9 +53,6 @@ public class PageResource {
 	private final Logger log = LoggerFactory.getLogger(this.getClass()
 			.getName());
 
-	private final static String IMAGEPATH = "/library/images";
-	private String imageDir = null;
-
 	public PageResource(MagneatoConfiguration configuration,
 			ManagedElasticClient repository) {
 		this.templates = configuration.getTemplates();
@@ -67,7 +64,7 @@ public class PageResource {
 		String body = repository.get("1");
 		if (body == null) {
 			log.info("creating default page");
-			body = "{\"title\":\"Home Page\",\"feedback\":\"Welcome to Magneato CMS\",\"category\":\"Home Page\",\"metadata\":{\"edit_template\":\"simple\",\"display_template\":\"home\",\"create_date\":\"2018-01-01 00:01:01\",\"ip_addr\":\"127.0.0.1\",\"owner\":\"admin\",\"canonical_url\":\"index\"}}";
+			body = "{\"title\":\"Home Page\",\"content\":\"Welcome to Magneato CMS\",\"metadata\":{\"edit_template\":\"simple\",\"display_template\":\"simple\",\"create_date\":\"2018-01-01 00:01:01\",\"ip_addr\":\"127.0.0.1\",\"owner\":\"admin\",\"canonical_url\":\"index\"}}";
 			repository.insert("1", body);
 		}
 
@@ -75,7 +72,7 @@ public class PageResource {
 
 	/** default page, insert this at startup **/
 	@GET
-	//@Path("/")
+	// @Path("/")
 	@Produces(MediaType.TEXT_HTML)
 	public Object index() throws IOException {
 		return get("1", "index", null);
@@ -353,7 +350,6 @@ public class PageResource {
 		return data;
 	}
 
-
 	// https://github.com/slugify/slugify
 	private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
 	private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
@@ -367,6 +363,5 @@ public class PageResource {
 		slug = EDGESDHASHES.matcher(slug).replaceAll("");
 		return slug.toLowerCase(Locale.ENGLISH);
 	}
-
 
 }

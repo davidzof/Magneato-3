@@ -35,7 +35,9 @@ public class XMLParser extends org.xml.sax.helpers.DefaultHandler {
             Element root = doc.getRootElement();
             // parse the page meta data
             MetaParser metaParser = new MetaParser();
+            
             metaParser.listChildren(root, 0);
+            metaParser.close();
         } catch (ParsingException e) {
             e.printStackTrace();
         } catch (IOException e) {

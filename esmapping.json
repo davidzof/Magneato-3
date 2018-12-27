@@ -43,7 +43,7 @@
           },
           "create_date": {
             "type": "date",
-			"format": "YYYY-MM-DD HH:mm:ss"
+	    "format": "yyyy-MM-dd HH:mm:ss"
           }
         }
       }

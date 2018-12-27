@@ -13,6 +13,7 @@
 package org.magneato.utils.legacy;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
@@ -20,19 +21,21 @@ import org.apache.commons.text.StringEscapeUtils;
 
 /*
  this is what we are trying to produce
-{"_index":"my-index","_type":"_doc","_id":"ZRqdPWcBFZwRcx77qpZv","_score":1,"_source":
-{"title":"Snowga sucks",
-"feedback":"<p>I think that snowga really sucks donkey balls !</p><p><iframe src=\"//www.youtube.com/embed/PVJunr77pGE\" class=\"note-video-clip\" width=\"640\" height=\"360\" frameborder=\"0\"></iframe><br></p>",
-"files":[],
-"category":"Technology",
-"metadata":{"edit_template":"simple",
-"display_template":"simple",
-"create_date":"2018-11-22 23:48:52",
-"ip_addr":"127.0.0.1",
-"owner":"admin",
-"canonical_url":"snowga-sucks",
-"relations":["ZBqXPWcBFZwRcx772JZr"],
-"groups":["default"]}}}
+ {"_index":"my-index","_type":"_doc","_id":"ZRqdPWcBFZwRcx77qpZv","_score":1,"_source":
+ {"title":"Snowga sucks",
+ "feedback":"<p>I think that snowga really sucks donkey balls !</p><p><iframe src=\"//www.youtube.com/embed/PVJunr77pGE\" class=\"note-video-clip\" width=\"640\" height=\"360\" frameborder=\"0\"></iframe><br></p>",
+ "files":[],
+ "category":"Technology",
+ "metadata":{"edit_template":"simple",
+ "display_template":"simple",
+ "create_date":"2018-11-22 23:48:52",
+ "ip_addr":"127.0.0.1",
+ "owner":"admin",
+ "canonical_url":"snowga-sucks",
+ "relations":["ZBqXPWcBFZwRcx772JZr"],
+ "groups":["default"]}}}
+
+ {"title":"The Page Title","content":"Type your article here...","files":[],"category":"Comment","location":{"lat":"456","lon":"2222"},"metadata":{"edit_template":"article","display_template":"article","create_date":"2018-12-23 21:07:22","ip_addr":"127.0.0.1","owner":"admin","relations":[],"groups":["default"],"canonical_url":"the-page-title"}}
 
 
  */
@@ -110,8 +113,13 @@ public class Article {
 						+ "\" class=\"note-video-clip\" width=\"640\" height=\"360\" frameborder=\"0\"></iframe><br></p>");
 				break;
 			case "dailymotion":
+				contents.append("<p><iframe src=\"//www.dailymotion.com/embed/video/");
+				contents.append(videoId);
+				contents.append("\" class=\"note-video-clip\" width=\"640\" height=\"360\" frameborder=\"0\"></iframe><br></p>");
 			case "vimeo":
-				System.out.println("not done yet !!!");
+				contents.append("<iframe webkitallowfullscreen=\"\" mozallowfullscreen=\"\" allowfullscreen=\"\" src=\"//player.vimeo.com/video/");
+				contents.append(videoId);
+				contents.append("\" class=\"note-video-clip\" width=\"640\" height=\"360\" frameborder=\"0\"></iframe></p>");
 				break;
 			}
 			videoId = null;
@@ -132,32 +140,35 @@ public class Article {
 	}
 
 	public String getId() {
-		return metaData.name.substring(metaData.name.lastIndexOf('-')+1);
+		return metaData.name.substring(metaData.name.lastIndexOf('-') + 1);
 	}
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("\"title\":\"" + title + "\",\n");
-		sb.append("\"contents\":\""
-				+ StringEscapeUtils.escapeJava(contents.toString()) + "\",\n");
+		sb.append("\"title\":\"" + title + "\", ");
+		sb.append("\"content\":\""
+				+ StringEscapeUtils.escapeJava(contents.toString()) + "\", ");
 
-		sb.append("\"category\":\"" + category + "\",\n");
-		// latitude" + lat + ", longitude : " + lon
+		sb.append("\"category\":\"" + category + "\", ");
+		if (lat != null && lon != null) {
+			sb.append("\"location\":{\"lat\":" + lat + ",\"lon\":" + lon
+					+ "}, ");
+		}
 		if (!images.isEmpty()) {
-			sb.append("\"files\": [\n");
+			sb.append("\"files\": [");
 			boolean first = true;
 			for (String s : images) {
 				if (first) {
 					first = false;
 				} else {
-					sb.append(",\n");
+					sb.append(", ");
 				}
 				sb.append(s);
 
 			}
-			sb.append("\n],\n");
+			sb.append("], ");
 		}
-		
+
 		sb.append(metaData.toString());
 
 		return sb.toString();

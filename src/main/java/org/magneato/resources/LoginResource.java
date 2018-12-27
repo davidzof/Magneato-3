@@ -34,11 +34,12 @@ public class LoginResource {
 	@Path("/credentials")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String get(@Context SecurityContext security) {
-
+		String userName = "";
 		Principal principal = security.getUserPrincipal();
 		if (principal != null) {
-			System.out.println(security.getUserPrincipal().getName());
+			userName = security.getUserPrincipal().getName();
 		}
-		return "";
+		System.out.println("userName " + userName);
+		return "{ \"principal\":\"" + userName + "\"}";
 	}
 }

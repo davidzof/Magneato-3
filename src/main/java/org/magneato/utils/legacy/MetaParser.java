@@ -18,6 +18,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 
 import nu.xom.Builder;
 import nu.xom.Comment;
@@ -97,8 +98,9 @@ public class MetaParser {
 
 						articles.println("{\"_index\":\"main-index\",\"_type\":\"_doc\",\"_id\":\""
 										+ article.getId()
-										+ "\",\"_score\":1,\n\"_source\":{"
+										+ "\",\"_score\":1,\"_source\":{"
 										+ article + "}}");
+						System.out.print(".");
 
 					}
 				}
