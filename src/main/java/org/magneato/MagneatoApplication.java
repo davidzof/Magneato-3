@@ -80,7 +80,7 @@ public class MagneatoApplication extends Application<MagneatoConfiguration> {
 						new PageResource(configuration, managedClient));
 				environment.jersey().register(
 						new UploadResource(configuration, managedClient));
-				environment.jersey().register(new SearchResource());
+				environment.jersey().register(new SearchResource(managedClient));
 				environment.jersey().register(new LoginResource());
 				environment.jersey().register(new LogoutResource());
 				environment.jersey().register(MultiPartFeature.class);

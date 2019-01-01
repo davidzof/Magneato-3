@@ -20,6 +20,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryAction;
@@ -29,6 +30,7 @@ import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.magneato.service.ElasticSearch;
+import org.magneato.utils.Pagination;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,7 +135,9 @@ public class ManagedElasticClient implements Managed {
 	 * @param size
 	 * @param query
 	 * @return
-	 * @see <a href="https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/java-rest-high-search.html">ES Search</a>
+	 * @see <a
+	 *      href="https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/java-rest-high-search.html">ES
+	 *      Search</a>
 	 */
 	// http://localhost:9200/main-index/_search?q=*.*
 	// http://localhost:9200/main-index/_search?q=metadata.template=article&sort=metadata.create_date:asc
@@ -148,16 +152,20 @@ public class ManagedElasticClient implements Managed {
 				.setSize(size);
 
 		if (query != null) {
+			System.out.println(">>> query not null");
 			// add search query
 			String[] tokens = query.split("\\&");
 			for (String token : tokens) {
+				System.out.println(">>> token " + token);
 				int index = token.indexOf('=');
 				if (index != -1) {
 					String field = token.substring(0, index);
 					String value = token.substring(index + 1);
-					System.out.println("field " + field + " value " + value);
-					searchBuilder.setQuery(QueryBuilders
-							.matchQuery(field, value));
+					System.out.println(">>>> field " + field + " value "
+							+ value);
+					searchBuilder.setQuery(QueryBuilders.matchQuery(field,
+							value));
+
 				}
 			}
 		}
@@ -168,11 +176,43 @@ public class ManagedElasticClient implements Managed {
 		SearchHits searchHits = response.getHits();
 		for (SearchHit hit : searchHits) {
 			hit.getId(); // need to return this
-            System.out.println(hit.toString());
 			docs.add(hit.toString());
 		}
 
 		return docs;
+	}
+
+	public Pagination generalSearch(int from, int size, String query) {
+		log.debug("general search " + query + " size " + size + " from " + from);
+		SearchRequestBuilder searchBuilder = client
+				.prepareSearch(configuration.getIndexName())
+				.setTypes(INDEXTYPE)
+				/*.addSort(
+						new FieldSortBuilder("metadata.create_date")
+								.order(SortOrder.DESC)).setFrom(from)*/
+				.setSize(size);
+
+		MultiMatchQueryBuilder multiMatchQueryBuilder = QueryBuilders
+				.multiMatchQuery(query, "title", "content");
+
+		multiMatchQueryBuilder.minimumShouldMatch("75%");
+		searchBuilder.setQuery(multiMatchQueryBuilder);
+		
+
+		SearchResponse response = searchBuilder.get();
+
+		ArrayList<String> docs = new ArrayList<String>();
+		SearchHits searchHits = response.getHits();
+
+		for (SearchHit hit : searchHits) {
+			hit.getId(); // need to return this
+			docs.add(hit.toString());
+		}
+
+		Pagination pagination = new Pagination();
+		pagination.setDataList(docs);
+		pagination.setTotal(searchHits.totalHits);
+		return pagination;
 	}
 
 	public long delete(String key, String value) {
@@ -202,7 +242,7 @@ public class ManagedElasticClient implements Managed {
 		IndexResponse response = client
 				.prepareIndex(configuration.getIndexName(), INDEXTYPE, id)
 				.setSource(json, XContentType.JSON).get();
-//response.status().getStatus();
+		// response.status().getStatus();
 		return id;
 	}
 

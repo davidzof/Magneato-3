@@ -64,7 +64,7 @@ public class PageResource {
 		String body = repository.get("1");
 		if (body == null) {
 			log.info("creating default page");
-			body = "{\"title\":\"Home Page\",\"content\":\"Welcome to Magneato CMS\",\"metadata\":{\"edit_template\":\"simple\",\"display_template\":\"simple\",\"create_date\":\"2018-01-01 00:01:01\",\"ip_addr\":\"127.0.0.1\",\"owner\":\"admin\",\"canonical_url\":\"index\"}}";
+			body = "{\"title\":\"Home Page\",\"content\":\"Welcome to Magneato CMS\",\"metadata\":{\"edit_template\":\"simple\",\"display_template\":\"simple\",\"create_date\":\"2018-01-01 00:01:01\",\"ip_addr\":\"127.0.0.1\",\"owner\":\"admin\",\"canonical_url\":\"index\",\"groups\":[\"editors\"],\"perms\":11275}}";
 			repository.insert("1", body);
 		}
 
@@ -72,7 +72,6 @@ public class PageResource {
 
 	/** default page, insert this at startup **/
 	@GET
-	// @Path("/")
 	@Produces(MediaType.TEXT_HTML)
 	public Object index() throws IOException {
 		return get("1", "index", null);

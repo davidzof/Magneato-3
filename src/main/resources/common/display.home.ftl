@@ -1,32 +1,45 @@
 <#include "/common/header.ftl">
 
-<div class="container">
-    <div class="starter-template">
-        <h1>${json.title.asText()}</h1>
-
-        ${json.feedback.asText()?no_esc}
-
-		<#if json.files?? && (json.files.size() > 0) >
-	        <h2>Attachments</h2>
-	        <#assign size = json.files.size() - 1 >
-	        <#list 0..size as x>
-	            <#assign node = json.files.get(x) >
-	  	        <a href="${node.url.asText()}" title=""${node.name.asText()}"><img src="${node.thumbnailUrl.asText()}"/></a>
-	        </#list>
-		</#if>
-        
-        <h2>Related articles</h2>
-        <#list search(0,10,null) as row>
-            <#assign node = toJsonNode(row)>
-            <a href="/${node._id.asText()}/${node._source.metadata.canonical_url.asText()}">${node._source.title.asText()}</a><br/>
-        </#list>
+  <div class="mycontainer">
+    <div class="row">
+      <div class="col-sm-12">
+        <h2 class="home">the source for backcountry skiing</h2>
+          ${json.feedback.asText()?no_esc}
+      </div>
     </div>
 
     <div class="row">
-        <div class="col-sm-8">
-        <#include "/common/copyright.ftl">
-        </div>
+      <div class="col-sm-6">
+        <h2 class="home">Articles</h2>
+          <#list search(0,5,"metadata.edit_template=article") as row>
+            <#assign article = toJsonNode(row)>
+            <a class="fauxlink" href="/${article._id.asText()}/${article._source.metadata.canonical_url.asText()}">
+              <h2>${article._source.title.asText()}</h2>
+
+            <p>
+              <#if article._source.files?? && (article._source.files.size() > 0) >
+                <img class="thumb" src=${article._source.files.get(0).thumbnailUrl.asText()} align="left"/>
+              </#if>
+              ${getFirstPara(article._source.content.asText())?no_esc}
+            </p>
+            </a>
+
+            
+
+            <p><strong>Posted by ${article._source.metadata.owner.asText()} on the ${parseDate(article._source.metadata.create_date.asText(),"dd MMM yyyy")}</strong></p>
+        </#list>
+
+        <a class="btn btn-primary" href="/create?child=true">New Article</a><br/>
+      </div>
+      <div class="col-sm-6">
+        <h2 class="home">Trip Reports</h2>
+        <p>Coming soon!</p>
+      </div>
     </div>
-</div>
+  </div><!-- container -->
+
+  <div id="footer">
+   <#include "/common/copyright.ftl">
+  </div>
 </body>
 </html>

@@ -33,8 +33,8 @@ public class MetaData {
 
 	public MetaData() {
 		createDate = System.currentTimeMillis();
-		groups.add("default");
-		perms = 0x644; // rw_r__r__
+		groups.add("editors");
+		perms = 11275;
 		canonicalUrl = "";
 	}
 
@@ -118,10 +118,10 @@ public class MetaData {
 		return "{ \"edit_template\": \"" + editTemplate + "\","
 				+ "\"display_template\" : \"" + viewTemplate + "\","
 				+ "\"ip_addr\" : \"" + ipAddr + "\"," + "\"owner\" : \""
-				+ this.owner + "\"," + "\"canonical_url\" : \""
-				+ this.canonicalUrl + "\"," + "\"create_date\": \""
+				+ this.owner + "\"," + "\"perms\" : 11275,"
+				+ "\"canonical_url\" : \"" + this.canonicalUrl + "\","
+				+ "\"create_date\": \""
 				+ sdf.get().format(new Date(createDate)) + "\","
-				+ getGroupsAsString() + ","
-				+ getRelationsAsString() + "}";
+				+ getGroupsAsString() + "," + getRelationsAsString() + "}";
 	}
 }

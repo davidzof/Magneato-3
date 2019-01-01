@@ -27,9 +27,7 @@ public class LoginResource {
     public String error() {
         return "error logging in";
     }
-    
    
-
 	@GET
 	@Path("/credentials")
 	@Produces(MediaType.APPLICATION_JSON)
