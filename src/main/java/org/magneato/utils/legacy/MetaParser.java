@@ -73,6 +73,7 @@ public class MetaParser {
 
 					// parse article etc here
 					if ("article".equals(metaData.editTemplate)) {
+						/*
 						Article article = new Article(metaData);
 						// content is xml
 						try {
@@ -101,8 +102,41 @@ public class MetaParser {
 										+ "\",\"_score\":1,\"_source\":{"
 										+ article + "}}");
 						System.out.print(".");
+						*/
 
-					}
+					} else if ("route".equals(metaData.editTemplate)) {
+						Route route = new Route(metaData);
+						System.out.println("route");
+						try {
+							// could be xml or text (comment), parse later
+							Builder parser = new Builder();
+							Document doc = null;
+							try {
+								doc = parser.build(metaData.content, null);
+								Element root = doc.getRootElement();
+								// parse the page meta data
+
+								RouteParser routeParser = new RouteParser(
+										route);
+								routeParser.listChildren(root, 0);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+							System.out.println("{\"_index\":\"main-index\",\"_type\":\"_doc\",\"_id\":\""
+									+ route.getId()
+									+ "\",\"_score\":1,\"_source\":{"
+									+ route + "}}");
+							System.out.print(".");
+							Element root = doc.getRootElement();
+
+						} catch (ParsingException e) {
+							e.printStackTrace();
+						}
+
+
+
+                    }  else if ("tr".equals(metaData.editTemplate)) {
+                    }
 				}
 				metaData = new MetaData(); // what kind of page?
 			}

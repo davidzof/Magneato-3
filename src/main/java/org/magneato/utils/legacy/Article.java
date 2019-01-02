@@ -116,6 +116,7 @@ public class Article {
 				contents.append("<p><iframe src=\"//www.dailymotion.com/embed/video/");
 				contents.append(videoId);
 				contents.append("\" class=\"note-video-clip\" width=\"640\" height=\"360\" frameborder=\"0\"></iframe><br></p>");
+				break;
 			case "vimeo":
 				contents.append("<iframe webkitallowfullscreen=\"\" mozallowfullscreen=\"\" allowfullscreen=\"\" src=\"//player.vimeo.com/video/");
 				contents.append(videoId);
