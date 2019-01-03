@@ -12,197 +12,274 @@
  */
 package org.magneato.utils.legacy;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.text.StringEscapeUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+/*
+ * This is what we are aiming for
+ * {"title":"Mount Whitney Houston",
+ * "child":true,
+ * "activity":"Ski Touring",
+ * "date":"01/03/2019",
+ * "content":"<p>blah blah description</p>",
+ * "conditions":"<p>really bad conditions</p>",
+ * "ski_difficulty":{"rating":"1.2","bra":"-","snowline":650},
+ * "technical_c":{"imperial":true,"max":2345,"min":1200,"distance":23.4,"climb":300,"descent":456,
+ * "location":{"lat":"4.5","lon":"0.65"},
+ * "orientation":"North-West"},"files":[],
+ * "metadata":{"edit_template":"tripreport","display_template":"tripreport","create_date":"2019-01-03 22:37:51","ip_addr":"0:0:0:0:0:0:0:1","owner":"davidof"}}
 
+ */
 public class Route {
-    private MetaData metaData;
-    private final StringBuilder contents = new StringBuilder();
+	private MetaData metaData;
+	private final StringBuilder contents = new StringBuilder();
 
-    // variables
-    private String orientation; // facet
-    private String access = null; // content
-    private String comment = null; // content
-    private String description = null; // content
-    private String trailhead = null; // content
-    private String activity; // facet
-    private String date = "01/01/1970"; // MM/DD/YYYY
-    private boolean imperial = false;
-    private String bra = "-";
-    private String rating = null;
-    private String distance;
-    private String climb;
-    private String descent;
-    private String lat;
-    private String lon;
-
-    private String fileName;
-    private String size;
-    private final WikiParser wikiParser = new WikiParser();
-    private final List<String> images = new ArrayList<>();
-    private String title;
-    private String id = "";
-
-    Route(MetaData metaData) {
-        this.metaData = metaData;
-        this.title = metaData.title;
+	private static final Map<String, String> activityMap;
+    static
+    {
+    	activityMap = new HashMap<String, String>();
+    	activityMap.put("Ski-Touring", "Ski Touring");
+    	activityMap.put("c", "d");
     }
+    
+    
+	// variables
+	private String orientation; // facet
+	private String access = null; // content
+	private String comment = null; // content
+	private String conditions = null; // conditions
+	private String description = null; // content
+	private String trailhead = null; // content
+	private String snowline_up = null;
+	private String snowline_down = null;
 
-    void setOrientation(String orientation) {
-        this.orientation = orientation;
-    }
+	public void setConditions(String conditions) {
+		this.conditions = conditions;
+	}
 
-    void setAccess(String access) {
-        this.access = access;
-    }
+	public void setSnowline_up(String snowline_up) {
+		this.snowline_up = snowline_up;
+	}
 
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
+	public void setSnowline_down(String snowline_down) {
+		this.snowline_down = snowline_down;
+	}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	private String activity; // facet
+	private String date = "01/01/1970"; // MM/DD/YYYY
+	private boolean imperial = false;
+	private String bra = "-";
+	private String rating = null;
+	private String distance;
+	private String climb;
+	private String descent;
+	private String lat;
+	private String lon;
 
-    public void setTrailhead(String trailhead) {
-        this.trailhead = trailhead;
-    }
+	private String fileName;
+	private String size;
+	private final WikiParser wikiParser = new WikiParser();
+	private final List<String> images = new ArrayList<>();
+	private String title;
+	private String id = "";
 
-    public void setActivity(String activity) {
-        this.activity = activity;
-    }
+	Route(MetaData metaData) {
+		this.metaData = metaData;
+		this.title = metaData.title;
+	}
 
-    public void setBra(String bra) {
-        this.bra = bra;
-    }
+	void setOrientation(String orientation) {
+		this.orientation = orientation;
+	}
 
-    public void setRating(String rating) {
-        this.rating = rating;
-    }
+	void setAccess(String access) {
+		this.access = access;
+	}
 
-    public void setMax(String max) {
-        this.max = max;
-    }
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
 
-    private String max;
-    private String min;
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    public void setMin(String min) {
-        this.min = min;
-    }
+	public void setTrailhead(String trailhead) {
+		this.trailhead = trailhead;
+	}
 
-    public void setDistance(String distance) {
-        this.distance = distance;
-    }
+	public void setActivity(String activity) {
+		String mapped = activityMap.get(activity);
+		if (mapped != null) {
+			activity = mapped;
+		}
+		
+		this.activity = activity;
+	}
 
-    public void setClimb(String climb) {
-        this.climb = climb;
-    }
+	public void setBra(String bra) {
+		this.bra = bra;
+	}
 
-    public void setDescent(String descent) {
-        this.descent = descent;
-    }
+	public void setRating(String rating) {
+		this.rating = rating;
+	}
 
-    public void setLat(String lat) {
-        this.lat = lat;
-    }
+	public void setMax(String max) {
+		this.max = max;
+	}
 
-    public void setLon(String lon) {
-        this.lon = lon;
-    }
+	private String max;
+	private String min;
 
-    /* input yyyy-MM-dd
-    output: mm/dd/yyyy
-     */
-    public void setDate(String date) {
-        this.date = date;
-    }
+	public void setMin(String min) {
+		this.min = min;
+	}
 
-    void setTitle(String title) {
-        this.title = title;
-    }
+	public void setDistance(String distance) {
+		this.distance = distance;
+	}
 
-    void addImage(String path, String size) {
-        StringBuilder sb = new StringBuilder();
-        String basename = FilenameUtils.getBaseName(path);
-        String name = FilenameUtils.getName(path);
-        String filePath = FilenameUtils.getPath(path);
+	public void setClimb(String climb) {
+		this.climb = climb;
+	}
 
-        sb.append("{\"name\":");
-        sb.append("\"" + name + "\",");
-        sb.append("\"size\":");
-        sb.append("\"" + size + "\",");
-        sb.append("\"url\":");
-        sb.append("\"/library" + path + "\",");
-        sb.append("\"thumbnailUrl\":");
-        sb.append("\"/library/" + filePath + "thumb_" + basename + ".jpg\",");
-        sb.append("\"deleteUrl\":");
-        sb.append("\"/delete" + path + "\","); // remove leading directory
-        sb.append("\"deleteType\":");
-        sb.append("\"DELETE\"}");
+	public void setDescent(String descent) {
+		this.descent = descent;
+	}
 
-        images.add(sb.toString());
-    }
+	public void setLat(String lat) {
+		this.lat = lat;
+	}
 
-    public String getId() {
-        return metaData.name.substring(metaData.name.lastIndexOf('-') + 1);
-    }
+	public void setLon(String lon) {
+		this.lon = lon;
+	}
 
-    public String toString() {
-        if (description != null) {
-            // TODO links
-            contents.append("<p>" + description + "</p>");
-        }
-        if (comment != null) {
-            contents.append("<p><strong>Comments on route:</strong>");
-            contents.append(comment + "</p>");
-        }
-        if (access != null) {
-            contents.append("<strong>Access:</strong>");
-            contents.append(access);
-        }
-        if (trailhead != null) {
-            contents.append("<strong>Trailhead:</strong>");
-            contents.append(trailhead);
-        }
+	/*
+	 * input yyyy-MM-dd output: mm/dd/yyyy
+	 */
+	public void setDate(String date) {
+		this.date = date;
+	}
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("\"title\":\"" + title + "\", ");
-        sb.append("\"content\":\""
-                + StringEscapeUtils.escapeJava(contents.toString()) + "\", ");
+	void setTitle(String title) {
+		this.title = title;
+	}
 
-        sb.append("\"activity\":\"" + activity + "\", ");
+	void addImage(String path, String size) {
+		StringBuilder sb = new StringBuilder();
+		String basename = FilenameUtils.getBaseName(path);
+		String name = FilenameUtils.getName(path);
+		String filePath = FilenameUtils.getPath(path);
 
-        sb.append("\"ski_difficulty\":{");
-        sb.append("\"rating\":\"" + rating + "\", ");
-        sb.append("\"bra\":\"" + bra + "\"");
-        sb.append("},");
+		sb.append("{\"name\":");
+		sb.append("\"" + name + "\",");
+		sb.append("\"size\":");
+		sb.append("\"" + size + "\",");
+		sb.append("\"url\":");
+		sb.append("\"/library" + path + "\",");
+		sb.append("\"thumbnailUrl\":");
+		sb.append("\"/library/" + filePath + "thumb_" + basename + ".jpg\",");
+		sb.append("\"deleteUrl\":");
+		sb.append("\"/delete" + path + "\","); // remove leading directory
+		sb.append("\"deleteType\":");
+		sb.append("\"DELETE\"}");
 
-        sb.append("\"technical_c\":{");
-        sb.append("\"imperial\":\"" + imperial + "\", ");
-        sb.append("\"orientation\":\"" + orientation + "\"");
-        sb.append("},");
+		images.add(sb.toString());
+	}
 
-        if (!images.isEmpty()) {
-            sb.append("\"files\": [");
-            boolean first = true;
-            for (String s : images) {
-                if (first) {
-                    first = false;
-                } else {
-                    sb.append(", ");
-                }
-                sb.append(s);
+	public String getId() {
+		return metaData.name.substring(metaData.name.lastIndexOf('-') + 1);
+	}
 
-            }
-            sb.append("], ");
-        }
+	public String toString() {
+		if (description != null) {
+			// TODO links
+			contents.append("<p>" + description + "</p>");
+		}
+		if (comment != null) {
+			contents.append("<p><strong>Comments on route:</strong>");
+			contents.append(comment + "</p>");
+		}
+		if (access != null) {
+			contents.append("<strong>Access:</strong>");
+			contents.append(access);
+		}
+		if (trailhead != null) {
+			contents.append("<strong>Trailhead:</strong>");
+			contents.append(trailhead);
+		}
 
-        sb.append(metaData.toString());
+		StringBuilder sb = new StringBuilder();
+		sb.append("\"title\":\"" + title + "\", ");
+		
+		sb.append("\"activity\":\"" + activity + "\", ");
+		
+		// Description
+		
+		sb.append("\"content\":\""
+				+ StringEscapeUtils.escapeJava(contents.toString()) + "\", ");
+		
+		// Conditions
+	if (conditions != null) {
+		sb.append("\"conditions\":\""
+				+ StringEscapeUtils.escapeJava(conditions.toString()) + "\", ");
+	}
+		// "ski_difficulty":{"rating":"1.2","bra":"-","snowline":650},
+		if (activity.equals("Ski Touring")) {
+			sb.append("\"ski_difficulty\":{");
+			sb.append("\"rating\":\"" + rating + "\", ");
+			sb.append("\"bra\":\"" + bra + "\"");
+			if (snowline_down != null) {
+				sb.append("\"snowline\":" + snowline_down);
+			}
+			sb.append("},");
+		}
+		
+		// "technical_c":{"imperial":true,"max":2345,"min":1200,"distance":23.4,"climb":300,"descent":456,
+		sb.append("\"technical_c\":{");
+		sb.append("\"imperial\":\"" + imperial + "\", ");
+		sb.append("\"orientation\":\"" + orientation + "\",");
+		if (max != null) {
+			sb.append("\"max\":" + max + ",");
+		}
+		if (min != null) {
+			sb.append("\"min\":" + min + ",");
+		}
+		if (distance != null) {
+			sb.append("\"distance\":" + distance + ",");
+		}
+		if (climb != null) {
+			sb.append("\"climb\":" + climb + ",");
+		}
+		if (descent != null) {
+			sb.append("\"descent\":" + descent);
+		}
+		sb.append("},");
 
-        return sb.toString();
-    }
+		if (!images.isEmpty()) {
+			sb.append("\"files\": [");
+			boolean first = true;
+			for (String s : images) {
+				if (first) {
+					first = false;
+				} else {
+					sb.append(", ");
+				}
+				sb.append(s);
+
+			}
+			sb.append("], ");
+		}
+
+		sb.append(metaData.toString());
+
+		return sb.toString();
+	}
 }
