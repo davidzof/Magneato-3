@@ -60,9 +60,29 @@ public class MetaData implements Serializable {
 		StringBuilder sb = new StringBuilder();
 		try {
 			sb.append("\"metadata\" : {");
-			sb.append("\"canonical_url\":\"" + name.substring(1, name.lastIndexOf('-')) + "\",");
-			sb.append("\"edit_template\":\"" + editTemplate + "\",");
-			sb.append("\"display_template\":\"" + viewTemplate + "\",");
+			if (editTemplate.equals("route")) {
+			    // tr type url:
+			    // /aulp-du-seuil-couloir-en-virgule.18471522013-route-487992
+				// /aulp-du-seuil-couloir-en-virgule.18471522013_davidof_15-03-2013
+
+
+				// Route Urls have the following format:
+				// http://pistehors.com/aulp-du-seuil-couloir-en-virgule.18471522013.htm
+				// http://pistehors.com/aulp-du-seuil-couloir-en-virgule
+                int i = name.indexOf('.');
+                if (i > 0) {
+	                sb.append("\"canonical_url\":\"" + name.substring(1, i) + "\",");
+                } else {
+	                sb.append("\"canonical_url\":\"" + name.substring(1) + "\",");
+                }
+				sb.append("\"edit_template\":\"tripreport\",");
+				sb.append("\"display_template\":\"tripreport\",");
+			} else {
+				sb.append("\"canonical_url\":\"" + name.substring(1, name.lastIndexOf('-')) + "\",");
+				sb.append("\"edit_template\":\"" + editTemplate + "\",");
+				sb.append("\"display_template\":\"" + viewTemplate + "\",");
+
+			}
 			sb.append("\"create_date\":\"" + createDate + "\",");
 			sb.append("\"ip_addr\":\"" + ipAddr + "\",");
 			sb.append("\"owner\":\"" + author + "\",");
