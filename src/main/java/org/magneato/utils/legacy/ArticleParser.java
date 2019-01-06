@@ -32,17 +32,14 @@ import org.apache.commons.logging.LogFactory;
  * @author dgeorge
  */
 public class ArticleParser {
-
     private final Log _logger = LogFactory.getLog(ArticleParser.class);
     String element;
     Article article;
     Element temp;
 
-
     ArticleParser(Article article) {
         element = "";
         this.article = article;
-        
     }
 
     public void listChildren(Node current, int depth) {

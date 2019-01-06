@@ -14,6 +14,7 @@ package org.magneato.utils.legacy;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
@@ -28,9 +29,11 @@ public class MetaData implements Serializable {
 	public String author;
 	public String group;
 	public long perms;
-	public ArrayList<String> relations;
+	public List<String> relations = new ArrayList<String>();
 	public String content;
+	public String id;
 
+	
 	public enum Status {
 		DRAFT, REVIEW, PUBLISHED
 	}
@@ -53,6 +56,15 @@ public class MetaData implements Serializable {
 	public String getContent() {
 		return content;
 	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
 
 
 	@Override
@@ -88,10 +100,16 @@ public class MetaData implements Serializable {
 			sb.append("\"owner\":\"" + author + "\",");
 			sb.append("\"groups\":[\"" + group + "\"],");
 
-			if (relations != null) {
+			if (!relations.isEmpty()) {
 				sb.append("\"relations\":[");
+				boolean first = true;
 				for (String relation : relations) {
-					sb.append("\"" + relation + "\",");
+					if (!first) {
+						sb.append(",");
+					} else {
+						first = false;
+					}
+					sb.append("\"" + relation + "\"");
 				}
 				sb.append("],");
 			}

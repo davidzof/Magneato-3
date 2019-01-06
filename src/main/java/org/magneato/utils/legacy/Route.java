@@ -40,14 +40,18 @@ public class Route {
 	private final StringBuilder contents = new StringBuilder();
 
 	private static final Map<String, String> activityMap;
-    static
-    {
-    	activityMap = new HashMap<String, String>();
-    	activityMap.put("Ski-Touring", "Ski Touring");
-    	activityMap.put("c", "d");
-    }
-    
-    
+	static {
+		activityMap = new HashMap<String, String>();
+		activityMap.put("Ski-Touring", "Ski Touring");
+
+		activityMap.put("Off-Piste", "Off Piste Skiing");
+		activityMap.put("Nordic-Skiing", "Nordic Skiing");
+		activityMap.put("Hiking", "Hiking");
+		activityMap.put("Snowshoeing", "Snow Shoeing");
+		activityMap.put("Roller-Skiing", "Roller Skiing");
+		activityMap.put("Mountain-Biking", "Mountain Biking");
+	}
+
 	// variables
 	private String orientation; // facet
 	private String access = null; // content
@@ -57,6 +61,56 @@ public class Route {
 	private String trailhead = null; // content
 	private String snowline_up = null;
 	private String snowline_down = null;
+	private String region = null;
+	private String country = null;
+	private String difficulty = null;
+	private String weather = null;
+	private String route = null;
+	private List<String> participants = new ArrayList();
+
+	private String equipment = null;
+	private String activity; // facet
+	private String date = "01/01/1970";
+	private boolean imperial = false;
+	private String bra = "-";
+	private String rating = null;
+	private String distance;
+	private String climb;
+	private String descent;
+	private String lat;
+	private String lon;
+	private String fileName;
+	private String size;
+	private final WikiParser wikiParser = new WikiParser();
+	private final List<String> images = new ArrayList<>();
+	private String title;
+	private String max;
+	private String min;
+
+	Route(MetaData metaData) {
+		this.metaData = metaData;
+		this.title = metaData.title;
+	}
+
+	// input date is YYYY-MM-DD, output date is // MM/DD/YYYY
+	public void setDate(String date) {
+		int s = date.indexOf('-');
+		int e = date.lastIndexOf('-');
+		String year = date.substring(0, s);
+		String month = date.substring(s + 1, e);
+		String day = date.substring(e + 1);
+
+		this.date = month + "/" + day + "/" + year;
+
+	}
+
+	public void setRegion(String region) {
+		this.region = region;
+	}
+
+	public void setCountry(String country) {
+		this.country = country;
+	}
 
 	public void setConditions(String conditions) {
 		this.conditions = conditions;
@@ -70,27 +124,8 @@ public class Route {
 		this.snowline_down = snowline_down;
 	}
 
-	private String activity; // facet
-	private String date = "01/01/1970"; // MM/DD/YYYY
-	private boolean imperial = false;
-	private String bra = "-";
-	private String rating = null;
-	private String distance;
-	private String climb;
-	private String descent;
-	private String lat;
-	private String lon;
-
-	private String fileName;
-	private String size;
-	private final WikiParser wikiParser = new WikiParser();
-	private final List<String> images = new ArrayList<>();
-	private String title;
-	private String id = "";
-
-	Route(MetaData metaData) {
-		this.metaData = metaData;
-		this.title = metaData.title;
+	public void setEquipment(String equipment) {
+		this.equipment = equipment;
 	}
 
 	void setOrientation(String orientation) {
@@ -99,6 +134,18 @@ public class Route {
 
 	void setAccess(String access) {
 		this.access = access;
+	}
+
+	public void setRoute(String route) {
+		this.route = route;
+	}
+
+	public void setWeather(String weather) {
+		this.weather = weather;
+	}
+
+	public void addParticipants(String participant) {
+		participants.add(participant);
 	}
 
 	public void setComment(String comment) {
@@ -118,7 +165,7 @@ public class Route {
 		if (mapped != null) {
 			activity = mapped;
 		}
-		
+
 		this.activity = activity;
 	}
 
@@ -134,8 +181,9 @@ public class Route {
 		this.max = max;
 	}
 
-	private String max;
-	private String min;
+	public void setDifficulty(String difficulty) {
+		this.difficulty = difficulty;
+	}
 
 	public void setMin(String min) {
 		this.min = min;
@@ -161,13 +209,6 @@ public class Route {
 		this.lon = lon;
 	}
 
-	/*
-	 * input yyyy-MM-dd output: mm/dd/yyyy
-	 */
-	public void setDate(String date) {
-		this.date = date;
-	}
-
 	void setTitle(String title) {
 		this.title = title;
 	}
@@ -178,6 +219,8 @@ public class Route {
 		String name = FilenameUtils.getName(path);
 		String filePath = FilenameUtils.getPath(path);
 
+		String type = FilenameUtils.getExtension(path);
+
 		sb.append("{\"name\":");
 		sb.append("\"" + name + "\",");
 		sb.append("\"size\":");
@@ -185,7 +228,12 @@ public class Route {
 		sb.append("\"url\":");
 		sb.append("\"/library" + path + "\",");
 		sb.append("\"thumbnailUrl\":");
-		sb.append("\"/library/" + filePath + "thumb_" + basename + ".jpg\",");
+		if (type.equals("gpx")) {
+			sb.append("\"/library/gpxIcon.jpg\",");
+		} else {
+			sb.append("\"/library/" + filePath + "thumb_" + basename
+					+ ".jpg\",");
+		}
 		sb.append("\"deleteUrl\":");
 		sb.append("\"/delete" + path + "\","); // remove leading directory
 		sb.append("\"deleteType\":");
@@ -195,7 +243,7 @@ public class Route {
 	}
 
 	public String getId() {
-		return "R" + Math.abs(metaData.name.hashCode());
+		return metaData.id;
 	}
 
 	public String toString() {
@@ -207,59 +255,100 @@ public class Route {
 			contents.append("<p><strong>Comments on route:</strong>");
 			contents.append(comment + "</p>");
 		}
+		if (route != null) {
+			contents.append("<p><strong>Route Taken: </strong>");
+			contents.append(route + "</p>");
+		}
+		if (weather != null) {
+			contents.append("<p><strong>Weather: </strong>");
+			contents.append(weather + "</p>");
+		}
 		if (access != null) {
-			contents.append("<strong>Access:</strong>");
-			contents.append(access);
+			contents.append("<p><strong>Access:</strong>");
+			contents.append(access + "</p>");
+		}
+		if (equipment != null) {
+			contents.append("<p><strong>Equipment:</strong>");
+			contents.append(equipment + "</p>");
 		}
 		if (trailhead != null) {
-			contents.append("<strong>Trailhead:</strong>");
+			contents.append("<p><strong>Trailhead:</strong>");
 			contents.append(trailhead);
+		}
+		if (country != null) {
+			contents.append("<strong>Country: </strong>");
+			contents.append(country);
+		}
+		if (region != null) {
+			contents.append("<strong>Area: </strong>");
+			contents.append(region + "</p>");
+		}
+		if (!participants.isEmpty()) {
+			contents.append("<p><strong>Participants:</strong>");
+			for (String p : participants) {
+				contents.append(p + " ");
+			}
+			contents.append("</p>");
 		}
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("\"title\":\"" + title + "\", ");
-		
+
 		sb.append("\"activity\":\"" + activity + "\", ");
-		
+		sb.append("\"trip_date\":\"" + date + "\", ");
+
 		// Description
-		
+
 		sb.append("\"content\":\""
 				+ StringEscapeUtils.escapeJava(contents.toString()) + "\", ");
-		
+
 		// Conditions
-	if (conditions != null) {
-		sb.append("\"conditions\":\""
-				+ StringEscapeUtils.escapeJava(conditions.toString()) + "\", ");
-	}
+		if (conditions != null) {
+			sb.append("\"conditions\":\""
+					+ StringEscapeUtils.escapeJava(conditions.toString())
+					+ "\", ");
+		}
+
 		// "ski_difficulty":{"rating":"1.2","bra":"-","snowline":650},
-		if (activity.equals("Ski Touring")) {
+		if (activity.equals("Ski Touring")
+				|| activity.equals("Off Piste Skiing")) {
 			sb.append("\"ski_difficulty\":{");
 			sb.append("\"rating\":\"" + rating + "\", ");
 			sb.append("\"bra\":\"" + bra + "\"");
 			if (snowline_down != null) {
-				sb.append("\"snowline\":" + snowline_down);
+				sb.append(",\"snowline\":" + snowline_down);
+			} else if (snowline_up != null) {
+				sb.append(",\"snowline\":" + snowline_up);
 			}
 			sb.append("},");
 		}
-		
+		if (activity.equals("Snow Shoeing") || activity.equals("Road Cycling")
+				|| activity.equals("Mountain Biking")
+				|| activity.equals("Trail") || activity.equals("Via Ferrata")
+				|| activity.equals("Climbing")) {
+			sb.append("\"difficulty\":{");
+			sb.append("\"rating\":\"" + difficulty + "\"");
+			sb.append("},");
+		}
+
 		// "technical_c":{"imperial":true,"max":2345,"min":1200,"distance":23.4,"climb":300,"descent":456,
 		sb.append("\"technical_c\":{");
 		sb.append("\"imperial\":\"" + imperial + "\", ");
-		sb.append("\"orientation\":\"" + orientation + "\",");
+		sb.append("\"orientation\":\"" + orientation + "\"");
 		if (max != null) {
-			sb.append("\"max\":" + max + ",");
+			sb.append(", \"max\":" + max);
 		}
 		if (min != null) {
-			sb.append("\"min\":" + min + ",");
+			sb.append(", \"min\":" + min);
 		}
 		if (distance != null) {
-			sb.append("\"distance\":" + distance + ",");
+			sb.append(", \"distance\":" + distance);
 		}
 		if (climb != null) {
-			sb.append("\"climb\":" + climb + ",");
+			sb.append(", \"climb\":" + climb);
 		}
 		if (descent != null) {
-			sb.append("\"descent\":" + descent);
+			sb.append(", \"descent\":" + descent);
 		}
 		sb.append("},");
 
@@ -282,4 +371,5 @@ public class Route {
 
 		return sb.toString();
 	}
+
 }
