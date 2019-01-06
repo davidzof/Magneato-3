@@ -264,24 +264,25 @@ public class Route {
 			contents.append(weather + "</p>");
 		}
 		if (access != null) {
-			contents.append("<p><strong>Access:</strong>");
+			contents.append("<p><strong>Access: </strong>");
 			contents.append(access + "</p>");
 		}
 		if (equipment != null) {
-			contents.append("<p><strong>Equipment:</strong>");
+			contents.append("<p><strong>Equipment: </strong>");
 			contents.append(equipment + "</p>");
 		}
-		if (trailhead != null) {
-			contents.append("<p><strong>Trailhead:</strong>");
-			contents.append(trailhead);
-		}
+		
 		if (country != null) {
-			contents.append("<strong>Country: </strong>");
+			contents.append("<p><strong>Country: </strong>");
 			contents.append(country);
 		}
 		if (region != null) {
-			contents.append("<strong>Area: </strong>");
-			contents.append(region + "</p>");
+			contents.append("<strong> Area: </strong>");
+			contents.append(region);
+		}
+		if (trailhead != null) {
+			contents.append("<strong> Trailhead: </strong>");
+			contents.append(trailhead + "</p>");
 		}
 		if (!participants.isEmpty()) {
 			contents.append("<p><strong>Participants:</strong>");
@@ -313,7 +314,9 @@ public class Route {
 		if (activity.equals("Ski Touring")
 				|| activity.equals("Off Piste Skiing")) {
 			sb.append("\"ski_difficulty\":{");
-			sb.append("\"rating\":\"" + rating + "\", ");
+			if (rating != null) {
+				sb.append("\"rating\":\"" + rating + "\", ");
+			}
 			sb.append("\"bra\":\"" + bra + "\"");
 			if (snowline_down != null) {
 				sb.append(",\"snowline\":" + snowline_down);
@@ -333,8 +336,10 @@ public class Route {
 
 		// "technical_c":{"imperial":true,"max":2345,"min":1200,"distance":23.4,"climb":300,"descent":456,
 		sb.append("\"technical_c\":{");
-		sb.append("\"imperial\":\"" + imperial + "\", ");
-		sb.append("\"orientation\":\"" + orientation + "\"");
+		sb.append("\"imperial\":\"" + imperial + "\"");
+		if (orientation != null) {
+			sb.append(", \"orientation\":\"" + orientation + "\"");
+		}
 		if (max != null) {
 			sb.append(", \"max\":" + max);
 		}
