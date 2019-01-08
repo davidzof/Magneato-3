@@ -1,5 +1,6 @@
 package org.magneato.resources;
 
+import com.fasterxml.jackson.databind.ObjectReader;
 import io.dropwizard.views.View;
 
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.util.regex.Pattern;
 
 import org.magneato.managed.ManagedElasticClient;
 import org.magneato.service.MetaData;
+import org.magneato.utils.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +27,7 @@ public class PageView extends View {
 	private String uri;
 	private final Logger log = LoggerFactory.getLogger(this.getClass()
 			.getName());
-	private final ObjectMapper objectMapper = new ObjectMapper();
+	private final static ObjectMapper objectMapper = new ObjectMapper();
 	static ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
 		@Override
 		protected SimpleDateFormat initialValue() {
@@ -39,7 +41,8 @@ public class PageView extends View {
 		super("/common/" + templateName + ".ftl", StandardCharsets.UTF_8);
 
 		try {
-			jsonNode = objectMapper.readTree(json);
+			ObjectReader reader = objectMapper.reader();
+			jsonNode = reader.readTree(json);
 		} catch (IOException e) {
 			log.error("Something went wrong reading json " + e.getMessage()
 					+ " " + json);
@@ -65,23 +68,11 @@ public class PageView extends View {
 	
 	/**
 	 * Return first paragraph including end tag or first 100 characters of string
-	 * https://alvinalexander.com/blog/post/java/how-extract-html-tag-string-regex-pattern-matcher-group
-	 * @param s
+	 * @param paragraph
 	 * @return
 	 */
-	public String getFirstPara(String s) {
-		// non greedy match of first paragraph
-		Pattern p = Pattern.compile("<[p|P]>(.*?)</[p|P]>");
-	    Matcher m = p.matcher(s);
-
-	    if (m.find()) {
-	      return m.group(1);
-	    } else {
-	    	if (s.length() > 100) {
-	    		return s.substring(0, 100);
-	    	} 
-	    }
-	    return s;
+	public String getFirstPara(String paragraph) {
+		return StringHelper.getFirstPara(paragraph);
 	}
 
 	public JsonNode getJson() {
@@ -101,15 +92,7 @@ public class PageView extends View {
 	}
 
 	public JsonNode toJsonNode(String json) {
-		JsonNode jsonNode = null;
-		try {
-			jsonNode = objectMapper.readTree(json);
-		} catch (IOException e) {
-			log.error("Something went wrong reading json " + e.getMessage()
-					+ " " + json);
-		}
-
-		return jsonNode;
+		return StringHelper.toJsonNode(json);
 	}
 
 }
