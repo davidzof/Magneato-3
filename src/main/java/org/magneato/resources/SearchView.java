@@ -27,16 +27,7 @@ public class SearchView extends View {
 		return paginater;
 	}
 	
-	// TODO move to helper
 	public JsonNode toJsonNode(String json) {
-		JsonNode jsonNode = null;
-		try {
-			jsonNode = objectMapper.readTree(json);
-		} catch (IOException e) {
-			log.error("Something went wrong reading json " + e.getMessage()
-					+ " " + json);
-		}
-
-		return jsonNode;
+		return StringHelper.toJsonNode(json);
 	}
 }
