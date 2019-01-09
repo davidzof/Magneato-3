@@ -91,8 +91,8 @@ public class MetaData implements Serializable {
 				sb.append("\"display_template\":\"tripreport\",");
 			} else {
 				sb.append("\"canonical_url\":\"" + name.substring(1, name.lastIndexOf('-')) + "\",");
-				sb.append("\"edit_template\":\"" + editTemplate + "\",");
-				sb.append("\"display_template\":\"" + viewTemplate + "\",");
+				sb.append("\"edit_template\":\"tripreport\",");
+				sb.append("\"display_template\":\"tripreport\",");
 
 			}
 			sb.append("\"create_date\":\"" + createDate + "\",");
