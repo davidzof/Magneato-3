@@ -72,7 +72,7 @@ public class PageView extends View {
 	 * @return
 	 */
 	public String getFirstPara(String paragraph) {
-		return StringHelper.getFirstPara(paragraph);
+		return StringHelper.getSnippet(paragraph, 100);
 	}
 
 	public JsonNode getJson() {

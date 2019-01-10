@@ -30,26 +30,25 @@ public class StringHelper {
         return slug.toLowerCase(Locale.ENGLISH);
     }
     /**
-     * Return first paragraph including end tag or first 100 characters of string
+     * Return a snippet end tag or first 100 characters of string
      * https://alvinalexander.com/blog/post/java/how-extract-html-tag-string-regex-pattern-matcher-group
      * @param s
      * @return
      */
-    public static String getFirstPara(String s) {
+    public static String getSnippet(String s, int l) {
         // non greedy match of first paragraph
-        Pattern p = Pattern.compile("<[p|P]>(.*?)</[p|P]>");
+        Pattern p = Pattern.compile("((<p>)|(<P>))(.*?)((</p>)|(</P>)|(<br>))");
         Matcher m = p.matcher(s);
 
         if (m.find()) {
             return m.group(1);
         } else {
-            if (s.length() > 100) {
-                return s.substring(0, 100);
+            if (s.length() > l) {
+                return s.substring(0, l);
             }
         }
         return s;
     }
-
 
     public static JsonNode toJsonNode(String json) {
         JsonNode jsonNode = null;
