@@ -37,7 +37,7 @@ public class StringHelper {
      */
     public static String getSnippet(String s, int l) {
         // non greedy match of first paragraph
-        Pattern p = Pattern.compile("((<p>)|(<P>))(.*?)((</p>)|(</P>)|(<br>))");
+        Pattern p = Pattern.compile("<\\s*p[^>]*>([^<]*)((<br ?\\/?>)|(<\\s*\\/\\s*[p]\\s*>))");
         Matcher m = p.matcher(s);
 
         if (m.find()) {
