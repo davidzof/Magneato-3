@@ -29,25 +29,29 @@ public class StringHelper {
         slug = EDGESDHASHES.matcher(slug).replaceAll("");
         return slug.toLowerCase(Locale.ENGLISH);
     }
+
     /**
      * Return a snippet end tag or first 100 characters of string
-     * https://alvinalexander.com/blog/post/java/how-extract-html-tag-string-regex-pattern-matcher-group
-     * @param s
+     *
+     * @param snippet - string to snip
+     * @param max - max length of snippet
      * @return
      */
-    public static String getSnippet(String s, int l) {
-        // non greedy match of first paragraph
+    public static String getSnippet(String snippet, int max) {
+        // non greedy match of first paragraph, note regexp are not perfect for processing html but good enough in most cases
         Pattern p = Pattern.compile("<\\s*p[^>]*>([^<]*)((<br ?\\/?>)|(<\\s*\\/\\s*[p]\\s*>))");
-        Matcher m = p.matcher(s);
+        Matcher m = p.matcher(snippet);
 
         if (m.find()) {
-            return m.group(1);
-        } else {
-            if (s.length() > l) {
-                return s.substring(0, l);
-            }
+            String snippet = m.group(1);
         }
-        return s;
+
+        if (snippet.length > max) {
+            // shorten snippet
+            snippet = snippet.substring(0, snippet.lastIndexOf(' ');
+        }
+
+        return snippet;
     }
 
     public static JsonNode toJsonNode(String json) {
@@ -62,6 +66,5 @@ public class StringHelper {
 
         return jsonNode;
     }
-
 
 }
