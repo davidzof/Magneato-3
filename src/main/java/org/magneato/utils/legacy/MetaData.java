@@ -14,6 +14,7 @@ package org.magneato.utils.legacy;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
@@ -28,9 +29,11 @@ public class MetaData implements Serializable {
 	public String author;
 	public String group;
 	public long perms;
-	public ArrayList<String> relations;
+	public List<String> relations = new ArrayList<String>();
 	public String content;
+	public String id;
 
+	
 	public enum Status {
 		DRAFT, REVIEW, PUBLISHED
 	}
@@ -54,24 +57,59 @@ public class MetaData implements Serializable {
 		return content;
 	}
 
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		try {
 			sb.append("\"metadata\" : {");
-			sb.append("\"canonical_url\":\"" + name.substring(1, name.lastIndexOf('-')) + "\",");
-			sb.append("\"edit_template\":\"" + editTemplate + "\",");
-			sb.append("\"display_template\":\"" + viewTemplate + "\",");
+			if (editTemplate.equals("route")) {
+			    // tr type url:
+			    // /aulp-du-seuil-couloir-en-virgule.18471522013-route-487992
+				// /aulp-du-seuil-couloir-en-virgule.18471522013_davidof_15-03-2013
+
+
+				// Route Urls have the following format:
+				// http://pistehors.com/aulp-du-seuil-couloir-en-virgule.18471522013.htm
+				// http://pistehors.com/aulp-du-seuil-couloir-en-virgule
+                int i = name.indexOf('.');
+                if (i > 0) {
+	                sb.append("\"canonical_url\":\"" + name.substring(1, i) + "\",");
+                } else {
+	                sb.append("\"canonical_url\":\"" + name.substring(1) + "\",");
+                }
+				sb.append("\"edit_template\":\"tripreport\",");
+				sb.append("\"display_template\":\"tripreport\",");
+			} else {
+				sb.append("\"canonical_url\":\"" + name.substring(1, name.lastIndexOf('-')) + "\",");
+				sb.append("\"edit_template\":\"tripreport\",");
+				sb.append("\"display_template\":\"tripreport\",");
+
+			}
 			sb.append("\"create_date\":\"" + createDate + "\",");
 			sb.append("\"ip_addr\":\"" + ipAddr + "\",");
 			sb.append("\"owner\":\"" + author + "\",");
 			sb.append("\"groups\":[\"" + group + "\"],");
 
-			if (relations != null) {
+			if (!relations.isEmpty()) {
 				sb.append("\"relations\":[");
+				boolean first = true;
 				for (String relation : relations) {
-					sb.append("\"" + relation + "\",");
+					if (!first) {
+						sb.append(",");
+					} else {
+						first = false;
+					}
+					sb.append("\"" + relation + "\"");
 				}
 				sb.append("],");
 			}

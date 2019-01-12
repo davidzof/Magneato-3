@@ -55,48 +55,96 @@ public class RouteParser {
             value = value.replace('\n', ' ').trim();
             if (!value.isEmpty()) {
                 data = current.getValue();
-
                 if (!data.trim().isEmpty()) {
                     switch (element) {
+                    case "access":
+                        route.setAccess(data);
+                        break;
+                    case "altitude": // TR ignore
+                        break;
+
+                    case "date":
+                        route.setDate(data);
+                        break;
+                    case "doComment":
+                        System.out.println( element + ": " + data);
+                        break;
+                    case "down": // TR
+                    	route.setSnowline_down(data);
+                        break;
+                    case "fresh": // TR - ignore
+
+                        break;
+                    case "location": // TR - ignore
+
+                        break;
+                    case "id": // TR
+                        break;
+                    case "participant": // TR
+                        route.addParticipants(data);
+                        break;
+                    case "route": // TR
+                    	route.setRoute(data);
+                        break;
+                    case "site": // TR
+                        System.out.println( element + ": " + data);
+                        break;
+                    case "stability": // TR - ignore
+                        break;
+                    case "time": // TR - ignore
+                        
+                        break;
+                    case "quality": // TR - ignore
+                        
+                        break;
+                    case "total": // TR - ignore
+
+                        break;
+                    case "weather": // TR
+                        route.setWeather(data);
+                        break;
                     case "aspect":
                         route.setOrientation(data);
                         break;
-                    case "caption":
-                        System.out.println( element + ": " + data);
+                    case "caption": // Photo caption, ignore
+                        
                         break;
                     case "climb":
                         route.setClimb(data);
                         break;
-                    case "comment":
+                    case "conditions":// TR
+                    	route.setConditions(data);
+                        break;
+                    case "comment":// Route
                         route.setComment(data);
                         break;
                     case "country":
-                        System.out.println( element + ": " + data);
+                        route.setCountry(data);
                         break;
-                    case "descent":
+                    case "descent": // Route + TR
                         route.setDescent(data);
                         break;
-                    case "description":
+                    case "comments": // TR
+                    case "description": // ROUTE
                         route.setDescription(data);
                         break;
                     case "difficulty":
-                        System.out.println( element + ": " + data);
+                        route.setDifficulty(data);
                         break;
-                    case "distance":
+                    case "distance": // Route +TR
                         route.setDistance(data);
+                        break;
+                    case "up": // TR
+                        route.setSnowline_up(data);
                         break;
                     case "duration":
                         System.out.println( element + ": " + data);
                         break;
                     case "equipment":
-                        System.out.println( element + ": " + data);
+                        route.setEquipment(data);
                         break;
-                    case "file":
-                        System.out.println( element + ": " + data);
-                        break;
-                    case "gps":
-                        System.out.println( element + ": " + data);
-                        break;
+                    
+
                     case "lift-access":
                         System.out.println( element + ": " + data);
                         break;
@@ -110,13 +158,13 @@ public class RouteParser {
                         System.out.println( element + ": " + data);
                         break;
                     case "range":
-                        System.out.println( element + ": " + data);
+                        route.setRegion(data);
                         break;
                     case "rating":
                         System.out.println( element + ": " + data);
                         break;
                     case "risk":
-                        System.out.println( element + ": " + data);
+                        route.setBra(data);
                         break;
                     case "road":
                         System.out.println( element + ": " + data);
@@ -136,8 +184,8 @@ public class RouteParser {
                     case "trailhead":
                         route.setTrailhead(data);
                         break;
-                    case "type":
-                        route.setActivity(data);
+                    case "type": // Route + TR
+                        //route.setActivity(data);
                         break;
                     case "units":
                         // ignore, always metric, default
@@ -145,7 +193,9 @@ public class RouteParser {
                     case "vertical":
                         System.out.println( element + ": " + data);
                         break;
+                    case "gps":
                     case "image":
+                    case "file":
                         String size = null;
                         String mediatype = null;
                         String filename = null;

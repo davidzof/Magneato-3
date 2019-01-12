@@ -1,7 +1,19 @@
 package org.magneato.resources;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.views.View;
+import org.magneato.MagneatoConfiguration;
+import org.magneato.managed.ManagedElasticClient;
+import org.magneato.service.MetaData;
+import org.magneato.service.Template;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -11,33 +23,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-import javax.annotation.security.RolesAllowed;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriBuilder;
-
-import org.magneato.MagneatoConfiguration;
-import org.magneato.managed.ManagedElasticClient;
-import org.magneato.service.MetaData;
-import org.magneato.service.Template;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import static org.magneato.utils.StringHelper.toSlug;
 
 // https://github.com/wdawson/dropwizard-auth-example/blob/master/pom.xml
 /*
@@ -329,11 +315,11 @@ public class PageResource {
 						.setOwner(security.getUserPrincipal().getName())
 						.setCanonicalURL(pageTitle);
 
-				((ObjectNode) jsonNode).set("metadata",
+				((com.fasterxml.jackson.databind.node.ObjectNode) jsonNode).set("metadata",
 						objectMapper.readTree(metaData.toJson()));
 			} else {
 
-				((ObjectNode) jsonNode.get("metadata")).put("canonical_url",
+				((com.fasterxml.jackson.databind.node.ObjectNode) jsonNode.get("metadata")).put("canonical_url",
 						pageTitle);
 			}
 			body = jsonNode.toString();
@@ -348,19 +334,4 @@ public class PageResource {
 
 		return data;
 	}
-
-	// https://github.com/slugify/slugify
-	private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
-	private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
-	private static final Pattern EDGESDHASHES = Pattern.compile("(^-|-$)");
-
-	public static String toSlug(String input) {
-		String nowhitespace = WHITESPACE.matcher(input).replaceAll("-");
-		String normalized = Normalizer.normalize(nowhitespace,
-				Normalizer.Form.NFD);
-		String slug = NONLATIN.matcher(normalized).replaceAll("");
-		slug = EDGESDHASHES.matcher(slug).replaceAll("");
-		return slug.toLowerCase(Locale.ENGLISH);
-	}
-
 }

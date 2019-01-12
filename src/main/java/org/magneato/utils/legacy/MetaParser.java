@@ -46,6 +46,7 @@ public class MetaParser {
 	private String element;
 	private MetaData metaData = null;
 	private Article article = null;
+	HashMap routes = new HashMap();
 
 	// "2018-11-22 23:48:52"
 	// yyyy-mm-dd hh:mm:ss"
@@ -59,7 +60,7 @@ public class MetaParser {
 	}
 
 	void close() {
-	    articles.close();
+		articles.close();
 
 	}
 
@@ -74,39 +75,29 @@ public class MetaParser {
 					// parse article etc here
 					if ("article".equals(metaData.editTemplate)) {
 						/*
-						Article article = new Article(metaData);
-						// content is xml
-						try {
-							// could be xml or text (comment), parse later
-							Builder parser = new Builder();
-							Document doc = null;
-							try {
-								doc = parser.build(metaData.content, null);
-								Element root = doc.getRootElement();
-								// parse the page meta data
+						 * Article article = new Article(metaData); // content
+						 * is xml try { // could be xml or text (comment), parse
+						 * later Builder parser = new Builder(); Document doc =
+						 * null; try { doc = parser.build(metaData.content,
+						 * null); Element root = doc.getRootElement(); // parse
+						 * the page meta data
+						 * 
+						 * ArticleParser articleParser = new ArticleParser(
+						 * article); articleParser.listChildren(root, 0); }
+						 * catch (IOException e) { e.printStackTrace(); }
+						 * Element root = doc.getRootElement();
+						 * 
+						 * } catch (ParsingException e) { e.printStackTrace(); }
+						 * 
+						 * articles.println(
+						 * "{\"_index\":\"main-index\",\"_type\":\"_doc\",\"_id\":\""
+						 * + article.getId() + "\",\"_score\":1,\"_source\":{" +
+						 * article + "}}"); System.out.print(".");
+						 */
 
-								ArticleParser articleParser = new ArticleParser(
-										article);
-								articleParser.listChildren(root, 0);
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
-							Element root = doc.getRootElement();
-
-						} catch (ParsingException e) {
-							e.printStackTrace();
-						}
-
-						articles.println("{\"_index\":\"main-index\",\"_type\":\"_doc\",\"_id\":\""
-										+ article.getId()
-										+ "\",\"_score\":1,\"_source\":{"
-										+ article + "}}");
-						System.out.print(".");
-						*/
-
-					} else if ("route".equals(metaData.editTemplate)) {
+					} else if ("route".equals(metaData.editTemplate)
+							|| "tr".equals(metaData.editTemplate)) {
 						Route route = new Route(metaData);
-						System.out.println("route");
 						try {
 							// could be xml or text (comment), parse later
 							Builder parser = new Builder();
@@ -116,16 +107,16 @@ public class MetaParser {
 								Element root = doc.getRootElement();
 								// parse the page meta data
 
-								RouteParser routeParser = new RouteParser(
-										route);
+								RouteParser routeParser = new RouteParser(route);
 								routeParser.listChildren(root, 0);
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
-							System.out.println("{\"_index\":\"main-index\",\"_type\":\"_doc\",\"_id\":\""
+							articles.println("{\"_index\":\"main-index\",\"_type\":\"_doc\",\"_id\":\""
 									+ route.getId()
 									+ "\",\"_score\":1,\"_source\":{"
-									+ route + "}}");
+									+ route
+									+ "}}");
 							System.out.print(".");
 							Element root = doc.getRootElement();
 
@@ -133,10 +124,7 @@ public class MetaParser {
 							e.printStackTrace();
 						}
 
-
-
-                    }  else if ("tr".equals(metaData.editTemplate)) {
-                    }
+					}
 				}
 				metaData = new MetaData(); // what kind of page?
 			}
@@ -154,6 +142,15 @@ public class MetaParser {
 				data = current.getValue();
 
 				switch (element) {
+				case "parent":
+					String parent = data.substring(data.lastIndexOf('-') + 1);
+					metaData.relations.add("r" + parent);
+
+					break;
+				case "uuid":
+					String id = data.substring(data.lastIndexOf('-') + 1);
+					metaData.setId("r" + id);
+					break;
 				case "ipAddr":
 					// System.out.println("\"ip_addr\": \"" + data + "\"");
 					metaData.ipAddr = data;
@@ -170,7 +167,6 @@ public class MetaParser {
 					Date result = new Date(currentTime);
 
 					metaData.createDate = sdf.format(result);
-
 					break;
 				case "editTemplate":
 					metaData.editTemplate = data;
