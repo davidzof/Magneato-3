@@ -12,7 +12,14 @@
  */
 package org.magneato.utils.legacy;
 
-import nu.xom.*;
+import nu.xom.Attribute;
+import nu.xom.Comment;
+import nu.xom.DocType;
+import nu.xom.Element;
+import nu.xom.Node;
+import nu.xom.ProcessingInstruction;
+import nu.xom.Text;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

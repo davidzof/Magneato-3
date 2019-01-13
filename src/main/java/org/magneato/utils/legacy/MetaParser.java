@@ -74,26 +74,35 @@ public class MetaParser {
 
 					// parse article etc here
 					if ("article".equals(metaData.editTemplate)) {
-						/*
-						 * Article article = new Article(metaData); // content
-						 * is xml try { // could be xml or text (comment), parse
-						 * later Builder parser = new Builder(); Document doc =
-						 * null; try { doc = parser.build(metaData.content,
-						 * null); Element root = doc.getRootElement(); // parse
-						 * the page meta data
-						 * 
-						 * ArticleParser articleParser = new ArticleParser(
-						 * article); articleParser.listChildren(root, 0); }
-						 * catch (IOException e) { e.printStackTrace(); }
-						 * Element root = doc.getRootElement();
-						 * 
-						 * } catch (ParsingException e) { e.printStackTrace(); }
-						 * 
-						 * articles.println(
-						 * "{\"_index\":\"main-index\",\"_type\":\"_doc\",\"_id\":\""
-						 * + article.getId() + "\",\"_score\":1,\"_source\":{" +
-						 * article + "}}"); System.out.print(".");
-						 */
+
+						Article article = new Article(metaData); // content is
+																	// xml
+						try { // could be xml or text (comment), parse later
+							Builder parser = new Builder();
+							Document doc = null;
+							try {
+								doc = parser.build(metaData.content, null);
+								Element root = doc.getRootElement();
+								// parse the page meta data
+
+								ArticleParser articleParser = new ArticleParser(
+										article);
+								articleParser.listChildren(root, 0);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
+							Element root = doc.getRootElement();
+
+						} catch (ParsingException e) {
+							e.printStackTrace();
+						}
+
+						articles.println("{\"_index\":\"main-index\",\"_type\":\"_doc\",\"_id\":\""
+								+ article.getId()
+								+ "\",\"_score\":1,\"_source\":{"
+								+ article
+								+ "}}");
+						System.out.print(".");
 
 					} else if ("route".equals(metaData.editTemplate)
 							|| "tr".equals(metaData.editTemplate)) {

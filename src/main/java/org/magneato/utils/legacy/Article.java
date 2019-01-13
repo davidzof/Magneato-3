@@ -87,6 +87,7 @@ public class Article {
 		String name = FilenameUtils.getName(path);
 		String filePath = FilenameUtils.getPath(path);
 
+		contents.append("{image " + images.size() + "}");
 		sb.append("{\"name\":");
 		sb.append("\"" + name + "\",");
 		sb.append("\"size\":");
