@@ -123,49 +123,57 @@
             <artifactId>jquery</artifactId>
             <version>3.1.1</version>
         </dependency>
-        
+
         <dependency>
             <groupId>nu.xom</groupId>
             <artifactId>xom</artifactId>
             <version>1.2.11</version>
         </dependency>
-        
+
         <dependency>
-    		<groupId>org.eclipse.mylyn</groupId>
-   			<artifactId>wikitext</artifactId>
-    		<version>1.8.0</version>
-		</dependency>
+            <groupId>org.eclipse.mylyn</groupId>
+            <artifactId>wikitext</artifactId>
+            <version>1.8.0</version>
+        </dependency>
 
-		<dependency>
-    		<groupId>org.eclipse.mylyn.wikitext</groupId>
-   			<artifactId>confluence</artifactId>
-    		<version>1.8.0</version>
-    		<scope>runtime</scope>
-		</dependency>
-		
-		<dependency>
-  <groupId>org.apache.commons</groupId>
-  <artifactId>commons-text</artifactId>
-  <version>1.6</version>
-</dependency>
+        <dependency>
+            <groupId>org.eclipse.mylyn.wikitext</groupId>
+            <artifactId>confluence</artifactId>
+            <version>1.8.0</version>
+            <scope>runtime</scope>
+        </dependency>
 
-<!-- https://mvnrepository.com/artifact/junit/junit -->
-<dependency>
-    <groupId>junit</groupId>
-    <artifactId>junit</artifactId>
-    <version>4.12</version>
-    <scope>test</scope>
-</dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.6</version>
+        </dependency>
 
-<!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
-<dependency>
-    <groupId>org.assertj</groupId>
-    <artifactId>assertj-core</artifactId>
-    <version>3.11.1</version>
-    <scope>test</scope>
-</dependency>
+        <!-- https://mvnrepository.com/artifact/junit/junit -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.11.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-all -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.10.19</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
 
     <build>
         <plugins>

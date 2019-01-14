@@ -43,12 +43,12 @@ public class StringHelper {
         Matcher m = p.matcher(snippet);
 
         if (m.find()) {
-            String snippet = m.group(1);
+            snippet = m.group(1);
         }
 
-        if (snippet.length > max) {
+        if (snippet.length() > max) {
             // shorten snippet
-            snippet = snippet.substring(0, snippet.lastIndexOf(' ');
+            snippet = snippet.substring(0, snippet.lastIndexOf(' '));
         }
 
         return snippet;

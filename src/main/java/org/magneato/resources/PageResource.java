@@ -19,8 +19,10 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.text.Normalizer;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import static org.magneato.utils.StringHelper.toSlug;
@@ -269,6 +271,7 @@ public class PageResource {
 		// Security.canCreate(uri);
 
 		if (security.isUserInRole("ADMIN")) {
+			// TODO fix this
 			System.out.println("************ >>> admin can update meta data");
 		}
 
@@ -319,7 +322,6 @@ public class PageResource {
 				((com.fasterxml.jackson.databind.node.ObjectNode) jsonNode).set("metadata",
 						objectMapper.readTree(metaData.toJson()));
 			} else {
-
 				((com.fasterxml.jackson.databind.node.ObjectNode) jsonNode.get("metadata")).put("canonical_url",
 						pageTitle);
 			}
@@ -334,5 +336,44 @@ public class PageResource {
 		}
 
 		return data;
+	}
+
+	String cloneContent(String content) {
+	    StringBuilder cloned = new StringBuilder();
+
+		try {
+			JsonNode rootNode = objectMapper.reader().readTree(content);
+			Iterator<Map.Entry<String, JsonNode>> nodes = rootNode.fields();
+
+			while (nodes.hasNext()) {
+				Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) nodes
+						.next();
+
+				if (entry.getKey().endsWith("_c")) {
+					// clone
+					if (cloned.length() > 0) {
+						cloned.append(',');
+					}
+					cloned.append("\"" + entry.getKey() + "\":" + entry.getValue());
+				} else {
+					if (entry.getValue().isObject()) {
+                        String object = cloneContent(entry.getValue().toString());
+                        if (!object.isEmpty()) {
+                            if (cloned.length() > 0) {
+                                cloned.append(',');
+                            }
+                            cloned.append("\"" + entry.getKey() + "\":{");
+                            cloned.append(object);
+                            cloned.append("}");
+                        }
+					}
+				}
+			}
+		} catch (IOException e) {
+            log.error("Couldn't clone contents id {}", e.getMessage());
+            return null;
+		}
+
+		return cloned.toString();
 	}
 }

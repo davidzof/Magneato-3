@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 import com.codahale.metrics.health.HealthCheck.Result;
 
 // https://github.com/spinscale/dropwizard-blog-sample/tree/master/src/main/java/services
-public class MagneatoApplication extends Application<MagneatoConfiguration> {
+public class MagneatoApplication extends Application<org.magneato.MagneatoConfiguration> {
 	private final Logger log = LoggerFactory.getLogger(this.getClass()
 			.getName());
 
