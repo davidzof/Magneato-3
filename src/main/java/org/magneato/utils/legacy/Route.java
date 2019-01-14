@@ -20,17 +20,19 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.text.StringEscapeUtils;
 
 /*
- * This is what we are aiming for
+ * This is the desired output
+ * 
  * {"title":"Mount Whitney Houston",
- * "child":true,
- * "activity":"Ski Touring",
+ * "child":false,
+ * "activity_c":"Ski Touring",
  * "date":"01/03/2019",
  * "content":"<p>blah blah description</p>",
  * "conditions":"<p>really bad conditions</p>",
- * "ski_difficulty":{"rating":"1.2","bra":"-","snowline":650},
+ * "ski_difficulty_c":{"rating":"1.2","bra":"-","snowline":650},
  * "technical_c":{"imperial":true,"max":2345,"min":1200,"distance":23.4,"climb":300,"descent":456,
  * "location":{"lat":"4.5","lon":"0.65"},
- * "orientation":"North-West"},"files":[],
+ * "orientation":"North-West"},
+ * "files":[],
  * "metadata":{"edit_template":"tripreport","display_template":"tripreport","create_date":"2019-01-03 22:37:51","ip_addr":"0:0:0:0:0:0:0:1","owner":"davidof"}}
 
  */

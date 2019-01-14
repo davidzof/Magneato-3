@@ -34,6 +34,7 @@ import static org.magneato.utils.StringHelper.toSlug;
 public class PageResource {
 	private final List<Template> templates;
 	private ManagedElasticClient repository;
+	// TODO: does this need to be per thread? - what did we do elsewhere?
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass()
@@ -157,7 +158,7 @@ public class PageResource {
 					String id = path.substring(1, sep);
 					log.debug("parent " + id);
 
-					String body = repository.get(id);
+					String body = repository.get(id); // get parent
 					if (body != null) {
 
 						// clone is always a child page
