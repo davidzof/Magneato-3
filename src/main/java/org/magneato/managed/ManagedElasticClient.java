@@ -12,11 +12,11 @@ import java.util.ArrayList;
 
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -108,7 +108,7 @@ public class ManagedElasticClient implements Managed {
 
 			log.debug("ES Json Mapping " + mappingSource.toString());
 
-			PutMappingResponse response = client.admin().indices()
+			AcknowledgedResponse response = client.admin().indices()
 					.preparePutMapping(configuration.getIndexName())
 					.setType(INDEXTYPE)
 					.setSource(mappingSource.toString(), XContentType.JSON)

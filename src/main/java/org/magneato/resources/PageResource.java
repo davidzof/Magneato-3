@@ -149,7 +149,7 @@ public class PageResource {
 				int sep = -1;
 				String path = null;
 				try {
-					path = new URL(request.getHeader("referer")).getPath();
+					path = new URL(referrer).getPath();
 					sep = path.lastIndexOf('/');
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
@@ -162,19 +162,13 @@ public class PageResource {
 
 					String body = repository.get(id); // get parent
 					if (body != null) {
-
 						// clone is always a child page
 						try {
-							// try and clone, don't clone any attachments, or
-							// children,
-							// only clone edit/display template, not title, this
-							// needs improving
-							JsonNode jsonNode = objectMapper.readTree(body);
-							editTemplate = jsonNode.get("metadata")
-									.get("edit_template").asText();
-							displayTemplate = jsonNode.get("metadata")
-									.get("display_template").asText();
-
+							// only clone edit/display template, and fields marked as clonable
+							JsonNode metadata = objectMapper.readTree(body).get("metadata");
+							editTemplate =		metadata.get("edit_template").asText();
+							displayTemplate = metadata.get("display_template").asText();
+							
 						} catch (IOException e) {
 							log.error(e.getMessage());
 							return new ErrorView("404-error");
@@ -182,6 +176,7 @@ public class PageResource {
 
 						if (clone) {
 							// we need to set meta data here
+							body = cloneContent(body);
 							log.debug("cloned page, returning " + body);
 							return new EditView(body, editTemplate);
 						}
