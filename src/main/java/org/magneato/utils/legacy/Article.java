@@ -49,6 +49,7 @@ public class Article {
 	private String videoId = null;
 	private String fileName;
 	private String size;
+	private String caption;
 	private final WikiParser wikiParser = new WikiParser();
 	private final List<String> images = new ArrayList<>();
 	private String title;
@@ -70,6 +71,10 @@ public class Article {
 
 	void setCategory(String category) {
 		this.category = category;
+	}
+	
+	void setCaption(String caption) {
+		contents.append("<br><b>"+caption+"</b>");
 	}
 
 	void setLongitude(String lon) {
@@ -154,6 +159,9 @@ public class Article {
 		if (lat != null && lon != null) {
 			sb.append("\"location\":{\"lat\":" + lat + ",\"lon\":" + lon
 					+ "}, ");
+			sb.append("\"addlocation\":true");
+		} else {
+			sb.append("\"addlocation\":false");
 		}
 		if (!images.isEmpty()) {
 			sb.append("\"files\": [");

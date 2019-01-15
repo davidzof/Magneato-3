@@ -306,9 +306,13 @@ public class Route {
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append("\"title\":\"" + title + "\", ");
-
-        sb.append("\"activity\":\"" + activity + "\", ");
+        sb.append("\"title_c\":\"" + title + "\", ");
+        if(metaData.editTemplate.equals("route")) {
+        	sb.append("\"child\":true");
+        } else {
+        	sb.append("\"child\":false");
+        }
+        sb.append("\"activity_c\":\"" + activity + "\", ");
         sb.append("\"trip_date\":\"" + date + "\", ");
 
         // Description
@@ -326,7 +330,7 @@ public class Route {
         // "ski_difficulty":{"rating":"1.2","bra":"-","snowline":650},
         if (activity.equals("Ski Touring")
                 || activity.equals("Off Piste Skiing")) {
-            sb.append("\"ski_difficulty\":{");
+            sb.append("\"ski_difficulty_c\":{");
             if (rating != null) {
                 sb.append("\"rating\":\"" + rating + "\", ");
             }
@@ -342,10 +346,11 @@ public class Route {
                 || activity.equals("Mountain Biking")
                 || activity.equals("Trail") || activity.equals("Via Ferrata")
                 || activity.equals("Climbing")) {
-            sb.append("\"difficulty\":{");
+            sb.append("\"difficulty_c\":{");
             sb.append("\"rating\":\"" + difficulty + "\"");
             sb.append("},");
         }
+
 
         // "technical_c":{"imperial":true,"max":2345,"min":1200,"distance":23.4,"climb":300,"descent":456,
         sb.append("\"technical_c\":{");

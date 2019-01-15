@@ -114,7 +114,6 @@ public class RouteParser {
                         route.setOrientation(data);
                         break;
                     case "caption": // Photo caption, ignore
-                        
                         break;
                     case "climb":
                         route.setClimb(data);
@@ -150,8 +149,6 @@ public class RouteParser {
                     case "equipment":
                         route.setEquipment(data);
                         break;
-                    
-
                     case "lift-access":
                         System.out.println( element + ": " + data);
                         break;

@@ -73,6 +73,11 @@ public class ArticleParser {
                     case "category":
                         article.setCategory(data);
                         break;
+                        
+                    case "caption":
+                        article.setCaption(data);
+                        break;
+
 
                     case "image":
                         String size = null;
