@@ -74,7 +74,7 @@ public class Article {
 	}
 	
 	void setCaption(String caption) {
-		contents.append("<br><b>"+caption+"</b>");
+		contents.append("<br><b>"+caption+"</b><br>");
 	}
 
 	void setLongitude(String lon) {
@@ -91,7 +91,7 @@ public class Article {
 		String name = FilenameUtils.getName(path);
 		String filePath = FilenameUtils.getPath(path);
 
-		contents.append("{image " + images.size() + "}");
+		contents.append("{image:" + images.size() + "}");
 		sb.append("{\"name\":");
 		sb.append("\"" + name + "\",");
 		sb.append("\"size\":");
@@ -159,9 +159,9 @@ public class Article {
 		if (lat != null && lon != null) {
 			sb.append("\"location\":{\"lat\":" + lat + ",\"lon\":" + lon
 					+ "}, ");
-			sb.append("\"addlocation\":true");
+			sb.append("\"addlocation\":true,");
 		} else {
-			sb.append("\"addlocation\":false");
+			sb.append("\"addlocation\":false,");
 		}
 		if (!images.isEmpty()) {
 			sb.append("\"files\": [");

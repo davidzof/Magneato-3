@@ -89,6 +89,10 @@ public class MetaData implements Serializable {
                 }
 				sb.append("\"edit_template\":\"tripreport\",");
 				sb.append("\"display_template\":\"tripreport\",");
+			} else if (editTemplate.equals("article")) {
+				sb.append("\"canonical_url\":\"" + name.substring(1, name.lastIndexOf('-')) + "\",");
+				sb.append("\"edit_template\":\"article\",");
+				sb.append("\"display_template\":\"article\",");
 			} else {
 				sb.append("\"canonical_url\":\"" + name.substring(1, name.lastIndexOf('-')) + "\",");
 				sb.append("\"edit_template\":\"tripreport\",");

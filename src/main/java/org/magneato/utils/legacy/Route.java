@@ -39,7 +39,7 @@ import org.apache.commons.text.StringEscapeUtils;
 public class Route {
     private MetaData metaData;
     private final StringBuilder contents = new StringBuilder();
-
+    private final StringBuilder variants;
     private static final Map<String, String> activityMap;
 
     static {
@@ -68,7 +68,7 @@ public class Route {
     private String difficulty = null;
     private String weather = null;
     private String route = null;
-    private List<String> participants = new ArrayList();
+    private List<String> participants = new ArrayList<String>();
 
     private String equipment = null;
     private String activity; // facet
@@ -88,8 +88,10 @@ public class Route {
     private String title;
     private String max;
     private String min;
+    private String liftAccess;
 
     Route(MetaData metaData) {
+    	this.variants = new StringBuilder();
         this.metaData = metaData;
         this.title = metaData.title;
 
@@ -224,6 +226,14 @@ public class Route {
     void setTitle(String title) {
         this.title = title;
     }
+    
+    void setLiftAccess(String s) {
+    	this.liftAccess = s;
+    }
+    
+    void addVariant(String s) {
+    	variants.append(s);
+    }
 
     void addImage(String path, String size) {
         StringBuilder sb = new StringBuilder();
@@ -265,8 +275,12 @@ public class Route {
             contents.append("<p>" + s + "</p>");
         }
         if (comment != null) {
-            contents.append("<p><strong>Comments on route:</strong>");
+            contents.append("<p><strong>Comments on route: </strong>");
             contents.append(comment + "</p>");
+        }
+        if (liftAccess != null) {
+            contents.append("<p><strong>Lift Access: </strong>");
+            contents.append(liftAccess + "</p>");
         }
         if (route != null) {
             contents.append("<p><strong>Route Taken: </strong>");
@@ -284,6 +298,7 @@ public class Route {
             contents.append("<p><strong>Equipment: </strong>");
             contents.append(equipment + "</p>");
         }
+
 
         if (country != null) {
             contents.append("<p><strong>Country: </strong>");
@@ -304,13 +319,19 @@ public class Route {
             }
             contents.append("</p>");
         }
+        
+        
+        if (variants.length() > 0) {
+            contents.append("<h3>Other routes</h3>");
+            contents.append(variants + "</p>");
+        }
 
         StringBuilder sb = new StringBuilder();
-        sb.append("\"title_c\":\"" + title + "\", ");
+        sb.append("\"title\":\"" + title + "\", ");
         if(metaData.editTemplate.equals("route")) {
-        	sb.append("\"child\":true");
+        	sb.append("\"child\":true,");
         } else {
-        	sb.append("\"child\":false");
+        	sb.append("\"child\":false,");
         }
         sb.append("\"activity_c\":\"" + activity + "\", ");
         sb.append("\"trip_date\":\"" + date + "\", ");
@@ -356,7 +377,10 @@ public class Route {
         sb.append("\"technical_c\":{");
         sb.append("\"imperial\":\"" + imperial + "\"");
         if (orientation != null) {
-            sb.append(", \"orientation\":\"" + orientation + "\"");
+        	sb.append(", \"orientation\": \"" + orientation + "\"");
+        }
+        if (lat !=null && lon != null) {
+        	sb.append(", \"location\":{\"lat\":\"" + lat + ",\"lon\":\"" +  lon + "\"");
         }
         if (max != null) {
             sb.append(", \"max\":" + max);
