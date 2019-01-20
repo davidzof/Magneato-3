@@ -157,11 +157,11 @@ public class Article {
 
 		sb.append("\"category\":\"" + category + "\", ");
 		if (lat != null && lon != null) {
-			sb.append("\"location\":{\"lat\":" + lat + ",\"lon\":" + lon
-					+ "}, ");
-			sb.append("\"addlocation\":true,");
+			sb.append("\"technical_c\":{\"location\":{\"lat\":" + lat + ",\"lon\":" + lon
+					+ "}}, ");
+			sb.append("\"add_location\":true,");
 		} else {
-			sb.append("\"addlocation\":false,");
+			sb.append("\"add_location\":false,");
 		}
 		if (!images.isEmpty()) {
 			sb.append("\"files\": [");
