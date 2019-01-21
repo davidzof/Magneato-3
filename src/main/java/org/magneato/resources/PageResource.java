@@ -368,6 +368,11 @@ public class PageResource {
             log.error("Couldn't clone contents id {}", e.getMessage());
             return null;
 		}
+		if (cloned.length() > 0) {
+			// we cloned something
+			cloned.insert(0,"{");
+			cloned.append("}");
+		}
 
 		return cloned.toString();
 	}
