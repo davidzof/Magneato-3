@@ -164,21 +164,18 @@ public class PageResource {
 					if (body != null) {
 						// clone is always a child page
 						try {
-							// only clone edit/display template, and fields marked as clonable
-							JsonNode metadata = objectMapper.readTree(body).get("metadata");
-							editTemplate =		metadata.get("edit_template").asText();
-							displayTemplate = metadata.get("display_template").asText();
-							
+							// only clone edit/display template, and fields
+							// marked as clonable
+							JsonNode metadata = objectMapper.readTree(body)
+									.get("metadata");
+							editTemplate = metadata.get("edit_template")
+									.asText();
+							displayTemplate = metadata.get("display_template")
+									.asText();
+
 						} catch (IOException e) {
 							log.error(e.getMessage());
 							return new ErrorView("404-error");
-						}
-
-						if (clone) {
-							// we need to set meta data here
-							body = cloneContent(body);
-							log.debug("cloned page, returning " + body);
-							return new EditView(body, editTemplate);
 						}
 
 						log.debug("parent " + id);
@@ -192,7 +189,17 @@ public class PageResource {
 								.addRelation(id)
 								.setOwner(security.getUserPrincipal().getName());
 
-						return new EditView(metaData);
+						EditView view;
+						if (clone) {
+							// we need to set meta data here
+							body = cloneContent(body);
+							log.debug("cloned page, adding " + body);
+							view = new EditView(body, metaData);
+						} else {
+							view = new EditView(metaData);
+						}
+						
+						return view;
 					}
 				}
 			}
@@ -314,11 +321,12 @@ public class PageResource {
 						.setOwner(security.getUserPrincipal().getName())
 						.setCanonicalURL(pageTitle);
 
-				((com.fasterxml.jackson.databind.node.ObjectNode) jsonNode).set("metadata",
-						objectMapper.readTree(metaData.toJson()));
+				((com.fasterxml.jackson.databind.node.ObjectNode) jsonNode)
+						.set("metadata",
+								objectMapper.readTree(metaData.toJson()));
 			} else {
-				((com.fasterxml.jackson.databind.node.ObjectNode) jsonNode.get("metadata")).put("canonical_url",
-						pageTitle);
+				((com.fasterxml.jackson.databind.node.ObjectNode) jsonNode
+						.get("metadata")).put("canonical_url", pageTitle);
 			}
 			body = jsonNode.toString();
 
@@ -333,8 +341,11 @@ public class PageResource {
 		return data;
 	}
 
+	/*
+	 * Object is not enclosed in braces
+	 */
 	String cloneContent(String content) {
-	    StringBuilder cloned = new StringBuilder();
+		StringBuilder cloned = new StringBuilder();
 
 		try {
 			JsonNode rootNode = objectMapper.reader().readTree(content);
@@ -349,29 +360,26 @@ public class PageResource {
 					if (cloned.length() > 0) {
 						cloned.append(',');
 					}
-					cloned.append("\"" + entry.getKey() + "\":" + entry.getValue());
+					cloned.append("\"" + entry.getKey() + "\":"
+							+ entry.getValue());
 				} else {
 					if (entry.getValue().isObject()) {
-                        String object = cloneContent(entry.getValue().toString());
-                        if (!object.isEmpty()) {
-                            if (cloned.length() > 0) {
-                                cloned.append(',');
-                            }
-                            cloned.append("\"" + entry.getKey() + "\":{");
-                            cloned.append(object);
-                            cloned.append("}");
-                        }
+						String object = cloneContent(entry.getValue()
+								.toString());
+						if (!object.isEmpty()) {
+							if (cloned.length() > 0) {
+								cloned.append(',');
+							}
+							cloned.append("\"" + entry.getKey() + "\":{");
+							cloned.append(object);
+							cloned.append("}");
+						}
 					}
 				}
 			}
 		} catch (IOException e) {
-            log.error("Couldn't clone contents id {}", e.getMessage());
-            return null;
-		}
-		if (cloned.length() > 0) {
-			// we cloned something
-			cloned.insert(0,"{");
-			cloned.append("}");
+			log.error("Couldn't clone contents id {}", e.getMessage());
+			return null;
 		}
 
 		return cloned.toString();

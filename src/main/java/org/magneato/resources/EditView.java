@@ -14,15 +14,14 @@ public class EditView extends View {
 	private static final String EDITTEMPLATE = "edit.ftl";
 	
     public EditView(MetaData metaData) {
-    	super(EDITTEMPLATE, StandardCharsets.UTF_8);
-    	this.url = "";
+    	this(null, null, metaData.getEditTemplate());
         this.metaData = metaData;
-        this.editTemplate = metaData.getEditTemplate();
     }
     
 
-    public EditView(String body, String editTemplate) {
-    	this("", body, editTemplate);
+    public EditView(String body, MetaData metaData) {
+    	this(null, body, metaData.getEditTemplate());
+    	this.metaData = metaData;
     }
     
     public EditView(String url, String body, String editTemplate) {
