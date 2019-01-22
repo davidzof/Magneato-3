@@ -8,7 +8,7 @@ import org.magneato.service.MetaData;
 
 public class EditView extends View {
 	private String url = null;
-	private MetaData metaData;
+	private MetaData metaData = null;
 	private String editTemplate;
 	private String body;
 	private static final String EDITTEMPLATE = "edit.ftl";
@@ -41,7 +41,10 @@ public class EditView extends View {
     }
     
     public String getMetaData() {
-    	return metaData.toJson();
+    	if (metaData != null) {
+		    return metaData.toJson();
+	    }
+	    return null;
     }
 
 	public String getEditTemplate() {

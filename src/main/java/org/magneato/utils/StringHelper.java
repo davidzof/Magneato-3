@@ -34,7 +34,7 @@ public class StringHelper {
      * Return a snippet end tag or first 100 characters of string
      *
      * @param snippet - string to snip
-     * @param max - max length of snippet
+     * @param max     - max length of snippet
      * @return
      */
     public static String getSnippet(String snippet, int max) {
@@ -52,6 +52,50 @@ public class StringHelper {
         }
 
         return snippet;
+    }
+
+    /**
+     * tags are: {image:0} - reference to attached file
+     *
+     * @param snippet
+     * @param node
+     * @return
+     */
+    public static String parseTags(String snippet, JsonNode node) {
+        Pattern p = Pattern.compile("\\{[a-z:0-9]+\\}");
+        Matcher m = p.matcher(snippet);
+        StringBuffer sb = new StringBuffer();
+        JsonNode files = node.get("files");
+        if (files == null) {
+            return snippet;
+        }
+
+        // consume tags
+        while (m.find()) {
+            String tag = m.group(0);
+            int i = tag.indexOf(':');
+            if (i == -1) {
+                log.error("Invalid tag format {}", tag);
+                continue; // process next tag
+            }
+            try {
+                int index = Integer.parseInt(tag.substring(i + 1, tag.length() - 1));
+                if (index <= files.size()) {
+                    String url = files.get(index).get("url").asText();
+                    // TODO check ending - can be .jpeg, .jpg, .png, .gif for image types
+                    m.appendReplacement(sb, "<img class=\"img-responsive\" src=\"" + url + "\"/>");
+                } else {
+                    log.error("tag index out of range {}", tag);
+
+                }
+            } catch (NumberFormatException e) {
+                log.error("tag bad index format {}", tag);
+                continue; // process next tag
+            }
+        }
+        m.appendTail(sb);
+
+        return sb.toString();
     }
 
     public static JsonNode toJsonNode(String json) {

@@ -64,8 +64,16 @@ public class PageView extends View {
 		return "";
 	}
 
-	
-	
+	/**
+	 * Translate moustache type tages into html
+	 *
+	 * @param paragraph
+	 * @return parsed text
+	 */
+	public String parseTags(String paragraph) {
+		return StringHelper.parseTags(paragraph, jsonNode);
+	}
+
 	/**
 	 * Return first paragraph including end tag or first 100 characters of string
 	 * @param paragraph
