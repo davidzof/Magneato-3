@@ -212,6 +212,9 @@ public class ManagedElasticClient implements Managed {
 		Pagination pagination = new Pagination();
 		pagination.setDataList(docs);
 		pagination.setTotal(searchHits.totalHits);
+		pagination.setCurrent(from);
+		pagination.setSize(size);
+		pagination.setQuery(query);
 		return pagination;
 	}
 

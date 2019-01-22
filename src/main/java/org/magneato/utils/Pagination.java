@@ -8,7 +8,27 @@ import java.util.List;
  */
 public class Pagination {
 	long total;
+	long current;
+	long size;
+	String query;
 	List<String> results;
+
+	public String getQuery() {
+		return query;
+	}
+
+	public void setQuery(String query) {
+		this.query = query;
+	}
+
+	public long getSize() {
+		return size;
+	}
+
+	public void setSize(long size) {
+		this.size = size;
+	}
+
 
 	public long getTotal() {
 		return total;
@@ -18,6 +38,14 @@ public class Pagination {
 		this.total = total;
 	}
 
+	public long getCurrent() {
+		return current;
+	}
+
+	public void setCurrent(long current) {
+		this.current = current;
+	}
+
 	public List<String> getResults() {
 		return results;
 	}
@@ -25,5 +53,4 @@ public class Pagination {
 	public void setDataList(List<String> results) {
 		this.results = results;
 	}
-
 }
