@@ -1,13 +1,11 @@
 package org.magneato.resources;
 
-import io.dropwizard.views.View;
-
 import org.magneato.utils.Pagination;
 import org.magneato.utils.StringHelper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public class SearchView extends View {
+public class SearchView extends ContentView {
 	Pagination paginater;
 
 	public SearchView(Pagination paginater) {

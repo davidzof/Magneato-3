@@ -3,7 +3,9 @@ package org.magneato.resources;
 import java.io.IOException;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.SecurityContext;
 
 import org.magneato.managed.ManagedElasticClient;
 import org.magneato.utils.Pagination;
@@ -24,19 +26,33 @@ public class SearchResource {
 		this.repository = repository;
 	}
 
+	@GET
+	@Path("/search/{query}/{page}/{size}")
+	@Produces(MediaType.TEXT_HTML)
+	public Object get(@PathParam("query") String query,
+			@PathParam("page") int page, @PathParam("size") int size)
+			throws IOException {
+		if (page < 0) {
+			page = 0;
+		}
+		if (size < 0 || size > 100) {
+			size = 10;
+		}	
+		Pagination pagination = repository.generalSearch(page * size, size,
+				query);
+		return new SearchView(pagination);
+	}
+
 	@POST
 	@Path("/search")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.TEXT_HTML)
-	public Object search(
-			@FormParam("query") String query,
-			@FormParam("from") int from,
-			@FormParam("size") int size)
+	public Object search(@FormParam("query") String query,
+			@FormParam("from") int from, @FormParam("size") int size)
 			throws IOException {
 
 		Pagination pagination = repository.generalSearch(from, size, query);
 		return new SearchView(pagination);
 	}
-
 
 }

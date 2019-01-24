@@ -190,7 +190,7 @@ public class ManagedElasticClient implements Managed {
 				/*.addSort(
 						new FieldSortBuilder("metadata.create_date")
 								.order(SortOrder.DESC)).setFrom(from)*/
-				.setSize(size);
+				.setSize(size).setFrom(from);
 
 		MultiMatchQueryBuilder multiMatchQueryBuilder = QueryBuilders
 				.multiMatchQuery(query, "title", "content");

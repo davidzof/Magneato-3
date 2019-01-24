@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class PageView extends View {
+public class PageView extends ContentView {
 	private JsonNode jsonNode = null;
 	private ManagedElasticClient esClient;
 	private String uri;
@@ -38,7 +38,7 @@ public class PageView extends View {
 	public PageView(String json, String templateName,
 			ManagedElasticClient esClient, String uri) {
 
-		super("/common/" + templateName + ".ftl", StandardCharsets.UTF_8);
+		super("/common/" + templateName + ".ftl");
 
 		try {
 			ObjectReader reader = objectMapper.reader();
@@ -72,15 +72,6 @@ public class PageView extends View {
 	 */
 	public String parseTags(String paragraph) {
 		return StringHelper.parseTags(paragraph, jsonNode);
-	}
-
-	/**
-	 * Return first paragraph including end tag or first 100 characters of string
-	 * @param paragraph
-	 * @return
-	 */
-	public String getFirstPara(String paragraph) {
-		return StringHelper.getSnippet(paragraph, 100);
 	}
 
 	public JsonNode getJson() {
