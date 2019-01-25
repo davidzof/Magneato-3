@@ -1,32 +1,25 @@
 package org.magneato.resources;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import io.dropwizard.views.View;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.magneato.managed.ManagedElasticClient;
 import org.magneato.service.MetaData;
 import org.magneato.utils.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 
-public class PageView extends ContentView {
+public class PageView extends org.magneato.resources.ContentView {
 	private JsonNode jsonNode = null;
 	private ManagedElasticClient esClient;
 	private String uri;
-	private final Logger log = LoggerFactory.getLogger(this.getClass()
-			.getName());
+	private final Logger log = LoggerFactory.getLogger(this.getClass().getName());
 	private final static ObjectMapper objectMapper = new ObjectMapper();
 	static ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
 		@Override

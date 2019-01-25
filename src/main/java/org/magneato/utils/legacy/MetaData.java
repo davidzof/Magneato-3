@@ -94,7 +94,10 @@ public class MetaData implements Serializable {
 				sb.append("\"edit_template\":\"article\",");
 				sb.append("\"display_template\":\"article\",");
 			} else {
-				sb.append("\"canonical_url\":\"" + name.substring(1, name.lastIndexOf('-')) + "\",");
+				String canonical_url =name.substring(1, name.lastIndexOf('-'));
+				sb.append("\"canonical_url\":\"" + canonical_url + "\",");
+				System.out.println("name " + name);
+				System.out.println("newurl " + id + "/" + canonical_url);
 				sb.append("\"edit_template\":\"tripreport\",");
 				sb.append("\"display_template\":\"tripreport\",");
 
