@@ -73,7 +73,7 @@ public class MetaParser {
 				if (metaData != null) {
 
 					// parse article etc here
-					if ("farticle".equals(metaData.editTemplate)) {
+					if ("article".equals(metaData.editTemplate)) {
 
 						Article article = new Article(metaData); // content is
 																	// xml

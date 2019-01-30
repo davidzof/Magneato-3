@@ -16,7 +16,7 @@ public abstract class ContentView extends View {
 	 * @return
 	 */
 	public String getFirstPara(String paragraph) {
-		return StringHelper.getSnippet(paragraph, 100);
+		return StringHelper.getSnippet(paragraph, 200);
 	}
 
 }

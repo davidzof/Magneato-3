@@ -14,7 +14,7 @@ public class CreatePageView extends View {
         this.templates = templates;
     }
     
-    // will not be cached, gets called multiple time!
+    // will not be cached, gets called multiple times!
     public List<Template> getTemplates() {
     	return templates;
     }

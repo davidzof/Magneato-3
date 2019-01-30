@@ -14,7 +14,10 @@ import java.util.regex.Pattern;
 
 public class StringHelper {
     private static final ObjectMapper mapper = new ObjectMapper();
-    private static final Logger log = LoggerFactory.getLogger(StringHelper.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(StringHelper.class);
+    // strip html - only works on well formed html but should be ok with our editor, note Pattern is thread safe
+    private static final Pattern p = Pattern.compile("<[^>]*>");
 
     // https://github.com/slugify/slugify
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
@@ -38,17 +41,17 @@ public class StringHelper {
      * @return
      */
     public static String getSnippet(String snippet, int max) {
-        // non greedy match of first paragraph, note regexp are not perfect for processing html but good enough in most cases
-        Pattern p = Pattern.compile("<\\s*p[^>]*>([^<]*)((<br ?\\/?>)|(<\\s*\\/\\s*[p]\\s*>))");
-        Matcher m = p.matcher(snippet);
-
-        if (m.find()) {
-            snippet = m.group(1);
-        }
-
         if (snippet.length() > max) {
-            // shorten snippet
-            snippet = snippet.substring(0, snippet.lastIndexOf(' '));
+            snippet = snippet.substring(0, max);
+        }
+        // remove well formed tags
+        Matcher m = p.matcher(snippet);
+        snippet = m.replaceAll("");
+
+        // cut at sentence boundary if possible
+        int i = snippet.lastIndexOf('.');
+        if (i > 0) {
+            snippet = snippet.substring(0, i+1);
         }
 
         return snippet;
@@ -79,11 +82,15 @@ public class StringHelper {
                 continue; // process next tag
             }
             try {
-                int index = Integer.parseInt(tag.substring(i + 1, tag.length() - 1));
+                int index = Integer.parseInt(tag.substring(i + 1,
+                        tag.length() - 1));
                 if (index <= files.size()) {
                     String url = files.get(index).get("url").asText();
-                    // TODO check ending - can be .jpeg, .jpg, .png, .gif for image types
-                    m.appendReplacement(sb, "<img class=\"img-responsive\" src=\"" + url + "\"/>");
+                    // TODO check ending - can be .jpeg, .jpg, .png, .gif for
+                    // image types
+                    m.appendReplacement(sb,
+                            "<img class=\"img-responsive\" src=\"" + url
+                                    + "\"/>");
                 } else {
                     log.error("tag index out of range {}", tag);
 
