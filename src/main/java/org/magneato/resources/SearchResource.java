@@ -30,7 +30,7 @@ public class SearchResource {
 	@Path("/search/{query}/{page}/{size}")
 	@Produces(MediaType.TEXT_HTML)
 	public Object get(@PathParam("query") String query,
-			@PathParam("page") int page, @PathParam("size") int size)
+			@PathParam("page") int page, @PathParam("size") int size )
 			throws IOException {
 		if (page < 0) {
 			page = 0;
