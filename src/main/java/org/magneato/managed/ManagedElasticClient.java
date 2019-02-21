@@ -1,6 +1,16 @@
 package org.magneato.managed;
 
 import io.dropwizard.lifecycle.Managed;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.get.GetResponse;
@@ -17,14 +27,10 @@ import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryAction;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.aggregations.bucket.filter.Filters;
 import org.elasticsearch.search.aggregations.bucket.global.Global;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.elasticsearch.search.aggregations.metrics.tophits.TopHits;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
@@ -32,14 +38,6 @@ import org.magneato.service.ElasticSearch;
 import org.magneato.utils.Pagination;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
 
 public class ManagedElasticClient implements Managed {
     private static final String INDEXTYPE = "_doc"; // from ES 6.* always _doc
@@ -147,12 +145,16 @@ public class ManagedElasticClient implements Managed {
      */
     // http://localhost:9200/main-index/_search?q=*.*
     // http://localhost:9200/main-index/_search?q=metadata.template:article&sort=metadata.create_date:asc
-    public ArrayList<String> search(int from, int size, String query ) {
-        return search(from, size, query, null) ;
+    public List<String> search(int from, int size, String query ) {
+        return search(from, size, query, null).getResults() ;
     }
 
-    public ArrayList<String> search(int from, int size, String query, String facets) {
+    public Pagination search(int from, int size, String query, String facets) {
         log.debug("search " + query);
+        Pagination pagination = new Pagination();
+pagination.setQuery(query);
+pagination.setSize(size);
+
         SearchRequestBuilder searchBuilder = client
                 .prepareSearch(configuration.getIndexName())
                 .setTypes(INDEXTYPE)
@@ -195,6 +197,7 @@ public class ManagedElasticClient implements Managed {
             hit.getId(); // need to return this
             docs.add(hit.toString());
         }
+        pagination.setResults(docs);
 
         // get the results
         if (facets != null) {
@@ -211,7 +214,7 @@ public class ManagedElasticClient implements Managed {
             }
         }
 
-        return docs;
+        return pagination;
     }
 
 
@@ -245,7 +248,7 @@ public class ManagedElasticClient implements Managed {
         }
 
         Pagination pagination = new Pagination();
-        pagination.setDataList(docs);
+        pagination.setResults(docs);
         pagination.setTotal(searchHits.totalHits);
         pagination.setCurrent(from);
         pagination.setSize(size);

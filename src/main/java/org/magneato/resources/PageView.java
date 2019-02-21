@@ -1,19 +1,20 @@
 package org.magneato.resources;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
 import org.magneato.managed.ManagedElasticClient;
 import org.magneato.service.MetaData;
 import org.magneato.utils.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 
 public class PageView extends org.magneato.resources.ContentView {
 	private JsonNode jsonNode = null;
@@ -79,7 +80,7 @@ public class PageView extends org.magneato.resources.ContentView {
 		return uri.substring(0, uri.lastIndexOf('/'));
 	}
 
-	public ArrayList<String> search(int from, int size, String query) {
+	public List<String> search(int from, int size, String query) {
 		return esClient.search(from, size, query);
 	}
 

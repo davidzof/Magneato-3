@@ -50,7 +50,7 @@ public class Pagination {
 		return results;
 	}
 
-	public void setDataList(List<String> results) {
+	public void setResults(List<String> results) {
 		this.results = results;
 	}
 }
