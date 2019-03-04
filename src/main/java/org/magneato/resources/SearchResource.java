@@ -47,6 +47,9 @@ public class SearchResource {
 		return new SearchView(pagination);
 	}
 
+	/*
+	http://localhost:9090/facets/metadata.edit_template=tripreport/activity_c,technical_c.orientation/0/10
+	 */
 	@GET
 	@Path("/facets/{query}/{facets}/{page}/{size}")
 	@Produces(MediaType.TEXT_HTML)

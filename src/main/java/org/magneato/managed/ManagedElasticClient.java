@@ -1,16 +1,6 @@
 package org.magneato.managed;
 
 import io.dropwizard.lifecycle.Managed;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.get.GetResponse;
@@ -38,6 +28,15 @@ import org.magneato.service.ElasticSearch;
 import org.magneato.utils.Pagination;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ManagedElasticClient implements Managed {
     private static final String INDEXTYPE = "_doc"; // from ES 6.* always _doc
@@ -135,25 +134,32 @@ public class ManagedElasticClient implements Managed {
     }
 
     /**
-     * @param from
-     * @param size
-     * @param query
-     * @return
-     * @see <a
-     * href="https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/java-rest-high-search.html">ES
-     * Search</a>
+     * @param from - start page
+     * @param size - number of results to return
+     * @param query - search query
+     * @return List of results
+     * @see <a href="https://www.elastic.co/guide/en/elasticsearch/client/java-rest/current/java-rest-high-search.html">ES Search</a>
      */
-    // http://localhost:9200/main-index/_search?q=*.*
-    // http://localhost:9200/main-index/_search?q=metadata.template:article&sort=metadata.create_date:asc
-    public List<String> search(int from, int size, String query ) {
-        return search(from, size, query, null).getResults() ;
+    public List<String> search(int from, int size, String query) {
+        /*
+         * http://localhost:9200/main-index/_search?q=*.*
+         * http://localhost:9200/main-index/_search?q=metadata.edit_template:tripreport&pretty=true
+         */
+        return search(from, size, query, null).getResults();
     }
 
+    /**
+     * @param from - start page
+     * @param size - number of results to return
+     * @param query - search query
+     * @param facets - facets to return
+*/
     public Pagination search(int from, int size, String query, String facets) {
-        log.debug("search " + query);
+        // facet: http://localhost:9090/facets/category=Hiking/activity_c,technical_c.orientation/0/10
+        log.debug("search " + query + " facets " + facets);
         Pagination pagination = new Pagination();
-pagination.setQuery(query);
-pagination.setSize(size);
+        pagination.setQuery(query);
+        pagination.setSize(size);
 
         SearchRequestBuilder searchBuilder = client
                 .prepareSearch(configuration.getIndexName())
@@ -171,6 +177,7 @@ pagination.setSize(size);
                 if (index != -1) {
                     String field = token.substring(0, index);
                     String value = token.substring(index + 1);
+                    log.debug(field + " : " + token);
                     searchBuilder.setQuery(QueryBuilders.matchQuery(field,
                             value));
 
@@ -178,12 +185,11 @@ pagination.setSize(size);
             }
         }
 
-        facets="activity_c,technical_c.orientation";
         if (facets != null) {
             // comma separated list of facets to collect
             String[] tokens = facets.split("\\,");
             AggregationBuilder aggregation = AggregationBuilders.global("facets");
-            for (String token: tokens) {
+            for (String token : tokens) {
                 aggregation.subAggregation(AggregationBuilders.terms(token).field(token));
             }
             searchBuilder.addAggregation(aggregation);
@@ -193,11 +199,16 @@ pagination.setSize(size);
 
         ArrayList<String> docs = new ArrayList<String>();
         SearchHits searchHits = response.getHits();
+        System.out.println("total hits " + searchHits.totalHits);
         for (SearchHit hit : searchHits) {
             hit.getId(); // need to return this
             docs.add(hit.toString());
         }
         pagination.setResults(docs);
+        pagination.setTotal(searchHits.totalHits);
+        pagination.setCurrent(from);
+        pagination.setSize(size);
+        pagination.setQuery(query);
 
         // get the results
         if (facets != null) {
@@ -205,18 +216,17 @@ pagination.setSize(size);
             String[] tokens = facets.split("\\,");
             // sr is here your SearchResponse object
 
-            for (String token: tokens) {
+            for (String token : tokens) {
                 Global global = response.getAggregations().get("facets");
                 Terms activity = global.getAggregations().get(token);
                 for (Terms.Bucket tb : activity.getBuckets()) {
-                    System.out.println(tb.getKey() + ":" + tb.getDocCount());
+                    System.out.println(token + "-->" + tb.getKey() + ":" + tb.getDocCount());
                 }
             }
         }
 
         return pagination;
     }
-
 
     public Pagination generalSearch(int from, int size, String query) {
         log.debug("general search " + query + " size " + size + " from " + from);
@@ -235,9 +245,7 @@ pagination.setSize(size);
         multiMatchQueryBuilder.minimumShouldMatch("75%");
         searchBuilder.setQuery(multiMatchQueryBuilder);
 
-
         SearchResponse response = searchBuilder.get();
-
 
         ArrayList<String> docs = new ArrayList<String>();
         SearchHits searchHits = response.getHits();
