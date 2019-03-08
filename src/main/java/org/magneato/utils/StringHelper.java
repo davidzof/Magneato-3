@@ -41,13 +41,15 @@ public class StringHelper {
      * @return
      */
     public static String getSnippet(String snippet, int max) {
-        if (snippet.length() > max) {
-            snippet = snippet.substring(0, max);
-        }
+        
         // remove well formed tags
         Matcher m = p.matcher(snippet);
         snippet = m.replaceAll("");
 
+        if (snippet.length() > max) {
+            snippet = snippet.substring(0, max);
+        }
+        
         // cut at sentence boundary if possible
         int i = snippet.lastIndexOf('.');
         if (i > 0) {

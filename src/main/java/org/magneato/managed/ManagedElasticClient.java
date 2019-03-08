@@ -118,7 +118,6 @@ public class ManagedElasticClient implements Managed {
                     .setSource(mappingSource.toString(), XContentType.JSON)
                     .execute().actionGet();
 
-            System.out.println("repsonse " + response.isAcknowledged());
         } catch (IOException e) {
 
             e.printStackTrace();
@@ -159,6 +158,7 @@ public class ManagedElasticClient implements Managed {
         log.debug("search " + query + " facets " + facets);
         Pagination pagination = new Pagination();
         pagination.setQuery(query);
+        pagination.setFacets(facets);
         pagination.setSize(size);
 
         SearchRequestBuilder searchBuilder = client
@@ -199,7 +199,7 @@ public class ManagedElasticClient implements Managed {
 
         ArrayList<String> docs = new ArrayList<String>();
         SearchHits searchHits = response.getHits();
-        System.out.println("total hits " + searchHits.totalHits);
+
         for (SearchHit hit : searchHits) {
             hit.getId(); // need to return this
             docs.add(hit.toString());
@@ -220,7 +220,7 @@ public class ManagedElasticClient implements Managed {
                 Global global = response.getAggregations().get("facets");
                 Terms activity = global.getAggregations().get(token);
                 for (Terms.Bucket tb : activity.getBuckets()) {
-                    System.out.println(token + "-->" + tb.getKey() + ":" + tb.getDocCount());
+                    //System.out.println(token + "-->" + tb.getKey() + ":" + tb.getDocCount());
                 }
             }
         }

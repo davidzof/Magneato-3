@@ -21,7 +21,16 @@ public class StringHelperTest {
         String result = StringHelper.getSnippet(content, 100);
         System.out.println(result);
     }
+    
+    @Test
+    public void iframe() {
+    	String content = "<p>This video looks at how to make a template for mounting tech / pintech type bindings.</p><p><iframe src=\"//www.youtube.com/embed/Own0BXzzNb4\" class=\"note-video-clip\" width=\"640\" height=\"360\" frameborder=\"0\"></iframe><br></p>";
 
+        String result = StringHelper.getSnippet(content, 200);
+        System.out.println(result);
+    }
+    
+    
     @Test
     public void longSnippet2() {
         String content = "<p class=\"myclass test\">Skating in fresh powder seems to be a regular thing this January and it is character building to say the least. Still not enough snow at the lower and more convenient le Sappey slopes but it is coming!</p>";

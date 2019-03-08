@@ -1,6 +1,5 @@
 package org.magneato.utils;
 
-
 import java.util.List;
 
 /**
@@ -11,6 +10,7 @@ public class Pagination {
 	long current;
 	long size;
 	String query;
+	String facets;
 	List<String> results;
 
 	public String getQuery() {
@@ -21,6 +21,14 @@ public class Pagination {
 		this.query = query;
 	}
 
+	public String getFacets() {
+		return facets;
+	}
+
+	public void setFacets(String facets) {
+		this.facets = facets;
+	}
+
 	public long getSize() {
 		return size;
 	}
@@ -28,7 +36,6 @@ public class Pagination {
 	public void setSize(long size) {
 		this.size = size;
 	}
-
 
 	public long getTotal() {
 		return total;

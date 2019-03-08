@@ -17,6 +17,7 @@
           <h2 class="article">${article._source.title.asText()}</h2>
           <p>
             <#if article._source.files?? && (article._source.files.size() > 0) >
+
               <img class="img-responsive thumb" src=${article._source.files.get(0).thumbnailUrl.asText()} align="left"/>
             </#if>
             ${getFirstPara(article._source.content.asText())?no_esc}
@@ -27,17 +28,23 @@
       </div>
     </div>
   </#list>
+
   
   <div class="row">
     <#assign navBarSize = 10>
     <#assign lastPage = (paginator.total / paginator.size)?ceiling >
     <#assign currentPage = (paginator.current / paginator.size) >
-  
+ 
     <nav aria-label="Page navigation example">
         <ul class="pagination">
 
+
             <#if (currentPage > 0)>
-              <li class="page-item"><a class="page-link" href="/search/${paginator.query}/${currentPage - 1}/${paginator.size}">Previous</a></li>
+              <#if paginator.facets?? >
+                <li class="page-item"><a class="page-link" href="/facets/${paginator.query}/${paginator.facets}/${currentPage - 1}/${paginator.size}">Previous</a></li>
+              <#else>
+                <li class="page-item"><a class="page-link" href="/search/${paginator.query}/${currentPage - 1}/${paginator.size}">Previous</a></li>
+              </#if>
             <#else>
               <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
             </#if>
@@ -58,11 +65,19 @@
               <#if (currentPage+1) = page>
                 <li class="page-item disabled"><a class="page-link" href="#">${page}</a></li>
               <#else>
-                <li class="page-item"><a class="page-link" href="/search/${paginator.query}/${page-1}/${paginator.size}">${page}</a></li>
+                <#if paginator.facets?? >
+                  <li class="page-item"><a class="page-link" href="/facets/${paginator.query}/${paginator.facets}/${page-1}/${paginator.size}">${page}</a></li>
+                <#else>
+                  <li class="page-item"><a class="page-link" href="/search/${paginator.query}/${page-1}/${paginator.size}">${page}</a></li>
+                </#if>
               </#if>
             </#list>
             <#if (currentPage < lastPage -1)>
-              <li class="page-item"><a class="page-link" href="/search/${paginator.query}/${currentPage+1}/${paginator.size}">Next</a></li>
+              <#if paginator.facets?? >
+                <li class="page-item"><a class="page-link" href="/facets/${paginator.query}/${paginator.facets}/${currentPage+1}/${paginator.size}">Next</a></li>
+              <#else>
+                <li class="page-item"><a class="page-link" href="/search/${paginator.query}/${currentPage+1}/${paginator.size}">Next</a></li>
+              </#if>
             <#else>
               <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
             </#if>
@@ -77,3 +92,4 @@
 
 </body>
 </html>
+
