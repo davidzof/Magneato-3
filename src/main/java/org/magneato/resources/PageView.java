@@ -3,8 +3,11 @@ package org.magneato.resources;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import javax.activation.MimetypesFileTypeMap;
 
 import org.magneato.managed.ManagedElasticClient;
 import org.magneato.service.MetaData;
@@ -20,8 +23,16 @@ public class PageView extends org.magneato.resources.ContentView {
 	private JsonNode jsonNode = null;
 	private ManagedElasticClient esClient;
 	private String uri;
-	private final Logger log = LoggerFactory.getLogger(this.getClass().getName());
+	private final Logger log = LoggerFactory.getLogger(this.getClass()
+			.getName());
 	private final static ObjectMapper objectMapper = new ObjectMapper();
+	// maybe put this somewhere else
+	private final static MimetypesFileTypeMap mimeMap = new MimetypesFileTypeMap();
+	private final static String mimeTypes = "image/gif gif GIF\napplication/gpx+xml gpx GPX\nimage/jpeg jpeg jpg jpe JPG";
+	static {
+		mimeMap.addMimeTypes(mimeTypes);
+	}
+
 	static ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
 		@Override
 		protected SimpleDateFormat initialValue() {
@@ -76,6 +87,77 @@ public class PageView extends org.magneato.resources.ContentView {
 		return uri;
 	}
 
+	public String getFirst(String mimeType) {
+		if (jsonNode != null) {
+			JsonNode node = jsonNode.get("files");
+			if (node != null) {
+				int size = node.size();
+				for (int i = 0; i < size; i++) {
+					String url = node.get(i).get("url").asText();
+					if (!url.isEmpty()) {
+						if (mimeMap.getContentType(url).startsWith(mimeType)) {
+							return url;
+						}
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+	
+	public String getThumbnail(String mimeType) {
+		if (jsonNode != null) {
+			JsonNode node = jsonNode.get("files");
+			if (node != null) {
+				int size = node.size();
+				for (int i = 0; i < size; i++) {
+					String url = node.get(i).get("thumbnailUrl").asText();
+					if (!url.isEmpty()) {
+						if (mimeMap.getContentType(url).startsWith(mimeType)) {
+							return url;
+						}
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+
+	public List<String> getFiles(String mimeType) {
+		List<String> fileUrls = new ArrayList<String>();
+
+		if (jsonNode != null) {
+			JsonNode node = jsonNode.get("files");
+			if (node != null) {
+				int size = node.size();
+				for (int i = 0; i < size; i++) {
+					String url = node.get(i).get("url").asText();
+					if (!url.isEmpty()) {
+						if (mimeMap.getContentType(url).startsWith(mimeType)) {
+							fileUrls.add(url);
+						}
+					}
+				}
+			}
+		}
+
+		return fileUrls;
+	}
+
+	public void getParent() {
+		// return Parent url + title ?
+	}
+
+	public void getChildren() {
+
+	}
+
+	public void getSimilar() {
+
+	}
+
 	public String getId() {
 		return uri.substring(0, uri.lastIndexOf('/'));
 	}
@@ -87,5 +169,4 @@ public class PageView extends org.magneato.resources.ContentView {
 	public JsonNode toJsonNode(String json) {
 		return StringHelper.toJsonNode(json);
 	}
-
 }
