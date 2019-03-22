@@ -46,6 +46,23 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 	private double totalDistance;
 
 	private double lastHeight;
+
+	public long getTotalSeconds() {
+		return totalSeconds;
+	}
+
+	public double getTotalDistance() {
+		return totalDistance;
+	}
+
+	public double getTotalAscent() {
+		return totalAscent;
+	}
+
+	public int getVam() {
+		return vam;
+	}
+
 	private double totalAscent;
 	private double runningAscent;
 
@@ -60,12 +77,7 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 	
 	private final Log _logger = LogFactory.getLog(GpxParser.class);
 
-
-	public GpxParser() {
-		clear();
-	}
-
-	public void clear() {
+	private void clear() {
 		totalPoints = 0;
 		totalDistance = 0.0;
 
@@ -171,7 +183,6 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 	public void endElement(String uri, String localName, String qName)
 			throws SAXException {
 		String currentElement = elementNames.pop();
-		// System.out.println("currentElement " + currentElement);
 
 		if (totalPoints > 0 && currentElement != null) {
 			if (currentElement.compareToIgnoreCase("ele") == 0) {
@@ -182,7 +193,7 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 				// through, why not just subtract first data point at end?
 				if (lastHeight < 0.0) {
 					// first time thru'
-					//System.out.println("first time through " + elevation);
+					System.out.println("first time through " + elevation);
 					lastHeight = elevation;
 				}
 
@@ -204,15 +215,11 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 
 				lastHeight = elevation;
 
-				//System.out.println("total Ascent " + totalAscent + " ascent "
-				//		+ runningAscent + " distance " + totalDistance);
+				System.out.println("total Ascent " + totalAscent + " ascent "
+						+ runningAscent + " distance " + totalDistance);
 			} else {
 				if (currentElement.compareToIgnoreCase("time") == 0) {
-
 					Calendar c = this.readDate(contentBuffer.toString().trim());
-					// System.out.println("time " + contentBuffer.toString()
-					// + " time in millis " + c.getTimeInMillis());
-
 				} else if (currentElement.compareToIgnoreCase("trkpt") == 0) {
 					if (totalPoints > 1) {
 
@@ -224,9 +231,9 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 								newPoint.getLonAsFloat());
 						totalDistance += distance;
 
-						// System.out
-						// .println("distance from last point " + distance
-						// + " total distance " + totalDistance);
+						 System.out
+						 .println("distance from last point " + distance
+						 + " total distance " + totalDistance);
 					}
 				}
 			}
