@@ -61,6 +61,8 @@ public class PageViewTest {
 
 		List<String> files = view.getFiles("image");
 		Assert.assertEquals(files.size(), 3);
+		Assert.assertEquals("/library/images/3ma/3marvirgule.jpg", files.get(0));
+			
 	}
 
 	@Test
