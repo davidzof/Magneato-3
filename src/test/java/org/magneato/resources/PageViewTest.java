@@ -70,6 +70,6 @@ public class PageViewTest {
 		PageView view = createMocks();
 
 		Assert.assertEquals("/library/images/Cou/Couloir_Virgule_freshies.gpx",
-				view.getFirst("application/gpx"));
+				view.getFirst("gpx"));
 	}
 }

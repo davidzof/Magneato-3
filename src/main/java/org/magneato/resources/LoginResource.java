@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 public class LoginResource {
     @GET
     public View login() {
-        return new LoginView();
+        return new FTLView("login");
     }
 
     @GET @Path("error")
