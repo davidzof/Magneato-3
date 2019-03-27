@@ -6,6 +6,7 @@ import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.magneato.MagneatoConfiguration;
 import org.magneato.managed.ManagedElasticClient;
+import org.magneato.service.GpxParser;
 import org.magneato.utils.UploadHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -149,7 +150,12 @@ public class UploadResource {
             @FormDataParam("file") final InputStream fileInputStream
     ) {
         log.info("uploadGpx");
-        String content = "{\"title\":\"XXX\",\"child\":false,\"activity_c\":\"Mountain Biking\",\"trip_date\":\"08/04/2015\",\"content\":\"\",\"conditions\":\"\",\"difficulty_c\":{\"rating\":\"null\"},\"technical_c\":{\"imperial\":\"false\",\"distance\":33,\"climb\":800},\"files\":[{\"name\":\"46f42e49-6c34-4052-86ce-a225efc99b87_08042015-tour-du-cret-de-chazay.gpx\",\"size\":\"498815\",\"url\":\"/library/images/46f/b87/46f42e49-6c34-4052-86ce-a225efc99b87_08042015-tour-du-cret-de-chazay.gpx\",\"thumbnailUrl\":\"/library/gpxIcon.jpg\",\"deleteUrl\":\"/delete/images/46f/b87/46f42e49-6c34-4052-86ce-a225efc99b87_08042015-tour-du-cret-de-chazay.gpx\",\"deleteType\":\"DELETE\"}],\"metadata\":{\"canonical_url\":\"tour-of-the-cret-de-chazay-route\",\"edit_template\":\"tripreport\",\"display_template\":\"tripreport\",\"create_date\":\"2015-08-05 10:24:11\",\"ip_addr\":\"178.79.148.217\",\"owner\":\"davidof\",\"groups\":[\"editors\"],\"relations\":[\"r95eec7d13e7a\"],\"perms\":11275}}";
+
+        String content = "{\"title\":\"%s\",\"child\":false,\"activity_c\":\"Mountain Biking\",\"trip_date\":\"08/04/2015\",\"content\":\"\",\"conditions\":\"\",\"difficulty_c\":{\"rating\":\"null\"},\"technical_c\":{\"imperial\":\"false\",\"distance\":33,\"climb\":800},\"files\":[{\"name\":\"46f42e49-6c34-4052-86ce-a225efc99b87_08042015-tour-du-cret-de-chazay.gpx\",\"size\":\"498815\",\"url\":\"/library/images/46f/b87/46f42e49-6c34-4052-86ce-a225efc99b87_08042015-tour-du-cret-de-chazay.gpx\",\"thumbnailUrl\":\"/library/gpxIcon.jpg\",\"deleteUrl\":\"/delete/images/46f/b87/46f42e49-6c34-4052-86ce-a225efc99b87_08042015-tour-du-cret-de-chazay.gpx\",\"deleteType\":\"DELETE\"}],\"metadata\":{\"canonical_url\":\"tour-of-the-cret-de-chazay-route\",\"edit_template\":\"tripreport\",\"display_template\":\"tripreport\",\"create_date\":\"2015-08-05 10:24:11\",\"ip_addr\":\"178.79.148.217\",\"owner\":\"davidof\",\"groups\":[\"editors\"],\"relations\":[\"r95eec7d13e7a\"],\"perms\":11275}}";
+
+        GpxParser gpxParser = new GpxParser();
+        // maybe save to disk first?
+        gpxParser.read(fileInputStream);
 // handle bad data...
         String thumbName = null;
         final String mimeType = body.getMediaType().toString();

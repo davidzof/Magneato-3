@@ -33,6 +33,8 @@ import org.xml.sax.SAXException;
 
 /**
  * Parse the popular Garmin GPX format
+ *
+ * Can contain multiple tracks
  * 
  * @author dgeorge
  * 
@@ -41,11 +43,31 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 	private Stack<String> elementNames;
 	private ArrayList<Point> points = new ArrayList<Point>();
 	private float minLat, maxLat, minLon, maxLon;
+	private float maxHeight, minHeight;
 	private int totalPoints;
 	private long totalSeconds;
 	private double totalDistance;
+	private String name;
 
 	private double lastHeight;
+	private double totalAscent;
+	private double runningAscent;
+
+	private double totalDescent;
+	private int vam;
+
+	private StringBuilder contentBuffer;
+	private double currentDistance;
+
+	private static final SimpleDateFormat sdfNoMillis = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+	private static final SimpleDateFormat sdfMillis = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+	private final Log _logger = LogFactory.getLog(GpxParser.class);
+
+
+	public String getName() {
+		return name;
+	}
 
 	public long getTotalSeconds() {
 		return totalSeconds;
@@ -59,23 +81,14 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 		return totalAscent;
 	}
 
+	public double getTotalDescent() {
+		return totalAscent;
+	}
+
 	public int getVam() {
 		return vam;
 	}
 
-	private double totalAscent;
-	private double runningAscent;
-
-	private double totalDescent;
-	private int vam;
-
-	private StringBuilder contentBuffer;
-	private double currentDistance;
-	
-	private static final SimpleDateFormat sdfNoMillis = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-	private static final SimpleDateFormat sdfMillis = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-	
-	private final Log _logger = LogFactory.getLog(GpxParser.class);
 
 	private void clear() {
 		totalPoints = 0;
@@ -137,28 +150,22 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 		/**
 		 * GPX Format:-
 		 * 
-		 * <trk> <name>SEP-01-12 01:33:42 PM</name> <trkseg> <trkpt lat="45.205372"
-		 * lon="5.738155"><ele>248.64</ele><time>2012-09-01T11:14:12Z</time></trkpt>
+		 * <gpx><metadata></metadata><trk> <name>My Track</name><trkseg><trkpt lat="45.205372"
+		 * lon="5.738155"><ele>248.64</ele><time>2012-09-01T11:14:12Z</time></trkpt></gpx>
 		 */
-
 		if (qName.compareToIgnoreCase("bounds") == 0) {
-
 			minLat = new Float(attributes.getValue("minlat")).floatValue();
 			maxLat = new Float(attributes.getValue("maxlat")).floatValue();
 			minLon = new Float(attributes.getValue("minlon")).floatValue();
 			maxLon = new Float(attributes.getValue("maxlon")).floatValue();
-
-		} else {
-
-			// the <trkpt> element has attributes which specify latitude and
-			// longitude (it has child elements that specify the time and
-			// elevation)
-			if (qName.compareToIgnoreCase("trkpt") == 0) {
+		} else if (qName.compareToIgnoreCase("trkpt") == 0) {
+				// the <trkpt> element has attributes which specify latitude and
+				// longitude (it has child elements that specify the time and
+				// elevation)
 				totalPoints++;
 				Point point = new Point(attributes.getValue("lat"),
 						attributes.getValue("lon"));
 				points.add(point);
-			}
 		}
 
 		// Clear content buffer
@@ -183,57 +190,63 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 	public void endElement(String uri, String localName, String qName)
 			throws SAXException {
 		String currentElement = elementNames.pop();
+		if (currentElement != null) {
+		    switch(currentElement) {
+		    case "name":
+		    	name = contentBuffer.toString();
+		    	break;
+		    }
 
-		if (totalPoints > 0 && currentElement != null) {
-			if (currentElement.compareToIgnoreCase("ele") == 0) {
-				double elevation = Double.parseDouble(contentBuffer.toString()
-						.trim());
+			if (totalPoints > 0) {
+				if (currentElement.compareToIgnoreCase("ele") == 0) {
+					double elevation = Double.parseDouble(contentBuffer.toString()
+							.trim());
 
-				// this is bad code, need another way of determining first time
-				// through, why not just subtract first data point at end?
-				if (lastHeight < 0.0) {
-					// first time thru'
-					System.out.println("first time through " + elevation);
-					lastHeight = elevation;
-				}
-
-				if (elevation > lastHeight) {
-					// we are climbing
-					if (runningAscent >= 0.0) {
-						// climbing trend
-						runningAscent += elevation - lastHeight;
+					// this is bad code, need another way of determining first time
+					// through, why not just subtract first data point at end?
+					if (lastHeight < 0.0) {
+						// first time thru'
+						System.out.println("first time through " + elevation);
+						lastHeight = elevation;
 					}
-				} else {
-					// we are descending
 
+					if (elevation > lastHeight) {
+						// we are climbing
+						if (runningAscent >= 0.0) {
+							// climbing trend
+							runningAscent += elevation - lastHeight;
+						}
+					} else {
+						// we are descending
 						if (runningAscent > 10.0) {
 							totalAscent += runningAscent;
-							
-					}
+
+						}
 						runningAscent = 0.0;
-				}
+					}
 
-				lastHeight = elevation;
+					lastHeight = elevation;
 
-				System.out.println("total Ascent " + totalAscent + " ascent "
-						+ runningAscent + " distance " + totalDistance);
-			} else {
-				if (currentElement.compareToIgnoreCase("time") == 0) {
-					Calendar c = this.readDate(contentBuffer.toString().trim());
-				} else if (currentElement.compareToIgnoreCase("trkpt") == 0) {
-					if (totalPoints > 1) {
+					System.out.println("total Ascent " + totalAscent + " ascent "
+							+ runningAscent + " distance " + totalDistance);
+				} else {
+					if (currentElement.compareToIgnoreCase("time") == 0) {
+						Calendar c = this.readDate(contentBuffer.toString().trim());
+					} else if (currentElement.compareToIgnoreCase("trkpt") == 0) {
+						if (totalPoints > 1) {
 
-						Point oldPoint = points.get(totalPoints - 2);
-						Point newPoint = points.get(totalPoints - 1);
-						double distance = gps2m(oldPoint.getLatAsFloat(),
-								oldPoint.getLonAsFloat(),
-								newPoint.getLatAsFloat(),
-								newPoint.getLonAsFloat());
-						totalDistance += distance;
+							Point oldPoint = points.get(totalPoints - 2);
+							Point newPoint = points.get(totalPoints - 1);
+							double distance = gps2m(oldPoint.getLatAsFloat(),
+									oldPoint.getLonAsFloat(),
+									newPoint.getLatAsFloat(),
+									newPoint.getLonAsFloat());
+							totalDistance += distance;
 
-						 System.out
-						 .println("distance from last point " + distance
-						 + " total distance " + totalDistance);
+							System.out
+									.println("distance from last point " + distance
+											+ " total distance " + totalDistance);
+						}
 					}
 				}
 			}
@@ -252,7 +265,7 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 	}
 
 	/*
-	 * Distance in meters between two points
+	 * Distance in meters between two points, what about vertical?
 	 */
 	private double gps2m(float lat_a, float lng_a, float lat_b, float lng_b) {
 		float pk = (float) (180 / 3.14169);
