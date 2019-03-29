@@ -1,21 +1,25 @@
 package org.magneato.resources;
 
 import io.dropwizard.views.View;
+
 import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.magneato.MagneatoConfiguration;
 import org.magneato.managed.ManagedElasticClient;
 import org.magneato.service.GpxParser;
+import org.magneato.utils.PageUtils;
 import org.magneato.utils.UploadHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,6 +32,7 @@ import java.util.Map;
 public class UploadResource {
     private ManagedElasticClient repository;
     private static final int SUBDIR_SIZE = 3; // TODO user define
+	PageUtils pageUtils;
 
     private final Logger log = LoggerFactory.getLogger(this.getClass()
             .getName());
@@ -38,6 +43,7 @@ public class UploadResource {
     public UploadResource(MagneatoConfiguration configuration,
             ManagedElasticClient repository) {
         this.repository = repository;
+        this.pageUtils = new PageUtils();
 
         Map<String, String> overrides = configuration.getAssetsConfiguration()
                 .getOverrides();
@@ -55,9 +61,11 @@ public class UploadResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public String upload(
+    		
             @FormDataParam("files") final FormDataBodyPart body,
             @FormDataParam("files") final InputStream fileInputStream
     ) {
+    	
         String thumbName = null;
         final String mimeType = body.getMediaType().toString();
         String fileName = body.getContentDisposition().getFileName();
@@ -146,10 +154,17 @@ public class UploadResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.TEXT_HTML)
     public View uploadGPX(
+    		@QueryParam("parent") String parent,
             @FormDataParam("file") final FormDataBodyPart body,
             @FormDataParam("file") final InputStream fileInputStream
     ) {
         log.info("uploadGpx");
+        if (parent != null && !parent.isEmpty()) {
+    		log.debug("parent " + parent);
+    	
+			String xx = repository.get(parent); // get parent, how to merge this? only merge clonable fields where target is empty
+			// merge
+    	}
 
         String content = "{\"title\":\"%s\",\"child\":false,\"activity_c\":\"Mountain Biking\",\"trip_date\":\"08/04/2015\",\"content\":\"\",\"conditions\":\"\",\"difficulty_c\":{\"rating\":\"null\"},\"technical_c\":{\"imperial\":\"false\",\"distance\":33,\"climb\":800},\"files\":[{\"name\":\"46f42e49-6c34-4052-86ce-a225efc99b87_08042015-tour-du-cret-de-chazay.gpx\",\"size\":\"498815\",\"url\":\"/library/images/46f/b87/46f42e49-6c34-4052-86ce-a225efc99b87_08042015-tour-du-cret-de-chazay.gpx\",\"thumbnailUrl\":\"/library/gpxIcon.jpg\",\"deleteUrl\":\"/delete/images/46f/b87/46f42e49-6c34-4052-86ce-a225efc99b87_08042015-tour-du-cret-de-chazay.gpx\",\"deleteType\":\"DELETE\"}],\"metadata\":{\"canonical_url\":\"tour-of-the-cret-de-chazay-route\",\"edit_template\":\"tripreport\",\"display_template\":\"tripreport\",\"create_date\":\"2015-08-05 10:24:11\",\"ip_addr\":\"178.79.148.217\",\"owner\":\"davidof\",\"groups\":[\"editors\"],\"relations\":[\"r95eec7d13e7a\"],\"perms\":11275}}";
 
@@ -208,7 +223,10 @@ public class UploadResource {
     @GET
     @Path("/gpxview")
     @RolesAllowed({ "ADMIN", "EDITOR" })
-    public View uploadView() {
-        return new FTLView("uploadgpx");
+    public View uploadView(@Context HttpServletRequest request) {
+    	String id = pageUtils.getId(request.getHeader("referer"));
+    	FTLView view = new FTLView("uploadgpx");
+        view.setValue(id);;
+        return view;
     }
 }

@@ -19,6 +19,7 @@
         <div class="form-group row">
             <label>Select gpx file to upload:</label>
             <input class="form-control-file" type="file" name="file" id="fileToUpload"  accept=".gpx, application/gpx">
+            <input type="hidden" name="parent" value="${value}">
         </div>
         <div class="form-group row">
             <input type="submit" value="Upload GPX" name="submit" id="i_submit">

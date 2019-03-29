@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.magneato.MagneatoConfiguration;
 import org.magneato.managed.ManagedElasticClient;
+import org.magneato.utils.PageUtils;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
@@ -24,9 +25,11 @@ public class PageResourceTest {
 	private final static ObjectMapper objectMapper = new ObjectMapper();
 	HttpServletRequest request;
 	SecurityContext security;
+	PageUtils pageUtils;
 
 	@Before
 	public void setUp() {
+		 pageUtils = new PageUtils();
 		MockitoAnnotations.initMocks(this);
 	}
 
@@ -54,7 +57,7 @@ public class PageResourceTest {
 	public void simpleCase() throws IOException {
 		PageResource pageResource = createMocks();
 		JsonNode rootNode = objectMapper.reader().readTree(content1);
-		String cloned = pageResource.cloneContent(rootNode.toString());
+		String cloned = pageUtils.cloneContent(rootNode.toString());
 		System.out.println(cloned);
 	}
 
@@ -62,7 +65,8 @@ public class PageResourceTest {
 	public void clonedObjectElement() throws IOException {
 		PageResource pageResource = createMocks();
 		JsonNode rootNode = objectMapper.reader().readTree(content2);
-		String cloned = pageResource.cloneContent(rootNode.toString());
+		
+		String cloned = pageUtils.cloneContent(rootNode.toString());
 		System.out.println("cloned " + cloned);
 	}
 

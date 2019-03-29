@@ -21,7 +21,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Stack;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -33,37 +32,37 @@ import org.xml.sax.SAXException;
 
 /**
  * Parse the popular Garmin GPX format
- *
+ * 
  * Can contain multiple tracks
  * 
  * @author dgeorge
  * 
  */
 public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
-	private Stack<String> elementNames;
+	private State state = State.START;
+	private String name;
+	Point currentPoint;
+	private double ascent;
+	private double descent;
+
 	private ArrayList<Point> points = new ArrayList<Point>();
 	private float minLat, maxLat, minLon, maxLon;
 	private float maxHeight, minHeight;
-	private int totalPoints;
+
 	private long totalSeconds;
 	private double totalDistance;
-	private String name;
 
-	private double lastHeight;
-	private double totalAscent;
-	private double runningAscent;
-
-	private double totalDescent;
 	private int vam;
 
 	private StringBuilder contentBuffer;
 	private double currentDistance;
 
-	private static final SimpleDateFormat sdfNoMillis = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-	private static final SimpleDateFormat sdfMillis = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+	private static final SimpleDateFormat sdfNoMillis = new SimpleDateFormat(
+			"yyyy-MM-dd'T'HH:mm:ss'Z'");
+	private static final SimpleDateFormat sdfMillis = new SimpleDateFormat(
+			"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
 	private final Log _logger = LogFactory.getLog(GpxParser.class);
-
 
 	public String getName() {
 		return name;
@@ -78,33 +77,28 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 	}
 
 	public double getTotalAscent() {
-		return totalAscent;
+		return ascent;
 	}
 
 	public double getTotalDescent() {
-		return totalAscent;
+		return descent;
 	}
 
 	public int getVam() {
 		return vam;
 	}
 
-
 	private void clear() {
-		totalPoints = 0;
 		totalDistance = 0.0;
-
-		lastHeight = -1.0;
-		System.out.println("lastHeight " + lastHeight);
-		totalAscent = 0;
-
-		runningAscent = 0;
+		ascent = 0;
+		descent = 0;
 		contentBuffer = new StringBuilder();
-		elementNames = new Stack<String>();
 	}
 
 	/*
 	 * READ GPX DATA FILE
+	 * 
+	 * We merge all segments
 	 * 
 	 * Profile Profile data should be of the form: [0, 200.60, 'null'], [1,
 	 * 230.60, '4.5%']... where the first variable is the distance, the second
@@ -147,32 +141,60 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 			Attributes attributes) throws SAXException {
 		// the <bounds> element has attributes which specify min & max latitude
 		// and longitude
+
+		switch (state) {
+		case START:
+			if (qName.compareToIgnoreCase("gpx") == 0) {
+				state = State.GPX;
+			}
+			break;
+		case GPX:
+			if (qName.compareToIgnoreCase("trk") == 0) {
+				state = State.TRK;
+			}
+			break;
+		case TRK:
+			if (qName.compareToIgnoreCase("name") == 0) {
+				state = State.NAME;
+			}
+			if (qName.compareToIgnoreCase("trkseg") == 0) {
+				state = State.TRKSEG;
+			}
+			break;
+		case TRKSEG:
+			if (qName.compareToIgnoreCase("trkpt") == 0) {
+				state = State.TRKPT;
+				currentPoint = new Point(attributes.getValue("lat"),
+						attributes.getValue("lon"));
+				points.add(currentPoint);
+			}
+			break;
+		case TRKPT:
+			if (qName.compareToIgnoreCase("ele") == 0) {
+				state = State.ELE;
+			}
+			if (qName.compareToIgnoreCase("time") == 0) {
+				state = State.TIME;
+			}
+			break;
+		}
 		/**
 		 * GPX Format:-
 		 * 
-		 * <gpx><metadata></metadata><trk> <name>My Track</name><trkseg><trkpt lat="45.205372"
-		 * lon="5.738155"><ele>248.64</ele><time>2012-09-01T11:14:12Z</time></trkpt></gpx>
+		 * <gpx><metadata></metadata><trk><name>My Track</name><trkseg><trkpt
+		 * lat="45.205372"
+		 * lon="5.738155"><ele>248.64</ele><time>2012-09-01T11:14
+		 * :12Z</time></trkpt><trkseg><trk></gpx>
 		 */
 		if (qName.compareToIgnoreCase("bounds") == 0) {
 			minLat = new Float(attributes.getValue("minlat")).floatValue();
 			maxLat = new Float(attributes.getValue("maxlat")).floatValue();
 			minLon = new Float(attributes.getValue("minlon")).floatValue();
 			maxLon = new Float(attributes.getValue("maxlon")).floatValue();
-		} else if (qName.compareToIgnoreCase("trkpt") == 0) {
-				// the <trkpt> element has attributes which specify latitude and
-				// longitude (it has child elements that specify the time and
-				// elevation)
-				totalPoints++;
-				Point point = new Point(attributes.getValue("lat"),
-						attributes.getValue("lon"));
-				points.add(point);
 		}
 
 		// Clear content buffer
 		contentBuffer.delete(0, contentBuffer.length());
-
-		// Store name of current element in stack
-		elementNames.push(qName);
 	}
 
 	/*
@@ -189,72 +211,60 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 	 */
 	public void endElement(String uri, String localName, String qName)
 			throws SAXException {
-		String currentElement = elementNames.pop();
-		if (currentElement != null) {
-		    switch(currentElement) {
-		    case "name":
-		    	name = contentBuffer.toString();
-		    	break;
-		    }
 
-			if (totalPoints > 0) {
-				if (currentElement.compareToIgnoreCase("ele") == 0) {
-					double elevation = Double.parseDouble(contentBuffer.toString()
-							.trim());
+		switch (state) {
+		case TRKPT:
+			if (qName.compareToIgnoreCase("trkpt") == 0) {
+				int size = points.size();
+				if (size > 1) {
+					Point oldPoint = points.get(size - 2);
 
-					// this is bad code, need another way of determining first time
-					// through, why not just subtract first data point at end?
-					if (lastHeight < 0.0) {
-						// first time thru'
-						System.out.println("first time through " + elevation);
-						lastHeight = elevation;
-					}
+					double distance = distance(oldPoint.getLatAsDouble(),
+							currentPoint.getLatAsDouble(),
+							oldPoint.getLonAsDouble(),
 
-					if (elevation > lastHeight) {
-						// we are climbing
-						if (runningAscent >= 0.0) {
-							// climbing trend
-							runningAscent += elevation - lastHeight;
-						}
-					} else {
-						// we are descending
-						if (runningAscent > 10.0) {
-							totalAscent += runningAscent;
+							currentPoint.getLonAsDouble(),
+							oldPoint.getElevation(),
+							currentPoint.getElevation());
 
-						}
-						runningAscent = 0.0;
-					}
-
-					lastHeight = elevation;
-
-					System.out.println("total Ascent " + totalAscent + " ascent "
-							+ runningAscent + " distance " + totalDistance);
+					totalDistance += distance;
+				}
+				state = State.TRKSEG;
+			}
+			break;
+		case NAME:
+			name = contentBuffer.toString();
+			state = State.TRK;
+			break;
+		case ELE:
+			// http://www.gpsvisualizer.com/tutorials/elevation_gain.html
+			currentPoint.setElevation(contentBuffer.toString().trim());
+			if (points.size() > 1) {
+				double lastElevation = (points.get(points.size() - 2))
+						.getElevation();
+				double difference = currentPoint.getElevation() - lastElevation;
+				if (difference > 0) {
+					// we are climbing
+					System.out.println("ascent " + ascent);
+					ascent += difference;
 				} else {
-					if (currentElement.compareToIgnoreCase("time") == 0) {
-						Calendar c = this.readDate(contentBuffer.toString().trim());
-					} else if (currentElement.compareToIgnoreCase("trkpt") == 0) {
-						if (totalPoints > 1) {
-
-							Point oldPoint = points.get(totalPoints - 2);
-							Point newPoint = points.get(totalPoints - 1);
-							double distance = gps2m(oldPoint.getLatAsFloat(),
-									oldPoint.getLonAsFloat(),
-									newPoint.getLatAsFloat(),
-									newPoint.getLonAsFloat());
-							totalDistance += distance;
-
-							System.out
-									.println("distance from last point " + distance
-											+ " total distance " + totalDistance);
-						}
-					}
+					System.out.println("descent " + descent);
+					descent += difference;
 				}
 			}
+
+			state = State.TRKPT;
+			break;
+		case TIME:
+			Calendar c = this.readDate(contentBuffer.toString().trim());
+			state = State.TRKPT;
+			break;
+
 		}
 	}
 
 	public int getTotalPoints() {
-		return totalPoints;
+		return points.size();
 	}
 
 	// TODO: do we need to copy this?, I think so because we could have someone
@@ -264,29 +274,10 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 		return points;
 	}
 
-	/*
-	 * Distance in meters between two points, what about vertical?
-	 */
-	private double gps2m(float lat_a, float lng_a, float lat_b, float lng_b) {
-		float pk = (float) (180 / 3.14169);
-
-		float a1 = lat_a / pk;
-		float a2 = lng_a / pk;
-		float b1 = lat_b / pk;
-		float b2 = lng_b / pk;
-
-		double t1 = Math.cos(a1) * Math.cos(a2) * Math.cos(b1) * Math.cos(b2);
-		double t2 = Math.cos(a1) * Math.sin(a2) * Math.cos(b1) * Math.sin(b2);
-		double t3 = Math.sin(a1) * Math.sin(b1);
-		double tt = Math.acos(t1 + t2 + t3);
-
-		return 6366000 * tt;
-	}
-
 	private Calendar readDate(String date) {
 		Calendar c = Calendar.getInstance();
 		Date d;
-		
+
 		try {
 			d = sdfNoMillis.parse(date);
 		} catch (ParseException e) {
@@ -297,9 +288,50 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 				return null;
 			}
 		}
-		
+
 		c.setTime(d);
 		return c;
 	}
 
+	/**
+	 * Calculate distance between two points in latitude and longitude taking
+	 * into account height difference. If you are not interested in height
+	 * difference pass 0.0. Uses Haversine method as its base.
+	 * 
+	 * lat1, lon1 Start point lat2, lon2 End point el1 Start altitude in meters
+	 * el2 End altitude in meters
+	 * 
+	 * @returns Distance in Meters
+	 */
+	public static double distance(double lat1, double lat2, double lon1,
+			double lon2, double el1, double el2) {
+
+		final int R = 6371; // Radius of the earth
+
+		double latDistance = Math.toRadians(lat2 - lat1);
+		double lonDistance = Math.toRadians(lon2 - lon1);
+		double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+				+ Math.cos(Math.toRadians(lat1))
+				* Math.cos(Math.toRadians(lat2)) * Math.sin(lonDistance / 2)
+				* Math.sin(lonDistance / 2);
+		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+		double distance = R * c * 1000; // convert to meters
+
+		double height = el1 - el2;
+
+		distance = Math.pow(distance, 2) + Math.pow(height, 2);
+
+		return Math.sqrt(distance);
+	}
+}
+
+enum State {
+	START, GPX, // from Start state
+	METADATA, // from GPX state
+	TRK, // from GPX state
+	NAME, // from TRK state
+	TRKSEG, // from TRK state
+	TRKPT, // from TRKSEG state
+	ELE, // from TRKSEG state
+	TIME // from TRKSET stage
 }

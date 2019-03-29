@@ -3,11 +3,19 @@ package org.magneato.service;
 public class Point {
 	String latitude;
 	String longitude;
-	String height;
+	String elevation;
 
 	public Point(String latitude, String longitude) {
 		this.latitude = latitude;
 		this.longitude = longitude;
+	}
+	
+	public void setElevation(String elevation) {
+		this.elevation = elevation;
+	}
+	
+	public double getElevation() {
+		return Double.parseDouble(elevation);
 	}
 
 	public String getLatitude() {
@@ -18,11 +26,11 @@ public class Point {
 		return longitude;
 	}
 	
-	public float getLatAsFloat() {
-		return Float.parseFloat(latitude);
+	public double getLatAsDouble() {
+		return Double.parseDouble(latitude);
 	}
 	
-	public float getLonAsFloat() {
-		return Float.parseFloat(longitude);
+	public double getLonAsDouble() {
+		return Double.parseDouble(longitude);
 	}
 }

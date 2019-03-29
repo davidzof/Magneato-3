@@ -1,31 +1,41 @@
 package org.magneato.resources;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.magneato.utils.StringHelper.toSlug;
 import io.dropwizard.views.View;
-import org.magneato.MagneatoConfiguration;
-import org.magneato.managed.ManagedElasticClient;
-import org.magneato.service.MetaData;
-import org.magneato.service.Template;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.annotation.security.RolesAllowed;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.text.Normalizer;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.regex.Pattern;
 
-import static org.magneato.utils.StringHelper.toSlug;
+import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.UriBuilder;
+
+import org.magneato.MagneatoConfiguration;
+import org.magneato.managed.ManagedElasticClient;
+import org.magneato.service.MetaData;
+import org.magneato.service.Template;
+import org.magneato.utils.PageUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 // https://github.com/wdawson/dropwizard-auth-example/blob/master/pom.xml
 /*
@@ -42,10 +52,13 @@ public class PageResource {
 	private final Logger log = LoggerFactory.getLogger(this.getClass()
 			.getName());
 
+	PageUtils pageUtils;
+
 	public PageResource(MagneatoConfiguration configuration,
 			ManagedElasticClient repository) {
 		this.templates = configuration.getTemplates();
 		this.repository = repository;
+		this.pageUtils = new PageUtils();
 
 		/*
 		 * Insert default page if it doesn't exist already
@@ -140,67 +153,46 @@ public class PageResource {
 		log.debug("create(" + editTemplate + ", " + displayTemplate + ")");
 
 		if (clone || child) {
-			String referrer = request.getHeader("referer");
+			String id = pageUtils.getId(request.getHeader("referer"));
+			if (id != null) {
+				String body = repository.get(id); // get parent
+				if (body != null) {
+					// clone is always a child page
+					try {
+						// only clone edit/display template, and fields
+						// marked as clonable
+						JsonNode metadata = objectMapper.readTree(body).get(
+								"metadata");
+						editTemplate = metadata.get("edit_template").asText();
+						displayTemplate = metadata.get("display_template")
+								.asText();
 
-			log.debug("referrer " + referrer);
-			if (referrer != null) {
-
-				// format is (in theory) http[s]://host[:port]/id/url
-				int sep = -1;
-				String path = null;
-				try {
-					path = new URL(referrer).getPath();
-					sep = path.lastIndexOf('/');
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
-				log.debug("separator " + sep);
-				if (sep > 0) {
-
-					String id = path.substring(1, sep);
-					log.debug("parent " + id);
-
-					String body = repository.get(id); // get parent
-					if (body != null) {
-						// clone is always a child page
-						try {
-							// only clone edit/display template, and fields
-							// marked as clonable
-							JsonNode metadata = objectMapper.readTree(body)
-									.get("metadata");
-							editTemplate = metadata.get("edit_template")
-									.asText();
-							displayTemplate = metadata.get("display_template")
-									.asText();
-
-						} catch (IOException e) {
-							log.error(e.getMessage());
-							return new ErrorView("404-error");
-						}
-
-						log.debug("parent " + id);
-						// child page inherits
-						// edit_template/display template plus sets parent
-						// relation
-						MetaData metaData = new MetaData()
-								.setEditTemplate(editTemplate)
-								.setViewTemplate(displayTemplate)
-								.setIPAddr(request.getRemoteAddr())
-								.addRelation(id)
-								.setOwner(security.getUserPrincipal().getName());
-
-						EditView view;
-						if (clone) {
-							// we need to set meta data here
-							body = cloneContent(body);
-							log.debug("cloned page, adding " + body);
-							view = new EditView(body, metaData);
-						} else {
-							view = new EditView(metaData);
-						}
-						
-						return view;
+					} catch (IOException e) {
+						log.error(e.getMessage());
+						return new ErrorView("404-error");
 					}
+
+					log.debug("parent " + id);
+					// child page inherits
+					// edit_template/display template plus sets parent
+					// relation
+					MetaData metaData = new MetaData()
+							.setEditTemplate(editTemplate)
+							.setViewTemplate(displayTemplate)
+							.setIPAddr(request.getRemoteAddr()).addRelation(id)
+							.setOwner(security.getUserPrincipal().getName());
+
+					EditView view;
+					if (clone) {
+						// we need to set meta data here
+						body = pageUtils.cloneContent(body);
+						log.debug("cloned page, adding " + body);
+						view = new EditView(body, metaData);
+					} else {
+						view = new EditView(metaData);
+					}
+
+					return view;
 				}
 			}
 		}
@@ -339,49 +331,5 @@ public class PageResource {
 		}
 
 		return data;
-	}
-
-	/*
-	 * Object is not enclosed in braces
-	 */
-	String cloneContent(String content) {
-		StringBuilder cloned = new StringBuilder();
-
-		try {
-			JsonNode rootNode = objectMapper.reader().readTree(content);
-			Iterator<Map.Entry<String, JsonNode>> nodes = rootNode.fields();
-
-			while (nodes.hasNext()) {
-				Map.Entry<String, JsonNode> entry = (Map.Entry<String, JsonNode>) nodes
-						.next();
-
-				if (entry.getKey().endsWith("_c")) {
-					// clone
-					if (cloned.length() > 0) {
-						cloned.append(',');
-					}
-					cloned.append("\"" + entry.getKey() + "\":"
-							+ entry.getValue());
-				} else {
-					if (entry.getValue().isObject()) {
-						String object = cloneContent(entry.getValue()
-								.toString());
-						if (!object.isEmpty()) {
-							if (cloned.length() > 0) {
-								cloned.append(',');
-							}
-							cloned.append("\"" + entry.getKey() + "\":{");
-							cloned.append(object);
-							cloned.append("}");
-						}
-					}
-				}
-			}
-		} catch (IOException e) {
-			log.error("Couldn't clone contents id {}", e.getMessage());
-			return null;
-		}
-
-		return cloned.toString();
 	}
 }
