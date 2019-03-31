@@ -18,7 +18,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -42,20 +41,21 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 	private State state = State.START;
 	private String name;
 	Point currentPoint;
+	Point lastPoint;
+	Point firstPoint;
 	private double ascent;
 	private double descent;
+	private double maxHeight, minHeight;
+	private Calendar c = null;
+	private static final double SEUIL = 5.0;
+	private final Rolling rollingAverage = new Rolling(10); // apply a bit of smoothing to glitchy altitude data
 
-	private ArrayList<Point> points = new ArrayList<Point>();
 	private float minLat, maxLat, minLon, maxLon;
-	private float maxHeight, minHeight;
 
 	private long totalSeconds;
 	private double totalDistance;
 
-	private int vam;
-
 	private StringBuilder contentBuffer;
-	private double currentDistance;
 
 	private static final SimpleDateFormat sdfNoMillis = new SimpleDateFormat(
 			"yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -72,20 +72,48 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 		return totalSeconds;
 	}
 
-	public double getTotalDistance() {
+	public double getDistance() {
 		return totalDistance;
 	}
 
-	public double getTotalAscent() {
+	public double getDistanceKM() {
+		return totalDistance / 1000;
+	}
+	
+	public double getClimb() {
 		return ascent;
 	}
 
-	public double getTotalDescent() {
+	public double getDescent() {
 		return descent;
 	}
 
-	public int getVam() {
-		return vam;
+	public double getMaxElevation() {
+		return maxHeight;
+	}
+
+	public double getMinElevation() {
+		return minHeight;
+	}
+
+	public String getStartLat() {
+		if (firstPoint != null) {
+			return firstPoint.getLatitude();
+		}
+
+		return "";
+	}
+
+	public String getStartLon() {
+		if (firstPoint != null) {
+			return firstPoint.getLongitude();
+		}
+
+		return "";
+	}
+
+	public Date getStartTime() {
+		return c.getTime();
 	}
 
 	private void clear() {
@@ -93,6 +121,10 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 		ascent = 0;
 		descent = 0;
 		contentBuffer = new StringBuilder();
+		firstPoint = null;
+		lastPoint = null;
+		currentPoint = null;
+
 	}
 
 	/*
@@ -164,9 +196,9 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 		case TRKSEG:
 			if (qName.compareToIgnoreCase("trkpt") == 0) {
 				state = State.TRKPT;
+				lastPoint = currentPoint;
 				currentPoint = new Point(attributes.getValue("lat"),
 						attributes.getValue("lon"));
-				points.add(currentPoint);
 			}
 			break;
 		case TRKPT:
@@ -215,19 +247,19 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 		switch (state) {
 		case TRKPT:
 			if (qName.compareToIgnoreCase("trkpt") == 0) {
-				int size = points.size();
-				if (size > 1) {
-					Point oldPoint = points.get(size - 2);
-
-					double distance = distance(oldPoint.getLatAsDouble(),
+				if (lastPoint != null) {
+					double distance = distance(lastPoint.getLatAsDouble(),
 							currentPoint.getLatAsDouble(),
-							oldPoint.getLonAsDouble(),
-
+							lastPoint.getLonAsDouble(),
 							currentPoint.getLonAsDouble(),
-							oldPoint.getElevation(),
+							lastPoint.getElevation(),
 							currentPoint.getElevation());
 
 					totalDistance += distance;
+				} else {
+					// first time through
+					firstPoint = currentPoint;
+					minHeight = currentPoint.getElevation();
 				}
 				state = State.TRKSEG;
 			}
@@ -238,40 +270,43 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 			break;
 		case ELE:
 			// http://www.gpsvisualizer.com/tutorials/elevation_gain.html
-			currentPoint.setElevation(contentBuffer.toString().trim());
-			if (points.size() > 1) {
-				double lastElevation = (points.get(points.size() - 2))
-						.getElevation();
-				double difference = currentPoint.getElevation() - lastElevation;
+			
+			currentPoint.setElevation(rollingAverage.add(Double.parseDouble(contentBuffer.toString().trim())));
+			if (currentPoint.getElevation() > this.maxHeight) {
+				maxHeight = currentPoint.getElevation();
+			}
+			if (currentPoint.getElevation() < minHeight) {
+				minHeight = currentPoint.getElevation();
+			}
+			if (lastPoint != null) {
+				double difference = currentPoint.getElevation() - lastPoint.getElevation();
 				if (difference > 0) {
 					// we are climbing
-					System.out.println("ascent " + ascent);
 					ascent += difference;
 				} else {
-					System.out.println("descent " + descent);
-					descent += difference;
+					descent -= difference;
+
 				}
+
+				/*
+				 * double difference = currentPoint.getElevation() -
+				 * lastElevation; System.out.println("difference " +
+				 * difference); if (difference > SEUIL) { // we are climbing
+				 * lastElevation = currentPoint.getElevation(); ascent +=
+				 * difference; } else if (difference < -SEUIL) { descent +=
+				 * difference; // we are climbing lastElevation =
+				 * currentPoint.getElevation(); }
+				 */
 			}
 
 			state = State.TRKPT;
 			break;
 		case TIME:
-			Calendar c = this.readDate(contentBuffer.toString().trim());
+			c = this.readDate(contentBuffer.toString().trim());
 			state = State.TRKPT;
 			break;
 
 		}
-	}
-
-	public int getTotalPoints() {
-		return points.size();
-	}
-
-	// TODO: do we need to copy this?, I think so because we could have someone
-	// updating the points
-	// while we read them.
-	public ArrayList<Point> getPoints() {
-		return points;
 	}
 
 	private Calendar readDate(String date) {
@@ -301,7 +336,7 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 	 * lat1, lon1 Start point lat2, lon2 End point el1 Start altitude in meters
 	 * el2 End altitude in meters
 	 * 
-	 * @returns Distance in Meters
+	 * @return distance in meters
 	 */
 	public static double distance(double lat1, double lat2, double lon1,
 			double lon2, double el1, double el2) {
@@ -334,4 +369,40 @@ enum State {
 	TRKPT, // from TRKSEG state
 	ELE, // from TRKSEG state
 	TIME // from TRKSET stage
+}
+
+class Rolling {
+
+	private int size;
+	private double total = 0d;
+	private int index = 0;
+	private int count = 0;
+	private double samples[];
+
+	public Rolling(int size) {
+		this.size = size;
+		samples = new double[size];
+		for (int i = 0; i < size; i++)
+			samples[i] = 0d;
+	}
+
+	public double add(double x) {
+		total -= samples[index];
+		samples[index] = x;
+		total += x;
+		if (++index == size) {
+			index = 0; // cheaper than modulus
+		}
+		count++;
+
+		return getAverage();
+	}
+
+	public double getAverage() {
+		if (count < size) {
+			return total / count; // while it is filling up initially
+		} else {
+			return total / size;
+		}
+	}
 }

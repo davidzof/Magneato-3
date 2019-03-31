@@ -254,6 +254,7 @@ public class PageResource {
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
+	@RolesAllowed("EDITOR")
 	@Path("/save/{id}/{uri}")
 	public String update(@PathParam("id") String id,
 			@PathParam("uri") String uri, String body,
@@ -277,7 +278,7 @@ public class PageResource {
 	}
 
 	/**
-	 * Create a new "page" asset. If admin Metadata can be edited Must be an
+	 * Create a new "page" asset. If admin, Metadata can be edited Must be an
 	 * Editor to create new pages
 	 * 
 	 * @param body

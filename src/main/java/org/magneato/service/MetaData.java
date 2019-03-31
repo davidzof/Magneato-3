@@ -24,7 +24,7 @@ public class MetaData {
 	private String ipAddr;
 	private String canonicalUrl;
 
-	static ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+	public static ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
 		@Override
 		protected SimpleDateFormat initialValue() {
 			return new SimpleDateFormat(DATE_FORMAT);
@@ -69,6 +69,11 @@ public class MetaData {
 
 	public MetaData addRelation(String relation) {
 		relations.add(relation);
+		return this;
+	}
+
+	public MetaData setCreateDate(long createDate) {
+		this.createDate = createDate;
 		return this;
 	}
 
