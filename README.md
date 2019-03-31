@@ -6,9 +6,9 @@ Optimized read path, intelligent multilevel caching, Java JVM and a blistering N
 Java core, a flexible Unix-like Security Model as well as multi-layered registration, page creation and comment authentication keeps your data secure.
 Technology
 
-    Based Dropwizard v 1.3.4
-    Elastic for search / facetting / storage
-    Alpaca for page structure
+    Based Dropwizard v 1.3.5
+    ElasticSearch 6.5 for search / facetting / storage
+    Alpaca for forms editing
     NoSQL
 
 Changes in Version 3.0
