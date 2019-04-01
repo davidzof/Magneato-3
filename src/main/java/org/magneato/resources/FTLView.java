@@ -8,7 +8,13 @@ public class FTLView extends View {
     public FTLView(String viewName) {
         super(viewName + ".ftl");
     }
-    
+
+    public FTLView(String viewName, String v) {
+        super(viewName + ".ftl");
+        this.v =v;
+
+    }
+
     public void setValue(String v) {
     	this.v = v;
     }

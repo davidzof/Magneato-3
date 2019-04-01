@@ -36,7 +36,7 @@ public class PageView extends org.magneato.resources.ContentView {
 	static ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
 		@Override
 		protected SimpleDateFormat initialValue() {
-			return new SimpleDateFormat(MetaData.DATE_FORMAT);
+			return new SimpleDateFormat(MetaData.DATETIME_FORMAT);
 		}
 	};
 

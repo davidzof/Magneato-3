@@ -98,7 +98,7 @@ public class Route {
 		try {
 			// MM/DD/YYYY
 			SimpleDateFormat sdf = new SimpleDateFormat(
-					org.magneato.service.MetaData.DATE_FORMAT);
+					org.magneato.service.MetaData.DATETIME_FORMAT);
 			Date d = sdf.parse(metaData.createDate);
 			SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
 			date = dateFormat.format(d);

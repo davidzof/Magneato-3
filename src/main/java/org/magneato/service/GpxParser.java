@@ -52,24 +52,38 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 
 	private float minLat, maxLat, minLon, maxLon;
 
-	private long totalSeconds;
 	private double totalDistance;
 
 	private StringBuilder contentBuffer;
 
-	private static final SimpleDateFormat sdfNoMillis = new SimpleDateFormat(
+	private final SimpleDateFormat sdfNoMillis = new SimpleDateFormat(
 			"yyyy-MM-dd'T'HH:mm:ss'Z'");
-	private static final SimpleDateFormat sdfMillis = new SimpleDateFormat(
+	private final SimpleDateFormat sdfMillis = new SimpleDateFormat(
 			"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+	private final SimpleDateFormat dateFormat = new SimpleDateFormat(
+			"MM/dd/yyyy");
+
+    public final static String DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
+	private int status;
+	private long createDate;
+	private String editTemplate;
+	private String viewTemplate;
+	private String ipAddr;
+	private String canonicalUrl;
+
+	/*public static ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
+		@Override
+		protected SimpleDateFormat initialValue() {
+			return new SimpleDateFormat(DATETIME_FORMAT);
+		}
+	};
+	*/
 
 	private final Log _logger = LogFactory.getLog(GpxParser.class);
 
 	public String getName() {
 		return name;
-	}
-
-	public long getTotalSeconds() {
-		return totalSeconds;
 	}
 
 	public double getDistance() {
@@ -114,6 +128,10 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 
 	public Date getStartTime() {
 		return c.getTime();
+	}
+
+	public String getDate() {
+        return dateFormat.format(c.getTime());
 	}
 
 	private void clear() {
@@ -287,16 +305,6 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 					descent -= difference;
 
 				}
-
-				/*
-				 * double difference = currentPoint.getElevation() -
-				 * lastElevation; System.out.println("difference " +
-				 * difference); if (difference > SEUIL) { // we are climbing
-				 * lastElevation = currentPoint.getElevation(); ascent +=
-				 * difference; } else if (difference < -SEUIL) { descent +=
-				 * difference; // we are climbing lastElevation =
-				 * currentPoint.getElevation(); }
-				 */
 			}
 
 			state = State.TRKPT;

@@ -15,7 +15,7 @@ public class MetaData {
 	private int perms;
 	private ArrayList<String> relations = new ArrayList<String>();
 	private ArrayList<String> groups = new ArrayList<String>();
-	public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+	public static final String DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
 	private int status;
 	private long createDate;
@@ -27,7 +27,7 @@ public class MetaData {
 	public static ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
 		@Override
 		protected SimpleDateFormat initialValue() {
-			return new SimpleDateFormat(DATE_FORMAT);
+			return new SimpleDateFormat(DATETIME_FORMAT);
 		}
 	};
 
