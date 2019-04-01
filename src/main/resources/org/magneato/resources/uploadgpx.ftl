@@ -15,13 +15,14 @@
 <body>
 <div class="container">
     <h1>Upload GPX</h1>
-    <form action="/uploadgpx" method="post" enctype="multipart/form-data">
+    <form action="/uploadgpx?parent=r35093708f43f" method="post" enctype="multipart/form-data">
         <div class="form-group row">
             <label>Select gpx file to upload:</label>
-            <input class="form-control-file" type="file" name="file" id="fileToUpload"  accept=".gpx, application/gpx">
+            <input class="form-control-file" type="file" name="file" id="fileToUpload"  accept=".gpx, application/octet-stream">
             <#if value?? >
                 <input type="hidden" name="parent" value="${value}">
             </#if>
+            
         </div>
         <div class="form-group row">
             <input type="submit" value="Upload GPX" name="submit" id="i_submit">

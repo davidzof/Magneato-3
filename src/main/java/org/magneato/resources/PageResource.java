@@ -184,7 +184,8 @@ public class PageResource {
 
 					EditView view;
 					if (clone) {
-						// we need to set meta data here
+						// we need to set meta data here. 
+						// TODO use body that we read above !!!!
 						body = pageUtils.cloneContent(body);
 						log.debug("cloned page, adding " + body);
 						view = new EditView(body, metaData);

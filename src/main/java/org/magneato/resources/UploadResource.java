@@ -1,6 +1,32 @@
 package org.magneato.resources;
 
 import io.dropwizard.views.View;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.SecurityContext;
+
 import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.media.multipart.FormDataBodyPart;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -13,16 +39,11 @@ import org.magneato.utils.UploadHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.security.RolesAllowed;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.SecurityContext;
-import java.io.*;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.util.Map;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ValueNode;
 
 // https://github.com/wdawson/dropwizard-auth-example/blob/master/pom.xml
 @Path("/")
@@ -30,7 +51,8 @@ public class UploadResource {
     private ManagedElasticClient repository;
     private static final int SUBDIR_SIZE = 3; // TODO user define
     private static final String GPXTYPE = "application/octet-stream";
-
+    private final ObjectMapper mapper = new ObjectMapper();
+    
     PageUtils pageUtils;
 
     private final Logger log = LoggerFactory.getLogger(this.getClass()
@@ -211,10 +233,33 @@ public class UploadResource {
                     gpxParser.getStartLon(), uploadInfo.toJson(),
                     metaData.toJson(),gpxParser.getDate());
 
-            System.out.println("json " + content);
+            System.out.println("json " + content + " parent " + parent);
             if (parent != null && !parent.isEmpty()) {
-                log.debug("parent " + parent);
+                
                 String parentJSON = repository.get(parent);
+                log.debug("parent " + parentJSON);
+				try {
+					JsonNode root = mapper.readTree(parentJSON);
+					JsonNode contentTree = mapper.readTree(content);
+					HashMap<String, String> clonableItems = addKeys("", root, false);
+	    			for (Map.Entry<String, String> entry : clonableItems.entrySet()) {
+	    				System.out.println(entry.getKey() + " " + entry.getValue());
+	    				JsonNode valueNode = getPath(contentTree, entry.getKey());
+	    				if(valueNode != null) {
+	    				System.out.println("" + valueNode.asText());
+	    				}
+	    				if(valueNode != null && valueNode.asText().isEmpty()) {
+	    					((ObjectNode)valueNode).put(entry.getKey(), entry.getValue());
+	    				}
+	    			}//
+	    			
+	    			content = contentTree.toString();
+				} catch (IOException e) {
+					log.error("Couldn't read parent JSON {1}", e.getMessage());
+					// just ignore, we've got gpx data
+				}
+    			
+
             }
 
             // Step.4 merge with parent data
@@ -236,4 +281,59 @@ public class UploadResource {
         ;
         return view;
     }
+    
+    // return parent if path exists and is empty, or should be set it here?
+    private JsonNode getPath(JsonNode root, String path, String value) {
+		String[] tokens = path.split("/");
+		for (String token : tokens) {
+			if (!token.isEmpty()) {
+
+				root = root.get(token);
+				if (root == null) {
+					return null;
+				}
+			}
+
+		}
+		return root;
+	}
+
+	private HashMap<String, String> addKeys(String path, JsonNode jsonNode,
+			boolean cloneable) {
+		HashMap<String, String> clonable = new HashMap<String, String>();
+
+		if (jsonNode.isObject()) {
+			// recurse
+			ObjectNode objectNode = (ObjectNode) jsonNode;
+			Iterator<Map.Entry<String, JsonNode>> iter = objectNode.fields();
+
+			while (iter.hasNext()) {
+				Map.Entry<String, JsonNode> entry = iter.next();
+				String key = entry.getKey();
+				if (cloneable == true || key.endsWith("_c")) {
+					clonable.putAll(addKeys(path + "/" + entry.getKey(),
+							entry.getValue(), true));
+				} else {
+					clonable.putAll(addKeys(path + "/" + entry.getKey(),
+							entry.getValue(), false));
+				}
+			}
+		} else if (jsonNode.isArray()) {
+			ArrayNode arrayNode = (ArrayNode) jsonNode;
+			/*
+			 * Not Implemented System.out.println("[" + path ); for (int i = 0;
+			 * i < arrayNode.size(); i++) {
+			 * System.out.println(arrayNode.get(i));
+			 * 
+			 * } System.out.println("]" );
+			 */
+		} else if (jsonNode.isValueNode()) {
+			ValueNode valueNode = (ValueNode) jsonNode;
+			if (cloneable) {
+				clonable.put(path, valueNode.asText());
+			}
+		}
+
+		return clonable;
+	}
 }

@@ -45,6 +45,7 @@ public class PageUtils {
 
 	/*
 	 * Object is not enclosed in braces
+	 * TODO change to take JsonNode
 	 */
 	public String cloneContent(String content) {
 		StringBuilder cloned = new StringBuilder();
