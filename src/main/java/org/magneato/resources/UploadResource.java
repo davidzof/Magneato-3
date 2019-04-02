@@ -187,7 +187,7 @@ public class UploadResource {
             @Context HttpServletRequest request,
             @Context SecurityContext security) {
 
-        String template = "{\"title\":\"%1$s\",\"child\":false,\"activity_c\":\"\",\"trip_date\":\"%11$s\",\"difficulty_c\":{\"rating\":\"\"},\"ski_difficulty_c\":{\"rating\":\"\"},\"technical_c\":{\"imperial\":\"false\",\"distance\":%2$.3f,\"climb\":%3$d,\"descent\":%4$d,\"min\":%5$d,\"max\":%6$d,\"location\":{\"lat\":%7$s,\"lon\":%8$s}},%9$s,\"metadata\":%10$s}";
+        String template = "{\"title\":\"%1$s\",\"child\":false,\"activity_c\":\"\",\"trip_date\":\"%11$s\",\"difficulty_c\":{\"rating\":\"\"},\"ski_difficulty_c\":{\"rating\":\"\"},\"technical_c\":{\"imperial\":\"false\",\"orientation\",:\"\",\"distance\":%2$.3f,\"climb\":%3$d,\"descent\":%4$d,\"min\":%5$d,\"max\":%6$d,\"location\":{\"lat\":%7$s,\"lon\":%8$s}},%9$s,\"metadata\":%10$s}";
         String content = null;
 
         final String mimeType = body.getMediaType().toString();
@@ -234,8 +234,8 @@ public class UploadResource {
                     metaData.toJson(),gpxParser.getDate());
 
             System.out.println("json " + content + " parent " + parent);
+            parent = "ra0a7f77cbee7";
             if (parent != null && !parent.isEmpty()) {
-                
                 String parentJSON = repository.get(parent);
                 log.debug("parent " + parentJSON);
 				try {
@@ -244,13 +244,7 @@ public class UploadResource {
 					HashMap<String, String> clonableItems = addKeys("", root, false);
 	    			for (Map.Entry<String, String> entry : clonableItems.entrySet()) {
 	    				System.out.println(entry.getKey() + " " + entry.getValue());
-	    				JsonNode valueNode = getPath(contentTree, entry.getKey());
-	    				if(valueNode != null) {
-	    				System.out.println("" + valueNode.asText());
-	    				}
-	    				if(valueNode != null && valueNode.asText().isEmpty()) {
-	    					((ObjectNode)valueNode).put(entry.getKey(), entry.getValue());
-	    				}
+	    				setTokenValue(contentTree, entry.getKey(), entry.getValue());
 	    			}//
 	    			
 	    			content = contentTree.toString();
@@ -282,20 +276,25 @@ public class UploadResource {
         return view;
     }
     
-    // return parent if path exists and is empty, or should be set it here?
-    private JsonNode getPath(JsonNode root, String path, String value) {
-		String[] tokens = path.split("/");
-		for (String token : tokens) {
-			if (!token.isEmpty()) {
-
-				root = root.get(token);
-				if (root == null) {
-					return null;
-				}
-			}
-
-		}
-		return root;
+    private void setTokenValue(JsonNode root, String path, String value) {
+		String[] keys = path.split("/");
+		for(int i = 1; i <keys.length; i++){
+		    String key = keys[i];
+			JsonNode nextToken = root.get(key);
+			if (nextToken == null) {
+				System.out.println(">>> token missing " + key);
+				return;
+            } else if (nextToken.isValueNode()) {
+			    if (i + 1 == keys.length) {
+                    break;
+                } else {
+                    System.out.println(">>> misplaced token " + key);
+			        return;
+                }
+            }
+			root = nextToken;
+		}// for
+        ((ObjectNode) root).put(keys[keys.length-1], value);
 	}
 
 	private HashMap<String, String> addKeys(String path, JsonNode jsonNode,
