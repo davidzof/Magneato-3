@@ -15,7 +15,7 @@
 <body>
 <div class="container">
     <h1>Upload GPX</h1>
-    <form action="/uploadgpx?parent=r35093708f43f" method="post" enctype="multipart/form-data">
+    <form action="/uploadgpx?parent=${value}" method="post" enctype="multipart/form-data">
         <div class="form-group row">
             <label>Select gpx file to upload:</label>
             <input class="form-control-file" type="file" name="file" id="fileToUpload"  accept=".gpx, application/octet-stream">
