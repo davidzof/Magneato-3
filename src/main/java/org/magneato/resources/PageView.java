@@ -88,7 +88,6 @@ public class PageView extends org.magneato.resources.ContentView {
 	}
 
 	public String getFirst(String mimeType) {
-		log.info("get first");
 		if (jsonNode != null) {
 			JsonNode node = jsonNode.get("files");
 			if (node != null) {
@@ -97,7 +96,6 @@ public class PageView extends org.magneato.resources.ContentView {
 					String url = node.get(i).get("url").asText();
 					if (!url.isEmpty()) {
 						if (mimeMap.getContentType(url).contains(mimeType)) {
-							log.info("get first " +url);
 							return url;
 						}
 					}
@@ -105,7 +103,7 @@ public class PageView extends org.magneato.resources.ContentView {
 			}
 		}
 
-		return null;
+		return "";
 	}
 	
 	public String getThumbnail(String mimeType) {

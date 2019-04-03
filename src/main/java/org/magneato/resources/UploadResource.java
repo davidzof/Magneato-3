@@ -176,6 +176,7 @@ public class UploadResource {
             @Context HttpServletRequest request,
             @Context SecurityContext security) {
 
+    	// TODO move to config
         String template = "{\"title\":\"%1$s\",\"child\":false,\"activity_c\":\"\",\"trip_date\":\"%11$s\",\"difficulty_c\":{\"rating\":\"\"},\"ski_difficulty_c\":{\"rating\":\"\"},\"technical_c\":{\"imperial\":\"false\",\"orientation\":\"\",\"distance\":%2$.3f,\"climb\":%3$d,\"descent\":%4$d,\"min\":%5$d,\"max\":%6$d,\"location\":{\"lat\":%7$s,\"lon\":%8$s}},%9$s,\"metadata\":%10$s}";
         String content = null;
 
@@ -210,6 +211,7 @@ public class UploadResource {
                     .setIPAddr(request.getRemoteAddr())
                     .setCreateDate(gpxParser.getStartTime().getTime())
                     .setOwner(security.getUserPrincipal().getName());
+            metaData.addRelation(parent);
 
             // Step.4 update gpx data in json
             // note all values should return empty string if they cannot be determined, let the clonage take over if neccessary
@@ -222,8 +224,6 @@ public class UploadResource {
                     gpxParser.getStartLon(), uploadInfo.toJson(),
                     metaData.toJson(), gpxParser.getDate());
 
-            System.out.println("json " + content + " parent " + parent);
-            parent = "ra0a7f77cbee7";
             if (parent != null && !parent.isEmpty()) {
                 String parentJSON = repository.get(parent);
                 log.debug("parent " + parentJSON);
@@ -259,9 +259,9 @@ public class UploadResource {
     @RolesAllowed({ "ADMIN", "EDITOR" })
     public View uploadView(@Context HttpServletRequest request) {
         String id = pageUtils.getId(request.getHeader("referer"));
-        FTLView view = new FTLView("uploadgpx");
-        view.setValue(id);
-        ;
+        System.out.println("parent " + id);
+        FTLView view = new FTLView("uploadgpx", id);
+
         return view;
     }
 
