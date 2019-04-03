@@ -142,15 +142,19 @@ public class UploadResource {
                 System.out.println("file len " + len);
                 thumbName = UploadHandler.createThumbnail(imageDir + subDir,
                         fileName, mimeType, false);
-                System.out.println("thumb " + thumbName);
-                UploadHandler.getMetaData(outputPath.toString());
+                // UploadHandler.getMetaData(outputPath.toString());
             }
         } catch (IOException e) {
             log.warn("problem uploading  file " + e.getMessage());
         }
 
         String url = IMAGEPATH + "/" + subDir + fileName;
-        String thumbUrl = IMAGEPATH + "/" + subDir + thumbName;
+        String thumbUrl;
+        if (thumbName.startsWith("/")) {
+            thumbUrl = thumbName;
+        } else {
+            thumbUrl = IMAGEPATH + "/" + subDir + thumbName;
+        }
         UploadInfo uploadInfo = new UploadInfo(fileName, len, url, thumbUrl,
                 mimeType, subDir, name);
 

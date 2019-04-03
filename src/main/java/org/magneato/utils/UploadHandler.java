@@ -24,6 +24,7 @@ public class UploadHandler {
     public static String createThumbnail(String path, String fileName,
             String mimeType, boolean exists) throws IOException {
         String thumbName = null;
+        System.out.println("create thumbnail " + path + " mime " + mimeType);
         // create a thumbnail
         switch (mimeType) {
         case "image/jpeg":
@@ -31,7 +32,9 @@ public class UploadHandler {
         case "image/png":
             // always create as jpg
             thumbName = "thumb_" + FilenameUtils.getBaseName(fileName) + ".jpg";
-            if (exists) {
+            // TODO better to check if thumbie exists and recreate as required
+            System.out.println("create thumb " + thumbName + " + exist " + exists);
+            if (!exists) {
                 BufferedImage img = new BufferedImage(100, 100,
                         BufferedImage.TYPE_INT_RGB);
                 img.createGraphics().drawImage(
@@ -45,6 +48,7 @@ public class UploadHandler {
             thumbName = "/library/gpxIcon.jpg";
             break;
         }// switch
+
         return thumbName;
     }
 
