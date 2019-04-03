@@ -10,6 +10,7 @@ import io.dropwizard.views.ViewBundle;
 
 import java.net.UnknownHostException;
 
+import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.magneato.core.ForbiddenExceptionMapper;
@@ -85,6 +86,11 @@ public class MagneatoApplication extends Application<org.magneato.MagneatoConfig
 				environment.jersey().register(new LogoutResource());
 				environment.jersey().register(MultiPartFeature.class);
 				environment.jersey().register(RolesAllowedDynamicFeature.class);
+
+				// custom 404
+				ErrorPageErrorHandler eph = new ErrorPageErrorHandler();
+				eph.addErrorPage(404, "/error/404");
+				environment.getApplicationContext().setErrorHandler(eph);
 
 				JettyAuthServerFactory jasf = (JettyAuthServerFactory) configuration
 						.getServerFactory();

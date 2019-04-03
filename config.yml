@@ -10,6 +10,11 @@ server:
     - type: http
       port: 9090
 
+#Uploader Configuration
+gpxuploader:
+  template: tripreport
+  contents:
+
 # Default Administrator User, update the password before putting into production
 login: admin
 password: secure

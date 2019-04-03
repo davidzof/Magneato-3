@@ -33,4 +33,24 @@ public class GpxParserTest {
 
 	}
 
+
+	@Test
+	public void testRead2() throws IOException {
+		FileInputStream fin = new FileInputStream("src/test/barioz.gpx");
+		gpxParser.read(fin);
+		Assert.assertEquals("Barioz", gpxParser.getName());
+
+		Assert.assertEquals(758, (int) gpxParser.getClimb());
+		Assert.assertEquals(755, (int) gpxParser.getDescent());
+		Assert.assertEquals(1830, (int) gpxParser.getMaxElevation());
+		Assert.assertEquals(1426, (int) gpxParser.getMinElevation());
+		Assert.assertEquals("45.3254650", gpxParser.getStartLat());
+		Assert.assertEquals("6.0471780", gpxParser.getStartLon());
+		Assert.assertEquals(1553766060000L, gpxParser.getStartTime().getTime()
+		);
+		Assert.assertEquals(23094, (int) gpxParser.getDistance());
+
+	}
+
+
 }
