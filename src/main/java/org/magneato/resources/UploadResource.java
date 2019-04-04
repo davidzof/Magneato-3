@@ -139,7 +139,6 @@ public class UploadResource {
                 // make the directory, if it doesn't exist
                 Files.createDirectories(outputPath.getParent());
                 len = Files.copy(fileInputStream, outputPath);
-                System.out.println("file len " + len);
                 thumbName = UploadHandler.createThumbnail(imageDir + subDir,
                         fileName, mimeType, false);
                 // UploadHandler.getMetaData(outputPath.toString());
@@ -197,7 +196,6 @@ public class UploadResource {
             // Step.2 parse gpx data
             GpxParser gpxParser = new GpxParser();
 
-            System.out.println("created gpx file " + uploadInfo.getName());
             File initialFile = new File(uploadInfo.getName());
             InputStream gpxStream;
             try {
@@ -236,7 +234,6 @@ public class UploadResource {
                     JsonNode contentTree = mapper.readTree(content);
                     HashMap<String, String> clonableItems = addKeys("", root, false);
                     for (Map.Entry<String, String> entry : clonableItems.entrySet()) {
-                        System.out.println(entry.getKey() + " " + entry.getValue());
                         setTokenValue(contentTree, entry.getKey(), entry.getValue());
                     }//
 
@@ -263,7 +260,6 @@ public class UploadResource {
     @RolesAllowed({ "ADMIN", "EDITOR" })
     public View uploadView(@Context HttpServletRequest request) {
         String id = pageUtils.getId(request.getHeader("referer"));
-        System.out.println("parent " + id);
         FTLView view = new FTLView("uploadgpx", id);
 
         return view;
@@ -275,13 +271,11 @@ public class UploadResource {
             String key = keys[i];
             JsonNode nextToken = root.get(key);
             if (nextToken == null) {
-                System.out.println(">>> token missing " + key);
                 return;
             } else if (nextToken.isValueNode()) {
                 if (i + 1 == keys.length) {
                     break;
                 } else {
-                    System.out.println(">>> misplaced token " + key);
                     return;
                 }
             }
