@@ -71,10 +71,11 @@ public class MetaParser {
 			element = temp.getQualifiedName();
 			if (element.equals("page")) {
 				if (metaData != null) {
+					System.out.println("metaData " + metaData);
 
 					// parse article etc here
 					if ("article".equals(metaData.editTemplate)) {
-
+/*
 						Article article = new Article(metaData); // content is
 																	// xml
 						try { // could be xml or text (comment), parse later
@@ -103,10 +104,12 @@ public class MetaParser {
 								+ article
 								+ "}}");
 						System.out.print(".");
-
+*/
 					} else if ("route".equals(metaData.editTemplate)
 							|| "tr".equals(metaData.editTemplate)) {
+						// 157996fd-a646-42a2-995a-df19cf3a50bf
 						Route route = new Route(metaData);
+
 						try {
 							// could be xml or text (comment), parse later
 							Builder parser = new Builder();
@@ -158,10 +161,12 @@ public class MetaParser {
 					break;
 				case "uuid":
 					String id = data.substring(data.lastIndexOf('-') + 1);
+					System.out.println("id " + id);
 					metaData.setId("r" + id);
 					break;
 				case "ipAddr":
 					// System.out.println("\"ip_addr\": \"" + data + "\"");
+					
 					metaData.ipAddr = data;
 					break;
 				case "author":

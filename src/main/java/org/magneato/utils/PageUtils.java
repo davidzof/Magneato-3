@@ -19,6 +19,12 @@ public class PageUtils {
 	private final Logger log = LoggerFactory.getLogger(this.getClass()
 			.getName());
 
+	/**
+	 * Get the parent page id from the referrer
+	 * 
+	 * @param referrer - parent page url
+	 * @return returns parent id if referrer not null, null otherwise
+	 */
 	public String getId(String referrer) {
 		String id = null;
 		if (referrer != null) {
@@ -34,9 +40,7 @@ public class PageUtils {
 			}
 			log.debug("separator " + sep);
 			if (sep > 0) {
-
 				id = path.substring(1, sep);
-
 			}
 		}
 		log.debug("parent " + id);

@@ -86,7 +86,7 @@ public class MetaData implements Serializable {
                 }
 
                 // URL mappings
-                System.out.println("RTE: " + name + ".htm /" + id + "/" + canonical_url);
+                //System.out.println("RTE: " + name + ".htm /" + id + "/" + canonical_url);
 
                 sb.append("\"canonical_url\":\"" + canonical_url + "\",");
                 sb.append("\"edit_template\":\"tripreport\",");
@@ -95,7 +95,7 @@ public class MetaData implements Serializable {
                 String canonical_url = name.substring(1, name.lastIndexOf('-'));
                 id = name.substring(name.lastIndexOf('-')+1);
                 // URL mappings
-                System.out.println("ART: " + name + ".htm /" + id + "/" + canonical_url);
+                //System.out.println("ART: " + name + ".htm /" + id + "/" + canonical_url);
 
                 sb.append("\"canonical_url\":\"" + canonical_url + "\",");
                 sb.append("\"edit_template\":\"article\",");
@@ -104,7 +104,7 @@ public class MetaData implements Serializable {
                 String canonical_url = name.substring(1, name.lastIndexOf('-'));
                 sb.append("\"canonical_url\":\"" + canonical_url + "\",");
                 // URL mappings
-                System.out.println("OTH: " + name + ".htm /" + id + "/" + canonical_url);
+                //System.out.println("OTH: " + name + ".htm /" + id + "/" + canonical_url);
                 sb.append("\"edit_template\":\"tripreport\",");
                 sb.append("\"display_template\":\"tripreport\",");
 
