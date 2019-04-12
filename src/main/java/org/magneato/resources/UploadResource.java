@@ -38,6 +38,9 @@ public class UploadResource {
     private static final int SUBDIR_SIZE = 3; // TODO user define
     private static final String GPXTYPE = "application/octet-stream";
     private final ObjectMapper mapper = new ObjectMapper();
+    // Map to store 62 possible characters
+    private final static String mapInitiliazer = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private final static char[] map = mapInitiliazer.toCharArray();
 
     PageUtils pageUtils;
 
@@ -131,6 +134,7 @@ public class UploadResource {
         long len = 0;
         try {
             if (Files.exists(outputPath)) {
+                // file already exists, do we want to overwrite it?
                 File file = outputPath.toFile();
                 len = file.length();
                 thumbName = UploadHandler.createThumbnail(imageDir + subDir,
@@ -322,4 +326,23 @@ public class UploadResource {
 
         return clonable;
     }
+
+    // Function to generate a short url from integer ID
+    String idToShortURL(long  id) {
+
+        StringBuilder shortName = new StringBuilder();
+
+        // Convert given integer id to a base 62 number
+        while (id > 0) {
+            // use above map to store actual character
+            // in short url
+            int i = (int) id%62;
+            char c = map[i];
+            shortName.append(c);
+            id = id/62;
+        }
+
+        return shortName.toString();
+    }
+
 }
