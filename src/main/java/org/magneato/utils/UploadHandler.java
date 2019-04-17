@@ -24,7 +24,6 @@ public class UploadHandler {
     public static String createThumbnail(String path, String fileName,
             String mimeType, boolean exists) throws IOException {
         String thumbName = null;
-        System.out.println("create thumbnail " + path + " mime " + mimeType);
         // create a thumbnail
         switch (mimeType) {
         case "image/jpeg":

@@ -99,7 +99,7 @@ public class UploadResource {
         if (!(new File(path)).delete()) {
             log.error("could not delete " + path);
         }
-        // alway jpg
+        // always jpg
         String thumbPath = imageDir + FilenameUtils.getPath(fileName)
                 + "thumb_" + FilenameUtils.getBaseName(fileName) + ".jpg";
         if (!(new File(thumbPath)).delete()) {
@@ -122,34 +122,35 @@ public class UploadResource {
             return null; // TODO some kind of error
         }
 
-        // store images in a subdir based on up to the first x letters of the
-        // filename, avoids putting too many files in one directory... maybe
-        // there is a better idea? TODO: change this random string
+        // Create short filename based on current time millis, handle possible dupes
+        java.nio.file.Path outputPath = null;
+        int version = 0;
+        String subDir;
+        String name;
+        do {
+            String ext = FilenameUtils.getExtension(fileName);
+            fileName = idToShortURL(System.currentTimeMillis());
+            if (fileName.length() > SUBDIR_SIZE) {
+                subDir = fileName.substring(0, 3) + "/";
+                fileName = fileName.substring(3);
+                if (version++ > 0) {
+                    fileName = fileName + "-" + version;
+                }
+            } else {
+                subDir = "";
+            }
+            fileName = fileName + "." + ext;
 
-        // TODO make configurable for big sites
-        String subDir = FilenameUtils.getBaseName(fileName);
-        if (subDir.length() > SUBDIR_SIZE) {
-            subDir = fileName.substring(0, 3) + "/";
-        }
+            name = imageDir + subDir + fileName + "." + ext;
+            outputPath = FileSystems.getDefault().getPath(name);
+        } while (outputPath != null && Files.exists(outputPath));
 
-        String name = imageDir + subDir + fileName;
-        java.nio.file.Path outputPath = FileSystems.getDefault().getPath(name);
         long len = 0;
         try {
-            if (Files.exists(outputPath)) {
-                // file already exists, do we want to overwrite it?
-                File file = outputPath.toFile();
-                len = file.length();
-                thumbName = UploadHandler.createThumbnail(imageDir + subDir,
-                        fileName, mimeType, true);
-            } else {
-                // make the directory, if it doesn't exist
-                Files.createDirectories(outputPath.getParent());
-                len = Files.copy(fileInputStream, outputPath);
-                thumbName = UploadHandler.createThumbnail(imageDir + subDir,
-                        fileName, mimeType, false);
-                // UploadHandler.getMetaData(outputPath.toString());
-            }
+            // make the directory, if it doesn't exist
+            Files.createDirectories(outputPath.getParent());
+            len = Files.copy(fileInputStream, outputPath);
+             thumbName = UploadHandler.createThumbnail(outputPath.getParent().toString(), outputPath.getFileName().toString(), mimeType, false);
         } catch (IOException e) {
             log.warn("problem uploading  file " + e.getMessage());
         }

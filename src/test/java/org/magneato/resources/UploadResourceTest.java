@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.SecurityContext;
 
 import org.eclipse.jetty.security.AbstractLoginService.UserPrincipal;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.magneato.MagneatoConfiguration;
@@ -69,10 +70,22 @@ public class UploadResourceTest {
 	}
 
 	@Test
+	public void testPathCreation() {
+		UploadResource uR = createMocks();
+		long time = 90389903843L;
+		String newName = uR.idToShortURL(time);
+
+		String subDir = newName.substring(0, 3);
+		newName = newName.substring(3);
+
+		Assert.assertEquals("3iZmPKb", subDir + newName);
+	}
+
+	@Test
 	public void testIdtoShortName() {
 		UploadResource uR = createMocks();
-		long time = System.currentTimeMillis();
+		long time = 90348039990348L;
 		String s = uR.idToShortURL(time);
-		System.out.println(s);
+		Assert.assertEquals("o1AQ5MOz", s);
 	}
 }
