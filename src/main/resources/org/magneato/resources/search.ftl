@@ -13,18 +13,23 @@
     <#assign article = toJsonNode(row)>
     <div class="row">
       <div class="col-sm-12">
-        <a class="fauxlink" href="/${article._id.asText()}/${article._source.metadata.canonical_url.asText()}">
-          <h2 class="article">${article._source.title.asText()}</h2>
-          <p>
-            <#if article._source.files?? && (article._source.files.size() > 0) >
-
-              <img class="img-responsive thumb" src=${article._source.files.get(0).thumbnailUrl.asText()} align="left"/>
-            </#if>
-            ${getFirstPara(article._source.content.asText())?no_esc}
-          </p>
-        </a>
-        <p><strong>${article._source.metadata.create_date.asText()}</strong></p>
-        </a>
+        <div class="media">
+          <a class="fauxlink" href="/${article._id.asText()}/${article._source.metadata.canonical_url.asText()}">
+            <h2 class="article">${article._source.title.asText()}</h2>
+            <#assign thumb = getFirstThumbnail(article._source)>
+              <div class="media-left">
+                <#if thumb?has_content >
+                  <img class="media-object" src="${thumb}" />
+                </#if>
+              </div>
+              <div class="media-body">
+                ${getFirstPara(article._source.content.asText())?no_esc}
+              </div>
+          </a>
+          <div class="media-heading">
+            <strong>${article._source.metadata.create_date.asText()}</strong></p>
+          </div>
+        </div>
       </div>
     </div>
   </#list>
@@ -92,4 +97,3 @@
 
 </body>
 </html>
-

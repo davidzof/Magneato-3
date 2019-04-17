@@ -17,7 +17,9 @@
     <div class="row">
         <div class="col-sm-4">
             <h1>404 Error</h1>
-            File not found
+            <a href="/">
+            <img src="/library/404.jpg" alt="uh oh not found">
+            </a>
         </div>
     </div>
 </div>

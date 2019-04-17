@@ -339,7 +339,8 @@ public class UploadResource {
         while (id > 0) {
             // use above map to store actual character
             // in short url
-            int i = (int) id%62;
+            int i =  (int)(id % 62);
+
             char c = map[i];
             shortName.append(c);
             id = id/62;

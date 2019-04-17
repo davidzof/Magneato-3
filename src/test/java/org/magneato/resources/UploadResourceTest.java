@@ -1,5 +1,7 @@
 package org.magneato.resources;
 
+import io.dropwizard.bundles.assets.AssetsConfiguration;
+
 import java.io.IOException;
 import java.security.Principal;
 import java.util.HashMap;
@@ -33,7 +35,7 @@ public class UploadResourceTest {
 
 	@Before
 	public void setUp() {
-		 pageUtils = new PageUtils();
+		pageUtils = new PageUtils();
 		MockitoAnnotations.initMocks(this);
 	}
 
@@ -42,6 +44,8 @@ public class UploadResourceTest {
 				.mock(ManagedElasticClient.class);
 		MagneatoConfiguration configuration = Mockito
 				.mock(MagneatoConfiguration.class);
+		AssetsConfiguration assetsConfiguration = Mockito
+				.mock(AssetsConfiguration.class);
 		request = Mockito.mock(HttpServletRequest.class);
 		security = Mockito.mock(SecurityContext.class);
 
@@ -49,6 +53,13 @@ public class UploadResourceTest {
 				.thenReturn(
 						"http://localhost:9090/r95eec7d13e7a/skating-to-the-cret-luisard");
 
+		
+		Map<String, String> overrides = new HashMap<String, String>();
+		overrides.put(UploadResource.IMAGEPATH, "imagedir");
+		Mockito.when(configuration.getAssetsConfiguration())
+		.thenReturn(assetsConfiguration);
+		Mockito.when(assetsConfiguration.getOverrides())
+				.thenReturn(overrides);
 		Mockito.when(repository.get("r95eec7d13e7a")).thenReturn(content1);
 		Mockito.when(repository.get("r95eec7d13e7b")).thenReturn(content2);
 		Principal principal = new UserPrincipal("testuser", null);
@@ -61,6 +72,7 @@ public class UploadResourceTest {
 	public void testIdtoShortName() {
 		UploadResource uR = createMocks();
 		long time = System.currentTimeMillis();
-		String s= uR.idToShortURL(time);
+		String s = uR.idToShortURL(time);
+		System.out.println(s);
 	}
 }
