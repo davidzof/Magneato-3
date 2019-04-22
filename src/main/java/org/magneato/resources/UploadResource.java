@@ -156,7 +156,7 @@ public class UploadResource {
             len = Files.copy(fileInputStream, outputPath);
             
             // we copy from source to destination but source doesn't exist?
-             thumbName = UploadHandler.createThumbnail(outputPath.getParent().toString(), outputPath.getFileName().toString(), mimeType, false);
+             thumbName = UploadHandler.createThumbnail(outputPath.getParent().toString(), outputPath.getFileName().toString(), mimeType);
         } catch (IOException e) {
             log.warn("problem uploading  file " + e.getMessage());
             // need to abort here

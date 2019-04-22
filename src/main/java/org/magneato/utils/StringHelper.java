@@ -86,7 +86,7 @@ public class StringHelper {
             try {
                 int index = Integer.parseInt(tag.substring(i + 1,
                         tag.length() - 1));
-                if (index <= files.size()) {
+                if (index < files.size() && index >= 0) {
                     String url = files.get(index).get("url").asText();
                     // TODO check ending - can be .jpeg, .jpg, .png, .gif for
                     // image types
