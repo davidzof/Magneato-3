@@ -110,6 +110,9 @@ public class UploadResource {
         return "???";
     }
 
+    /*
+     * Stores upload under random directory + filename
+     */
     private UploadInfo saveFile(final FormDataBodyPart body,
             final InputStream fileInputStream) {
         String thumbName = null;
@@ -123,12 +126,14 @@ public class UploadResource {
         }
 
         // Create short filename based on current time millis, handle possible dupes
+        // clean this code up!!!
         java.nio.file.Path outputPath = null;
         int version = 0;
-        String subDir;
-        String name;
+        String subDir; // 1st level subdir where upload is to be stored
+        String name; // full path to upload
+        String ext; // upload extension
         do {
-            String ext = FilenameUtils.getExtension(fileName);
+            ext = FilenameUtils.getExtension(fileName);
             fileName = idToShortURL(System.currentTimeMillis());
             if (fileName.length() > SUBDIR_SIZE) {
                 subDir = fileName.substring(0, 3) + "/";
@@ -139,7 +144,6 @@ public class UploadResource {
             } else {
                 subDir = "";
             }
-            fileName = fileName + "." + ext;
 
             name = imageDir + subDir + fileName + "." + ext;
             outputPath = FileSystems.getDefault().getPath(name);
@@ -150,12 +154,15 @@ public class UploadResource {
             // make the directory, if it doesn't exist
             Files.createDirectories(outputPath.getParent());
             len = Files.copy(fileInputStream, outputPath);
+            
+            // we copy from source to destination but source doesn't exist?
              thumbName = UploadHandler.createThumbnail(outputPath.getParent().toString(), outputPath.getFileName().toString(), mimeType, false);
         } catch (IOException e) {
             log.warn("problem uploading  file " + e.getMessage());
+            // need to abort here
         }
 
-        String url = IMAGEPATH + "/" + subDir + fileName;
+        String url = IMAGEPATH + "/" + subDir + fileName + "." + ext;
         String thumbUrl;
         if (thumbName.startsWith("/")) {
             thumbUrl = thumbName;

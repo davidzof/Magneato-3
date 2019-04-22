@@ -33,14 +33,15 @@ public class UploadHandler {
             thumbName = "thumb_" + FilenameUtils.getBaseName(fileName) + ".jpg";
             // TODO better to check if thumbie exists and recreate as required
             System.out.println("create thumb " + thumbName + " + exist " + exists);
+            System.out.println("path " + path + " filename " + fileName);
             if (!exists) {
                 BufferedImage img = new BufferedImage(100, 100,
                         BufferedImage.TYPE_INT_RGB);
                 img.createGraphics().drawImage(
-                        ImageIO.read(new File(path + fileName)).getScaledInstance(
+                        ImageIO.read(new File(path + "/" + fileName)).getScaledInstance(
                                 -1, 100, Image.SCALE_SMOOTH), 0, 0, null);
 
-                ImageIO.write(img, "jpg", new File(path + thumbName));
+                ImageIO.write(img, "jpg", new File(path + "/" + thumbName));
             }
             break;
         case "application/octet-stream":
