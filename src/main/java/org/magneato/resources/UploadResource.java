@@ -184,7 +184,7 @@ public class UploadResource {
      * @return
      */
     @POST
-    @Path("/uploadgpx")
+    @Path("/uploadgpx/{parent}")
     @RolesAllowed({ "ADMIN", "EDITOR" })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.TEXT_HTML)
@@ -193,6 +193,8 @@ public class UploadResource {
             @FormDataParam("file") final InputStream fileInputStream,
             @Context HttpServletRequest request,
             @Context SecurityContext security) {
+
+        System.out.println("***** upload gpx ");
 
     	// TODO move to config
         String template = "{\"title\":\"%1$s\",\"child\":false,\"activity_c\":\"\",\"trip_date\":\"%11$s\",\"difficulty_c\":{\"rating\":\"\"},\"ski_difficulty_c\":{\"rating\":\"\"},\"technical_c\":{\"imperial\":\"false\",\"orientation\":\"\",\"distance\":%2$.3f,\"climb\":%3$d,\"descent\":%4$d,\"min\":%5$d,\"max\":%6$d,\"location\":{\"lat\":%7$s,\"lon\":%8$s}},%9$s,\"metadata\":%10$s}";
