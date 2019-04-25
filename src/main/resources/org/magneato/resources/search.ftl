@@ -9,6 +9,16 @@
     </div>
   </div>
 
+  <#if paginator.total == 0>
+  <h2>Sorry, no matches for your search</h2>
+  <b>Some tips:</b>
+  <ul>
+    <li>Make sure that all words are spelled correctly.
+    <li>Try different keywords.
+    <li>Try more general keywords.
+  </ul>
+  <#else>
+
   <#list paginator.results as row>
     <#assign article = toJsonNode(row)>
     <div class="row">
@@ -17,11 +27,11 @@
           <a class="fauxlink" href="/${article._id.asText()}/${article._source.metadata.canonical_url.asText()}">
             <h2 class="article">${article._source.title.asText()}</h2>
             <#assign thumb = getFirstThumbnail(article._source)>
-              <div class="media-left">
-                <#if thumb?has_content >
+              <#if thumb?has_content >
+                <div class="media-left">
                   <img class="media-object" src="${thumb}" />
-                </#if>
-              </div>
+                </div>
+              </#if>
               <div class="media-body">
                 ${getFirstPara(article._source.content.asText())?no_esc}
               </div>
@@ -35,8 +45,9 @@
   </#list>
 
   
+  <#if (paginator.total > paginator.size)>
   <div class="row">
-    <#assign navBarSize = 10>
+    <#assign navBarSize = 9>
     <#assign lastPage = (paginator.total / paginator.size)?ceiling >
     <#assign currentPage = (paginator.current / paginator.size) >
  
@@ -66,7 +77,7 @@
               <#assign navBarSize = lastPage>
             </#if>
 
-            <#list startPage..startPage+(navBarSize-1) as page>
+            <#list startPage..startPage+(navBarSize) as page>
               <#if (currentPage+1) = page>
                 <li class="page-item disabled"><a class="page-link" href="#">${page}</a></li>
               <#else>
@@ -77,7 +88,7 @@
                 </#if>
               </#if>
             </#list>
-            <#if (currentPage < lastPage -1)>
+            <#if (currentPage < lastPage-1)>
               <#if paginator.facets?? >
                 <li class="page-item"><a class="page-link" href="/facets/${paginator.query}/${paginator.facets}/${currentPage+1}/${paginator.size}">Next</a></li>
               <#else>
@@ -89,7 +100,9 @@
         </ul>
     </nav>
   </div>
+</#if>
 </div>
+  </#if>
 
 <div id="footer">
   <#include "/common/copyright.ftl">

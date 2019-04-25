@@ -124,8 +124,8 @@ public class PageResource {
 		String viewTemplate = jsonNode.get("metadata").get("display_template")
 				.asText();
 
-		return new PageView(body, "display." + viewTemplate, repository, id
-				+ "/" + uri);
+		return new PageView(body, "display." + viewTemplate, repository, id,
+				uri);
 	}
 
 	/**
@@ -184,7 +184,7 @@ public class PageResource {
 
 					EditView view;
 					if (clone) {
-						// we need to set meta data here. 
+						// we need to set meta data here.
 						// TODO use body that we read above !!!!
 						body = pageUtils.cloneContent(body);
 						log.debug("cloned page, adding " + body);

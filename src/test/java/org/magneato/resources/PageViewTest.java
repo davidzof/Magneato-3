@@ -36,7 +36,7 @@ public class PageViewTest {
 		Mockito.when(repository.get("r95eec7d13e7a")).thenReturn(content);
 
 		return new PageView(content, "", repository,
-				"http://localhost:9090/r95eec7d13e7a/skating-to-the-cret-luisard");
+				"r95eec7d13e7a", "/skating-to-the-cret-luisard");
 	}
 
 	@Test

@@ -23,6 +23,7 @@ public class PageView extends org.magneato.resources.ContentView {
 	private JsonNode jsonNode = null;
 	private ManagedElasticClient esClient;
 	private String uri;
+	private String id;
 	private final Logger log = LoggerFactory.getLogger(this.getClass()
 			.getName());
 	private final static ObjectMapper objectMapper = new ObjectMapper();
@@ -41,7 +42,7 @@ public class PageView extends org.magneato.resources.ContentView {
 	};
 
 	public PageView(String json, String templateName,
-			ManagedElasticClient esClient, String uri) {
+			ManagedElasticClient esClient, String id, String uri) {
 
 		super("/common/" + templateName + ".ftl");
 
@@ -53,6 +54,7 @@ public class PageView extends org.magneato.resources.ContentView {
 					+ " " + json);
 		}
 		this.uri = uri;
+		this.id = id;
 		this.esClient = esClient;
 	}
 
@@ -60,6 +62,23 @@ public class PageView extends org.magneato.resources.ContentView {
 		try {
 			Date result = sdf.get().parse(date);
 			SimpleDateFormat dateFormat = new SimpleDateFormat(format);
+			return dateFormat.format(result);
+		} catch (ParseException e) {
+			log.error("unable to pages date " + date + " because "
+					+ e.getMessage());
+		}
+
+		return "";
+	}
+	
+	/*
+	 * Convert a data from one format to another
+	 */
+	public String parseDate(String date, String from, String to) {
+		try {
+			SimpleDateFormat fromSDF = new SimpleDateFormat(from);
+			Date result = fromSDF.parse(date);
+			SimpleDateFormat dateFormat = new SimpleDateFormat(to);
 			return dateFormat.format(result);
 		} catch (ParseException e) {
 			log.error("unable to pages date " + date + " because "
@@ -84,8 +103,13 @@ public class PageView extends org.magneato.resources.ContentView {
 	}
 
 	public String getUri() {
-		return uri;
+		return id + "/" + uri;
 	}
+	
+	public String getId() {
+		return id;
+	}
+
 
 	public String getFirst(String mimeType) {
 		if (jsonNode != null) {
@@ -156,10 +180,6 @@ public class PageView extends org.magneato.resources.ContentView {
 
 	public void getSimilar() {
 
-	}
-
-	public String getId() {
-		return uri.substring(0, uri.lastIndexOf('/'));
 	}
 
 	public List<String> search(int from, int size, String query) {
