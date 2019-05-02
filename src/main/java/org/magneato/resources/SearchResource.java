@@ -3,6 +3,7 @@ package org.magneato.resources;
 import java.io.IOException;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -62,6 +63,9 @@ public class SearchResource {
 		if (size < 0 || size > 100) {
 			size = 10;
 		}	
+		if (facets.trim().isEmpty()) {
+			facets = null;
+		}
 		Pagination pagination = repository.search(page * size, size, query, facets);
 		return new SearchView(pagination);
 	}

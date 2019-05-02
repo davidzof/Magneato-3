@@ -1,6 +1,9 @@
 package org.magneato.utils;
 
+import java.util.HashMap;
 import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Paging tool class
@@ -12,6 +15,7 @@ public class Pagination {
 	String query;
 	String facets;
 	List<String> results;
+	HashMap<String, List<Pair<String, Long>>> facetResults;
 
 	public String getQuery() {
 		return query;
@@ -59,5 +63,14 @@ public class Pagination {
 
 	public void setResults(List<String> results) {
 		this.results = results;
+	}
+
+	public void setFacetResults(
+			HashMap<String, List<Pair<String, Long>>> facetResults) {		
+		this.facetResults = facetResults;
+	}
+
+	public HashMap<String, List<Pair<String, Long>>> getFacetResults() {
+		return this.facetResults;
 	}
 }
