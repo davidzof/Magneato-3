@@ -272,10 +272,8 @@ public class PageResource {
 		}
 
 		repository.insert(id, body);
-		String data = null;
-		data = "{\"url\":\"/" + id + "/" + uri + "\"}";
+		String data = "{\"url\":\"/" + id + "/" + uri + "\"}";
 		return data;
-
 	}
 
 	/**

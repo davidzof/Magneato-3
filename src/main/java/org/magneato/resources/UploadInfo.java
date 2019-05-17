@@ -26,10 +26,11 @@ public class UploadInfo {
 	}
 
 	public String toJson() {
+		//url = "http://localhost:9090"+ url;
 		return "\"files\":[{\"url\":\"" + url + "\",\"thumbnailUrl\":\""
 				+ thumbUrl + "\",\"name\":\"" + fileName + "\",\"size\":\""
 				+ len + "\",\"type\":\"" + mimeType
-				+ "\",\"deleteUrl\":\"/delete/" + subDir + fileName
+				+ "\",\"deleteUrl\":\"/delete" + url
 				+ "\",\"deleteType\":\"DELETE\"}]";
 	}
 

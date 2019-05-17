@@ -25,7 +25,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.xml.transform.Result;
 
 import java.io.*;
 import java.nio.file.FileSystems;
@@ -72,6 +74,7 @@ public class UploadResource {
     // https://github.com/dropwizard-bundles/dropwizard-configurable-assets-bundle
     @POST
     @Path("/upload")
+    @RolesAllowed({ "ADMIN", "EDITOR" })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public String upload(@FormDataParam("files") final FormDataBodyPart body,
@@ -83,10 +86,14 @@ public class UploadResource {
         return ""; // TODO some kind of error
     }
 
+    // how do we secure this?, referrer, then check we have rights?
+    // also resource needs removing from jersey cache?
+    // or we do nothing about the resource and simply remove from page, have another process remove orphan files?
+    //
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/delete/{filename : .+}")
-    public String delete(@PathParam("filename") String fileName,
+    public Response delete(@PathParam("filename") String fileName,
             @Context SecurityContext security) throws IOException {
         log.debug("delete " + fileName + " imageDir " + imageDir);
 
@@ -107,7 +114,7 @@ public class UploadResource {
         }
         log.debug("deleted " + path + " + " + thumbPath);
 
-        return "???";
+        return Response.ok().build();
     }
 
     /*
@@ -194,8 +201,6 @@ public class UploadResource {
             @Context HttpServletRequest request,
             @Context SecurityContext security) {
 
-        System.out.println("***** upload gpx ");
-
     	// TODO move to config
         String template = "{\"title\":\"%1$s\",\"child\":false,\"activity_c\":\"\",\"trip_date\":\"%11$s\",\"difficulty_c\":{\"rating\":\"\"},\"ski_difficulty_c\":{\"rating\":\"\"},\"technical_c\":{\"imperial\":\"false\",\"orientation\":\"\",\"distance\":%2$.3f,\"climb\":%3$d,\"descent\":%4$d,\"min\":%5$d,\"max\":%6$d,\"location\":{\"lat\":%7$s,\"lon\":%8$s}},%9$s,\"metadata\":%10$s}";
         String content = null;
@@ -277,6 +282,9 @@ public class UploadResource {
     @RolesAllowed({ "ADMIN", "EDITOR" })
     public View uploadView(@Context HttpServletRequest request) {
         String id = pageUtils.getId(request.getHeader("referer"));
+        if (id == null) {
+            id = ""; // no referrer
+        }
         FTLView view = new FTLView("uploadgpx", id);
 
         return view;
