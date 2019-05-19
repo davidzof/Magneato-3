@@ -14,7 +14,8 @@
 
 <body>
 <div class="container">
-    <h1>Okay</h1>
+    <h1>Success</h1>
+   Yeah!!!
     <#if value?? >
     <input type="hidden" name="parent" value="${value}">
     </#if>

@@ -17,6 +17,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -35,7 +36,6 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.filter.Filter;
 import org.elasticsearch.search.aggregations.bucket.filter.FilterAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.global.Global;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -173,7 +173,7 @@ public class ManagedElasticClient implements Managed {
 	public Pagination search(int from, int size, String query, String facets) {
 		// facet:
 		// http://localhost:9090/facets/category=Hiking/activity_c,technical_c.orientation/0/10
-		
+
 		log.debug("search " + query + " facets " + facets);
 		Pagination pagination = new Pagination();
 		pagination.setQuery(query);
@@ -199,8 +199,7 @@ public class ManagedElasticClient implements Managed {
 					String field = token.substring(0, index);
 					String value = token.substring(index + 1);
 					log.debug(field + " : " + token);
-					qb.filter(QueryBuilders.matchQuery(field,
-							value));
+					qb.filter(QueryBuilders.matchQuery(field, value));
 
 				}
 			}
@@ -210,7 +209,8 @@ public class ManagedElasticClient implements Managed {
 		if (facets != null) {
 			// comma separated list of facets to collect
 			String[] tokens = facets.split("\\,");
-			FilterAggregationBuilder aggregation = AggregationBuilders.filter("facets", qb);
+			FilterAggregationBuilder aggregation = AggregationBuilders.filter(
+					"facets", qb);
 
 			for (String token : tokens) {
 				aggregation.subAggregation(AggregationBuilders.terms(token)
@@ -243,7 +243,7 @@ public class ManagedElasticClient implements Managed {
 			// sr is here your SearchResponse object
 
 			for (String token : tokens) {
-				Filter filter= response.getAggregations().get("facets");
+				Filter filter = response.getAggregations().get("facets");
 				Terms activity = filter.getAggregations().get(token);
 				ArrayList<Pair<String, Long>> list = new ArrayList<Pair<String, Long>>();
 				for (Terms.Bucket tb : activity.getBuckets()) {
@@ -307,6 +307,23 @@ public class ManagedElasticClient implements Managed {
 		log.info("Deleted " + response.getDeleted() + " element(s)!");
 
 		return response.getDeleted();
+	}
+
+	/**
+	 * Delete a document from the index
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public String delete(String id) {
+		DeleteResponse deleteResponse = client.prepareDelete(
+				configuration.getIndexName(), "_doc", id).get();
+		if (deleteResponse != null) {
+			log.info("Deleted " + id);
+			return id;
+			
+		}
+		return null;
 	}
 
 	public String insert(String json) {

@@ -4,14 +4,13 @@ import static org.magneato.utils.StringHelper.toSlug;
 import io.dropwizard.views.View;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -128,6 +127,40 @@ public class PageResource {
 				uri);
 	}
 
+	@DELETE
+	@Path("/{id}/{uri}")
+	@RolesAllowed({ "ADMIN", "EDITOR" })
+	@Produces(MediaType.TEXT_HTML)
+	public Object delete(@PathParam("id") String id,
+			@PathParam("uri") String uri, @Context SecurityContext security) {
+		String errMsg = null;
+
+		String body = repository.get(id);
+		if (body != null) {
+			try {
+				JsonNode metadata;
+
+				metadata = objectMapper.readTree(body).get("metadata");
+
+				String owner = metadata.get("owner").asText();
+				int perms = metadata.get("perms").asInt();
+
+				System.out.println(">>> delete " + owner + " " + perms);
+				// permission check delete
+
+				if (repository.delete(id) != null) {
+					return new FTLView("okay", "Page deleted " + uri);
+				}
+				errMsg = "Error deleting page " + uri;
+			} catch (IOException e) {
+				log.equals(e.getMessage());
+				errMsg = e.getMessage();
+			}
+		}
+
+		return new FTLView("error", errMsg);
+	}
+
 	/**
 	 * Create a new page, displays a form where you can select the edit and
 	 * display template to use
@@ -242,6 +275,22 @@ public class PageResource {
 
 		log.debug("edit returning " + body);
 		return new EditView(id + "/" + uri, body, editTemplate);
+	}
+
+	// https://www.jqueryscript.net/other/Beautiful-JSON-Viewer-Editor.html
+	@GET
+	@RolesAllowed("ADMIN")
+	@Produces(MediaType.TEXT_HTML)
+	@Path("/editRaw/{id}/{uri}")
+	public View editRaw(@PathParam("id") String id, @PathParam("uri") String uri) {
+		log.debug("edit " + id + "/" + uri);
+		
+		String body = repository.get(id);
+		if (body != null) {
+			return new FTLView("json", body);
+		}
+		
+		return new FTLView("error", "Can't find page " + uri);
 	}
 
 	/**

@@ -16,6 +16,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -48,7 +49,10 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 	private double maxHeight, minHeight;
 	private Calendar c = null;
 	private static final double SEUIL = 5.0;
-	private final Rolling rollingAverage = new Rolling(10); // apply a bit of smoothing to glitchy altitude data
+	private final Rolling rollingAverage = new Rolling(10); // apply a bit of
+															// smoothing to
+															// glitchy altitude
+															// data
 
 	private float minLat, maxLat, minLon, maxLon;
 
@@ -63,7 +67,7 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 	private final SimpleDateFormat dateFormat = new SimpleDateFormat(
 			"MM/dd/yyyy");
 
-    public final static String DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+	public final static String DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
 	private int status;
 	private long createDate;
@@ -72,13 +76,13 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 	private String ipAddr;
 	private String canonicalUrl;
 
-	/*public static ThreadLocal<SimpleDateFormat> sdf = new ThreadLocal<SimpleDateFormat>() {
-		@Override
-		protected SimpleDateFormat initialValue() {
-			return new SimpleDateFormat(DATETIME_FORMAT);
-		}
-	};
-	*/
+	/*
+	 * public static ThreadLocal<SimpleDateFormat> sdf = new
+	 * ThreadLocal<SimpleDateFormat>() {
+	 * 
+	 * @Override protected SimpleDateFormat initialValue() { return new
+	 * SimpleDateFormat(DATETIME_FORMAT); } };
+	 */
 
 	private final Log _logger = LogFactory.getLog(GpxParser.class);
 
@@ -91,9 +95,10 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 	}
 
 	public double getDistanceKM() {
-		return totalDistance / 1000;
+		BigDecimal bd = new BigDecimal(totalDistance / 1000);
+		return bd.setScale(1, BigDecimal.ROUND_HALF_EVEN).doubleValue();
 	}
-	
+
 	public double getClimb() {
 		return ascent;
 	}
@@ -131,7 +136,7 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 	}
 
 	public String getDate() {
-        return dateFormat.format(c.getTime());
+		return dateFormat.format(c.getTime());
 	}
 
 	private void clear() {
@@ -288,8 +293,9 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 			break;
 		case ELE:
 			// http://www.gpsvisualizer.com/tutorials/elevation_gain.html
-			
-			currentPoint.setElevation(rollingAverage.add(Double.parseDouble(contentBuffer.toString().trim())));
+
+			currentPoint.setElevation(rollingAverage.add(Double
+					.parseDouble(contentBuffer.toString().trim())));
 			if (currentPoint.getElevation() > this.maxHeight) {
 				maxHeight = currentPoint.getElevation();
 			}
@@ -297,7 +303,8 @@ public class GpxParser extends org.xml.sax.helpers.DefaultHandler {
 				minHeight = currentPoint.getElevation();
 			}
 			if (lastPoint != null) {
-				double difference = currentPoint.getElevation() - lastPoint.getElevation();
+				double difference = currentPoint.getElevation()
+						- lastPoint.getElevation();
 				if (difference > 0) {
 					// we are climbing
 					ascent += difference;
