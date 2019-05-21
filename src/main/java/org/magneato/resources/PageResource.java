@@ -31,6 +31,7 @@ import org.magneato.managed.ManagedElasticClient;
 import org.magneato.service.MetaData;
 import org.magneato.service.Template;
 import org.magneato.utils.PageUtils;
+import org.magneato.utils.PermissionsChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -144,7 +145,9 @@ public class PageResource {
                 /*
                  * Check, if ADMIN group - like superuser
                  */
-                if (!security.isUserInRole("ADMIN")) {
+                String[] roles = {"ADMIN"};
+				if (PermissionsChecker.isAllowed(roles, security)) {
+
                     // 1. check if owner, check group, check other check owner perms: we need what? Read/Create/Update/Delete
                     // page can have a number of roles == groups, + owner + other
                     // we need delete permission on page, we don't care about any parent
