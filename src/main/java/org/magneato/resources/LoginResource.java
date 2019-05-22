@@ -33,11 +33,13 @@ public class LoginResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String get(@Context SecurityContext security) {
 		String userName = "";
+		boolean isAdmin = false;
+
 		Principal principal = security.getUserPrincipal();
 		if (principal != null) {
 			userName = security.getUserPrincipal().getName();
+            isAdmin = security.isUserInRole("ADMIN");
 		}
-		System.out.println("userName " + userName);
-		return "{ \"principal\":\"" + userName + "\"}";
+		return "{ \"principal\":\"" + userName + "\", \"admin\":" + isAdmin + " }";
 	}
 }
