@@ -100,6 +100,14 @@ public class UploadResource {
     // also resource needs removing from jersey cache?
     // or we do nothing about the resource and simply remove from page, have another process remove orphan files?
     //
+    /**
+     * Delete an attachment
+     * 
+     * @param fileName
+     * @param security
+     * @return
+     * @throws IOException
+     */
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/delete/{filename : .+}")

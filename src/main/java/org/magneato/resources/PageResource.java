@@ -145,22 +145,15 @@ public class PageResource {
                 /*
                  * Check, if ADMIN group - like superuser
                  */
+                metadata = objectMapper.readTree(body).get("metadata");
+                String owner = metadata.get("owner").asText();
+                int perms = metadata.get("perms").asInt();
+                System.out.println(">>> delete " + owner + " " + perms);
                 String[] roles = {"ADMIN"};
-				if (PermissionsChecker.isAllowed(roles, security)) {
+				if (PermissionsChecker.isAllowed(roles, security, owner, perms)) {
 
-                    // 1. check if owner, check group, check other check owner perms: we need what? Read/Create/Update/Delete
-                    // page can have a number of roles == groups, + owner + other
-                    // we need delete permission on page, we don't care about any parent
-                    // this lets us
-                    Principal principal = security.getUserPrincipal();
-                    // principal can be null if not logged in
-                    System.out.println(">>> principal " + principal);
-                    String user = principal.getName();
-                    // permission check delete
-                    metadata = objectMapper.readTree(body).get("metadata");
-                    String owner = metadata.get("owner").asText();
-                    int perms = metadata.get("perms").asInt();
-                    System.out.println(">>> delete " + owner + " " + perms);
+                    
+                    
             }
 
                 // "files":[{"name":"XTAB","size":"74961","url":"/library/images/3gX/XTAB.jpg","thumbnailUrl":"/library/images/3gX/thumb_XTAB.jpg","deleteUrl":"http://localhost:9090/delete/3gX/XTAB","deleteType":"DELETE"},{"name":"2TAB","size":"2703898","url":"/library/images/9Gu/2TAB.jpg","thumbnailUrl":"/library/images/9Gu/thumb_2TAB.jpg","deleteUrl":"/library/images/9Gu/2TAB","deleteType":"DELETE"}]
