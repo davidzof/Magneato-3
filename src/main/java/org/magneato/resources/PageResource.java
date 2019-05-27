@@ -5,7 +5,6 @@ import io.dropwizard.views.View;
 
 import java.io.IOException;
 import java.net.URI;
-import java.security.Principal;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
@@ -131,7 +130,7 @@ public class PageResource {
 
 	@DELETE
 	@Path("/{id}/{uri}")
-	//@RolesAllowed({ "ADMIN", "EDITOR" })
+	// @RolesAllowed({ "ADMIN", "EDITOR" })
 	@Produces(MediaType.TEXT_HTML)
 	public Object delete(@PathParam("id") String id,
 			@PathParam("uri") String uri, @Context SecurityContext security) {
@@ -140,36 +139,37 @@ public class PageResource {
 		String body = repository.get(id);
 		if (body != null) {
 			try {
-                JsonNode metadata;
+				JsonNode metadata;
 
-                /*
-                 * Check, if ADMIN group - like superuser
-                 */
-                metadata = objectMapper.readTree(body).get("metadata");
-                String owner = metadata.get("owner").asText();
-                int perms = metadata.get("perms").asInt();
-                System.out.println(">>> delete " + owner + " " + perms);
-                String[] roles = {"ADMIN"};
-				if (PermissionsChecker.isAllowed(roles, security, owner, perms)) {
+				/*
+				 * Check, if ADMIN group - like superuser
+				 */
+				metadata = objectMapper.readTree(body).get("metadata");
+				String owner = metadata.get("owner").asText();
+				String group = metadata.get("group").asText();
+				int perms = metadata.get("perms").asInt();
+				System.out.println(">>> delete " + owner + " " + perms);
+				String[] roles = { "ADMIN" };
 
-                    
-                    
-            }
+				if (PermissionsChecker.canDelete(group, security, owner, perms)) {
 
-                // "files":[{"name":"XTAB","size":"74961","url":"/library/images/3gX/XTAB.jpg","thumbnailUrl":"/library/images/3gX/thumb_XTAB.jpg","deleteUrl":"http://localhost:9090/delete/3gX/XTAB","deleteType":"DELETE"},{"name":"2TAB","size":"2703898","url":"/library/images/9Gu/2TAB.jpg","thumbnailUrl":"/library/images/9Gu/thumb_2TAB.jpg","deleteUrl":"/library/images/9Gu/2TAB","deleteType":"DELETE"}]
-                JsonNode files = objectMapper.readTree(body).get("files");
+				}
 
-                if (files != null) {
-                        for (int i = 0; i < files.size(); i++) {
-                            JsonNode file = files.get(i);
-                            System.out.println(">>> file to delete " + file.get("url").asText());
-                        }// for
-                }
+				// "files":[{"name":"XTAB","size":"74961","url":"/library/images/3gX/XTAB.jpg","thumbnailUrl":"/library/images/3gX/thumb_XTAB.jpg","deleteUrl":"http://localhost:9090/delete/3gX/XTAB","deleteType":"DELETE"},{"name":"2TAB","size":"2703898","url":"/library/images/9Gu/2TAB.jpg","thumbnailUrl":"/library/images/9Gu/thumb_2TAB.jpg","deleteUrl":"/library/images/9Gu/2TAB","deleteType":"DELETE"}]
+				JsonNode files = objectMapper.readTree(body).get("files");
 
-				//if (repository.delete(id) != null) {
-					return new FTLView("okay", "Page deleted " + uri);
-				//}
-				//errMsg = "Error deleting page " + uri;
+				if (files != null) {
+					for (int i = 0; i < files.size(); i++) {
+						JsonNode file = files.get(i);
+						System.out.println(">>> file to delete "
+								+ file.get("url").asText());
+					}// for
+				}
+
+				// if (repository.delete(id) != null) {
+				return new FTLView("okay", "Page deleted " + uri);
+				// }
+				// errMsg = "Error deleting page " + uri;
 			} catch (IOException e) {
 				log.equals(e.getMessage());
 				errMsg = e.getMessage();
@@ -302,12 +302,12 @@ public class PageResource {
 	@Path("/editRaw/{id}/{uri}")
 	public View editRaw(@PathParam("id") String id, @PathParam("uri") String uri) {
 		log.debug("edit " + id + "/" + uri);
-		
+
 		String body = repository.get(id);
 		if (body != null) {
 			return new FTLView("json", body);
 		}
-		
+
 		return new FTLView("error", "Can't find page " + uri);
 	}
 
