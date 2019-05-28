@@ -25,25 +25,31 @@ public class PermissionCheckerTest {
 		Principal principal = new UserPrincipal("testuser", null);
 		// Credential credential = new Credential();
 		Mockito.when(security.getUserPrincipal()).thenReturn(principal);
+		Mockito.when(security.isUserInRole("ADMIN")).thenReturn(true);
 
 	}
 
+	/*
+	 * We're admin but special roles delete bit is off - we can even prevent
+	 * special users from deleting a file if we want. In this case you need to
+	 * use the raw JSON interface to reenable access
+	 */
 	@Test
 	public void checkNotAdminCantDelete() throws IOException {
 		createMocks();
-		Mockito.when(security.isUserInRole("ADMIN")).thenReturn(false);
-		boolean isAllowed = PermissionsChecker
-				.canDelete("", security, "", 0);
+		boolean isAllowed = PermissionsChecker.canDelete("", security, "", "",
+				0b1110111111110000);
 		Assert.assertFalse(isAllowed);
-
 	}
 
+	/*
+	 * We're admin special roles delete is on for the resource
+	 */
 	@Test
 	public void checkAdminCanDelete() throws IOException {
 		createMocks();
-		Mockito.when(security.isUserInRole("ADMIN")).thenReturn(true);
-		boolean isAllowed = PermissionsChecker
-				.canDelete("", security, "", 0);
+		boolean isAllowed = PermissionsChecker.canDelete("", security, "", "",
+				0b0001000000000000);
 		Assert.assertTrue(isAllowed);
 
 	}
@@ -53,7 +59,7 @@ public class PermissionCheckerTest {
 		createMocks();
 		Mockito.when(security.isUserInRole("")).thenReturn(false);
 		boolean isAllowed = PermissionsChecker.canDelete("", security,
-				"testuser", 0b111101110000);
+				"testuser", "", 0b111101110000);
 		Assert.assertTrue(isAllowed);
 
 	}
@@ -63,7 +69,7 @@ public class PermissionCheckerTest {
 		createMocks();
 		Mockito.when(security.isUserInRole("")).thenReturn(false);
 		boolean isAllowed = PermissionsChecker.canDelete("", security,
-				"testuser", 0b111001110000);
+				"testuser", "", 0b111001110000);
 		Assert.assertFalse(isAllowed);
 
 	}

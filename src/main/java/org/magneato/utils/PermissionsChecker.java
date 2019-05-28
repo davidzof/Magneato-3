@@ -1,23 +1,46 @@
 package org.magneato.utils;
 
 import java.security.Principal;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.ws.rs.core.SecurityContext;
 
 /*
- * Permisions are Create, Read, Update, Delete for : owner, group, other
+ * Permisions are Create, Read, Update, Delete for : special role, owner, group, other
+ * 
+ * Normally permissions for resource are: 0b1111111111101100
+ * 
+ * That is special users can do anything their permission mask allows
+ * Owners can do anything
+ * Groups members can do anything except delete
+ * Other can do anything except update and delete
  */
 public class PermissionsChecker {
 	private static final int CREATE = 0b100010001000;
 	private static final int READ = 0b010001000100;
 	private static final int UPDATE = 0b001000100010;
-	public static final int DELETE = 0b000100010001;
+	public static final int DELETE = 0b0001000100010001;
 	public static final int OWNER = 0b111100000000;
+	public static final int GROUP = 0b00011110000;
+	public static final int OTHER = 0b000000001111;
+
+	private static final Map<String, Integer> specialRoles;
+	static {
+		// this should be moved to config.yml
+		// a special role consists consists of a Role Name and a set of
+		// permissions, for example we could define a MODERATOR role with delete and update permission
+		// this is more global than file groups
+		Map<String, Integer> aMap = new HashMap<String, Integer>();
+		aMap.put("ADMIN", 0b1111000000000000); // admin can do anything
+		specialRoles = Collections.unmodifiableMap(aMap);
+	}
 
 	public static boolean canDelete(String role, SecurityContext security,
-			String owner, int perms) {
+			String owner, String group, int perms) {
 
-		return PermissionsChecker.isAllowed(role, security, owner, perms,
+		return PermissionsChecker.isAllowed(role, security, owner, group, perms,
 				PermissionsChecker.DELETE);
 	}
 
@@ -26,14 +49,24 @@ public class PermissionsChecker {
 	 * file
 	 */
 	private static boolean isAllowed(String role, SecurityContext security,
-			String owner, int resourcePerms, int allowedPerms) {
+			String owner, String group, int resourcePerms, int allowedPerms) {
 		if (security == null) {
 			// not logged in
 			return false;
 		}
+		
+		// check special roles
+		for (Map.Entry<String, Integer> entry : specialRoles.entrySet()) {
+			String specialRole = entry.getKey();
+			if (security.isUserInRole(specialRole)) {
+				int rolePerms = entry.getValue();
+				int perms = rolePerms & allowedPerms & resourcePerms;
+				System.out.println("perms " + perms);
+				if (perms > 0) {
+					return true;
+				}
+			}
 
-		if (security.isUserInRole("ADMIN")) {
-			return true;
 		}
 
 		// check resource permissions
