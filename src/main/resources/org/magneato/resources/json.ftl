@@ -89,8 +89,8 @@
                 contentType: 'application/json',
                 data: data,
                 dataType: 'JSON',
-				type: 'POST',
-				url: '/save',
+				type: 'PUT',
+				url: '/save/${url}',
                 success: function (data) {
                 	afterSuccess(data)
             	}

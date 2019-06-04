@@ -25,10 +25,15 @@ public class UploadInfo {
 		return name;
 	}
 
+//	{"files":[{"name":"FF4D00-0.8.png",
+// "size":false,
+// "type":"image\/png",
+// "error":"File upload aborted",
+// "deleteUrl":"http:\/\/www.alpacajs.org\/fileupload\/index.php?file=FF4D00-0.8.png",
+// "deleteType":"DELETE"}]}
 	public String toJson() {
-		//url = "http://localhost:9090"+ url;
 		return "\"files\":[{\"url\":\"" + url + "\",\"thumbnailUrl\":\""
-				+ thumbUrl + "\",\"name\":\"" + fileName + "\",\"size\":\""
+				+ thumbUrl + "\",\"name\":\"" + subDir + fileName + "\",\"size\":\""
 				+ len + "\",\"type\":\"" + mimeType
 				+ "\",\"deleteUrl\":\"/delete" + url
 				+ "\",\"deleteType\":\"DELETE\"}]";

@@ -25,6 +25,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.magneato.MagneatoConfiguration;
 import org.magneato.managed.ManagedElasticClient;
 import org.magneato.service.MetaData;
@@ -151,9 +152,9 @@ public class PageResource {
 				System.out.println(">>> delete " + owner + " " + perms);
 				String[] roles = { "ADMIN" };
 
-				if (PermissionsChecker.canDelete(group, security, owner, perms)) {
-
-				}
+				//if (PermissionsChecker.canDelete(group, security, owner, perms)) {
+//
+//				}
 
 				// "files":[{"name":"XTAB","size":"74961","url":"/library/images/3gX/XTAB.jpg","thumbnailUrl":"/library/images/3gX/thumb_XTAB.jpg","deleteUrl":"http://localhost:9090/delete/3gX/XTAB","deleteType":"DELETE"},{"name":"2TAB","size":"2703898","url":"/library/images/9Gu/2TAB.jpg","thumbnailUrl":"/library/images/9Gu/thumb_2TAB.jpg","deleteUrl":"/library/images/9Gu/2TAB","deleteType":"DELETE"}]
 				JsonNode files = objectMapper.readTree(body).get("files");
@@ -301,11 +302,13 @@ public class PageResource {
 	@Produces(MediaType.TEXT_HTML)
 	@Path("/editRaw/{id}/{uri}")
 	public View editRaw(@PathParam("id") String id, @PathParam("uri") String uri) {
-		log.debug("edit " + id + "/" + uri);
+		String url = id + "/" + uri;
+		log.debug("editRaw " + url);
 
 		String body = repository.get(id);
 		if (body != null) {
-			return new FTLView("json", body);
+			log.debug("editRaw " + body);
+			return new FTLView("json", body, url);
 		}
 
 		return new FTLView("error", "Can't find page " + uri);
@@ -333,13 +336,23 @@ public class PageResource {
 		// meta data is: create date, owner, editTemplate, displayTemplate
 		// Security.canCreate(uri);
 
-		if (security.isUserInRole("ADMIN")) {
-			// TODO fix this
-			System.out.println("************ >>> admin can update meta data");
-		}
 
-		repository.insert(id, body);
-		String data = "{\"url\":\"/" + id + "/" + uri + "\"}";
+		String data = null;
+		try {
+			JsonNode jsonNode = objectMapper.readTree(body);
+			if (security.isUserInRole("ADMIN")) {
+				// TODO fix this
+				System.out.println("************ >>> admin can update meta data");
+			}
+
+			body = jsonNode.toString();
+			System.out.println(">> body " + body);
+			repository.insert(id, body);
+			data = "{\"url\":\"/" + id + "/" + uri + "\"}";
+		} catch (IOException e) {
+			log.error(e.getMessage());
+			data = "{\"error\":\"" + e.getMessage() + "\"}";
+		}
 		return data;
 	}
 
@@ -365,7 +378,6 @@ public class PageResource {
 		}
 
 		String data = null;
-
 		try {
 			JsonNode jsonNode = objectMapper.readTree(body);
 			String pageTitle = jsonNode.get("title").asText();

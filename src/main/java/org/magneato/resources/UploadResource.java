@@ -94,6 +94,10 @@ public class UploadResource {
             return "{" + uploadInfo.toJson() + "}";
         }
         return ""; // TODO some kind of error
+        // https://github.com/blueimp/jQuery-File-Upload/wiki/Setup
+        // https://github.com/blueimp/jQuery-File-Upload/wiki
+
+        // {"files":[{"name":"FF4D00-0.8.png","size":false,"type":"image\/png","error":"File upload aborted","deleteUrl":"http:\/\/www.alpacajs.org\/fileupload\/index.php?file=FF4D00-0.8.png","deleteType":"DELETE"}]}
     }
 
     // how do we secure this?, referrer, then check we have rights?
@@ -112,12 +116,21 @@ public class UploadResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/delete/{filename : .+}")
     public Response delete(@PathParam("filename") String fileName,
-            @Context SecurityContext security) throws IOException {
+            @Context HttpServletRequest request,
+            @Context SecurityContext security
+    ) throws IOException {
         log.debug("delete " + fileName + " imageDir " + imageDir);
+
+        // what perms? they depend on the owner file
+        // we need to recover file, check the resource we are trying to delete belongs to file then check perms on file
+        String id = pageUtils.getId(request.getHeader("referer"));
+        if (id != null) {
+            log.debug("parent id " + id);
+        }
 
         if (imageDir == null) {
             log.warn("image directory not configured in config.yml");
-            return null;
+            return Response.status(404).build();
         }
 
         String path = imageDir + fileName;
@@ -132,7 +145,9 @@ public class UploadResource {
         }
         log.debug("deleted " + path + " + " + thumbPath);
 
-        return Response.ok().build();
+        //
+        return Response.status(403).build(); // forbidden
+        //return Response.ok().build();
     }
 
     /*
