@@ -22,34 +22,29 @@ public class PageUtils {
 	/**
 	 * Get the parent page id from the referrer
 	 * 
-	 * @param referrer - parent page url
+	 * @param referrer
+	 *            - parent page url
 	 * @return returns parent id if referrer not null, null otherwise
 	 */
-	public String getId(String referrer) {
+	public static String getId(String referrer) {
 		String id = null;
 		if (referrer != null) {
-
-			// format is (in theory) http[s]://host[:port]/id/url
-			int sep = -1;
-			String path = null;
-			try {
-				path = new URL(referrer).getPath();
-				sep = path.lastIndexOf('/');
-			} catch (MalformedURLException e) {
-				e.printStackTrace();
-			}
-			log.debug("separator " + sep);
+			// format is (in theory) http[s]://host[:port]/[action/]id/url
+			int sep = referrer.lastIndexOf('/');
 			if (sep > 0) {
-				id = path.substring(1, sep);
+				referrer = referrer.substring(0, sep);
+				sep = referrer.lastIndexOf('/');
+				if (sep != -1) {
+					id = referrer.substring(sep + 1);
+				}
 			}
 		}
-		log.debug("parent " + id);
+
 		return id;
 	}
 
 	/*
-	 * Object is not enclosed in braces
-	 * TODO change to take JsonNode
+	 * Object is not enclosed in braces TODO change to take JsonNode
 	 */
 	public String cloneContent(String content) {
 		StringBuilder cloned = new StringBuilder();
@@ -91,20 +86,20 @@ public class PageUtils {
 
 		return cloned.toString();
 	}
-	
+
 	public void treeTraversalSolution() {
-	    try {
-	        ObjectMapper mapper = new ObjectMapper();
-	        // use the ObjectMapper to read the json string and create a tree
-	        JsonNode node = mapper.readTree(new File("Persons.json"));
-	        Iterator<String> fieldNames = node.fieldNames();
-	        while (fieldNames.hasNext()) {
-	            
-	            fieldNames.next();
-	        }
-	    } catch (IOException ex) {
-	        ex.printStackTrace();
-	    }
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			// use the ObjectMapper to read the json string and create a tree
+			JsonNode node = mapper.readTree(new File("Persons.json"));
+			Iterator<String> fieldNames = node.fieldNames();
+			while (fieldNames.hasNext()) {
+
+				fieldNames.next();
+			}
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
 	}
-	 
+
 }

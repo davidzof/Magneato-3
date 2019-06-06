@@ -28,8 +28,8 @@
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.js"></script>
  
     <!-- alpaca -->
-    <link type="text/css" href="//code.cloudcms.com/alpaca/1.5.27/bootstrap/alpaca.min.css" rel="stylesheet" />
-    <script type="text/javascript" src="//code.cloudcms.com/alpaca/1.5.27/bootstrap/alpaca.min.js"></script>
+    <script src="/library/alpaca/bootstrap/alpaca.css"></script>
+    <script src="/library/alpaca/bootstrap/alpaca.js"></script>
 </head>
 <body>
 <div class="container">

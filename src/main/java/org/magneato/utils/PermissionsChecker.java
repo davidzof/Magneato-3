@@ -3,6 +3,7 @@ package org.magneato.utils;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.SecurityContext;
@@ -37,10 +38,10 @@ public class PermissionsChecker {
 		specialRoles = Collections.unmodifiableMap(aMap);
 	}
 
-	public static boolean canDelete(String role, SecurityContext security,
-			String owner, String group, int perms) {
+	public static boolean canDelete(SecurityContext security,
+			String owner, List<String> groups, int perms) {
 
-		return PermissionsChecker.isAllowed(role, security, owner, group, perms,
+		return PermissionsChecker.isAllowed(security, owner, groups, perms,
 				PermissionsChecker.DELETE);
 	}
 
@@ -48,8 +49,8 @@ public class PermissionsChecker {
 	 * Check if admin - special super user role otherwise check if same role as
 	 * file
 	 */
-	private static boolean isAllowed(String role, SecurityContext security,
-			String owner, String group, int resourcePerms, int allowedPerms) {
+	private static boolean isAllowed(SecurityContext security,
+			String owner, List<String> groups, int resourcePerms, int allowedPerms) {
 		if (security == null) {
 			// not logged in
 			return false;
@@ -69,12 +70,12 @@ public class PermissionsChecker {
 
 		}
 
-		// check resource permissions
+		// check resource permissions for principal
 		Principal principal = security.getUserPrincipal();
 		if (principal != null) {
 			String user = principal.getName();
 			if (user.equals(owner)) {
-				// check permis
+				// check perms
 				int perms = resourcePerms & OWNER & allowedPerms;
 				System.out.println("perms " + perms);
 				if (perms > 0) {
@@ -82,6 +83,10 @@ public class PermissionsChecker {
 				}
 			}
 		}
+		
+		// check groups, other than special roles
+		
+		// check other
 
 		return false;
 	}

@@ -37,9 +37,12 @@ public class PermissionCheckerTest {
 	@Test
 	public void checkNotAdminCantDelete() throws IOException {
 		createMocks();
-		boolean isAllowed = PermissionsChecker.canDelete("", security, "", "",
+		boolean isAllowed = PermissionsChecker.canDelete(security, "", null,
 				0b1110111111110000);
 		Assert.assertFalse(isAllowed);
+		
+		int i = 0b1111111111000000;
+		System.out.println(i);
 	}
 
 	/*
@@ -48,7 +51,7 @@ public class PermissionCheckerTest {
 	@Test
 	public void checkAdminCanDelete() throws IOException {
 		createMocks();
-		boolean isAllowed = PermissionsChecker.canDelete("", security, "", "",
+		boolean isAllowed = PermissionsChecker.canDelete(security, "", null,
 				0b0001000000000000);
 		Assert.assertTrue(isAllowed);
 
@@ -58,8 +61,8 @@ public class PermissionCheckerTest {
 	public void checkOwnerCanDelete() throws IOException {
 		createMocks();
 		Mockito.when(security.isUserInRole("")).thenReturn(false);
-		boolean isAllowed = PermissionsChecker.canDelete("", security,
-				"testuser", "", 0b111101110000);
+		boolean isAllowed = PermissionsChecker.canDelete(security,
+				"testuser", null, 0b111101110000);
 		Assert.assertTrue(isAllowed);
 
 	}
@@ -68,8 +71,8 @@ public class PermissionCheckerTest {
 	public void checkOwnerCantDelete() throws IOException {
 		createMocks();
 		Mockito.when(security.isUserInRole("")).thenReturn(false);
-		boolean isAllowed = PermissionsChecker.canDelete("", security,
-				"testuser", "", 0b111001110000);
+		boolean isAllowed = PermissionsChecker.canDelete(security,
+				"testuser", null, 0b111001110000);
 		Assert.assertFalse(isAllowed);
 
 	}
