@@ -1,7 +1,11 @@
 package org.magneato.resources;
 
+import io.dropwizard.bundles.assets.AssetsConfiguration;
+
 import java.io.IOException;
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.SecurityContext;
@@ -29,7 +33,7 @@ public class PageResourceTest {
 
 	@Before
 	public void setUp() {
-		 pageUtils = new PageUtils();
+		pageUtils = new PageUtils();
 		MockitoAnnotations.initMocks(this);
 	}
 
@@ -50,6 +54,7 @@ public class PageResourceTest {
 		Principal principal = new UserPrincipal("testuser", null);
 		Mockito.when(security.getUserPrincipal()).thenReturn(principal);
 
+		
 		return new PageResource(configuration, repository);
 	}
 
@@ -65,7 +70,7 @@ public class PageResourceTest {
 	public void clonedObjectElement() throws IOException {
 		PageResource pageResource = createMocks();
 		JsonNode rootNode = objectMapper.reader().readTree(content2);
-		
+
 		String cloned = pageUtils.cloneContent(rootNode.toString());
 		System.out.println("cloned " + cloned);
 	}

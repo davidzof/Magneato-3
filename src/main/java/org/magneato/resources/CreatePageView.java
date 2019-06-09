@@ -1,10 +1,10 @@
 package org.magneato.resources;
 
 import io.dropwizard.views.View;
-import org.magneato.service.Template;
 
-import java.io.IOException;
 import java.util.List;
+
+import org.magneato.service.Template;
 
 public class CreatePageView extends View {
 	final List<Template> templates;

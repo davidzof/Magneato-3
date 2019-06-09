@@ -3,10 +3,12 @@ package org.magneato.resources;
 import static org.magneato.utils.StringHelper.toSlug;
 import io.dropwizard.views.View;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
@@ -26,7 +28,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 
-import org.apache.commons.text.StringEscapeUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.magneato.MagneatoConfiguration;
 import org.magneato.managed.ManagedElasticClient;
 import org.magneato.service.MetaData;
@@ -53,8 +55,7 @@ public class PageResource {
 
 	private final Logger log = LoggerFactory.getLogger(this.getClass()
 			.getName());
-
-	PageUtils pageUtils;
+	private final PageUtils pageUtils;
 
 	public PageResource(MagneatoConfiguration configuration,
 			ManagedElasticClient repository) {
@@ -68,10 +69,10 @@ public class PageResource {
 		String body = repository.get("1");
 		if (body == null) {
 			log.info("creating default page");
-			body = "{\"title\":\"Home Page\",\"content\":\"Welcome to Magneato CMS\",\"metadata\":{\"edit_template\":\"simple\",\"display_template\":\"simple\",\"create_date\":\"2018-01-01 00:01:01\",\"ip_addr\":\"127.0.0.1\",\"owner\":\"admin\",\"canonical_url\":\"index\",\"groups\":[\"editors\"],\"perms\":11275}}";
+			// perms = CRUx|CRUx|CRxx|xxxx
+			body = "{\"title\":\"Home Page\",\"content\":\"Welcome to Magneato CMS\",\"metadata\":{\"edit_template\":\"simple\",\"display_template\":\"simple\",\"create_date\":\"2018-01-01 00:01:01\",\"ip_addr\":\"127.0.0.1\",\"owner\":\"admin\",\"canonical_url\":\"index\",\"groups\":[\"editors\"],\"perms\":61120}}";
 			repository.insert("1", body);
 		}
-
 	}
 
 	/** default page, insert this at startup **/
@@ -153,33 +154,36 @@ public class PageResource {
 					groups.add(groupNode.get(i).asText());
 				}// for
 				int perms = metadata.get("perms").asInt();
-				System.out.println(">>> delete " + owner + " " + perms);
 
-				if (PermissionsChecker.canDelete(security, owner, groups, perms)) {
+				if (PermissionsChecker
+						.canDelete(security, owner, groups, perms)) {
 					// delete any images first
 					JsonNode files = objectMapper.readTree(body).get("files");
 
-					if (files != null) {
+					// TODO don't allow file to be deleted with images attached
+					if (files != null && files.size() > 0) {
 						for (int i = 0; i < files.size(); i++) {
-							JsonNode file = files.get(i);
-							System.out.println(">>> file to delete "
-								+ file.get("deleteUrl").asText());
-						}// for
-					}
-System.out.println("delete page " + id);
-					// if (repository.delete(id) != null) {
-					String message = "Page deleted " + uri;
-					return "{\"url\":\"/" + id + "/" + uri + "\", \"message\":\"" + message + "\"}";
-					// }
-				}
+							errMsg = "Delete attachments first " + uri;
 
-				errMsg = "Error deleting page " + uri;
+						}// for
+					} else {
+						if (repository.delete(id) != null) {
+							String message = "Page deleted " + uri;
+							// redirect to confirmation page
+							return "{\"url\":\"/" + id + "/" + uri
+									+ "\", \"message\":\"" + message + "\"}";
+						}
+					}
+				} else {
+
+					errMsg = "You don't have permission to delete " + uri;
+				}
 			} catch (IOException e) {
 				log.equals(e.getMessage());
 				errMsg = e.getMessage();
 			}
 		} else {
-			errMsg = "no such page" +id + "/" + uri;
+			errMsg = "no such page" + id + "/" + uri;
 		}
 
 		return "{\"error\":\"" + errMsg + "\"}";
@@ -210,7 +214,7 @@ System.out.println("delete page " + id);
 		log.debug("create(" + editTemplate + ", " + displayTemplate + ")");
 
 		if (clone || child) {
-			String id = pageUtils.getId(request.getHeader("referer"));
+			String id = PageUtils.getId(request.getHeader("referer"));
 			if (id != null) {
 				String body = repository.get(id); // get parent
 				if (body != null) {
@@ -341,17 +345,16 @@ System.out.println("delete page " + id);
 		// meta data is: create date, owner, editTemplate, displayTemplate
 		// Security.canCreate(uri);
 
-
 		String data = null;
 		try {
 			JsonNode jsonNode = objectMapper.readTree(body);
 			if (security.isUserInRole("ADMIN")) {
 				// TODO fix this
-				System.out.println("************ >>> admin can update meta data");
+				System.out
+						.println("************ >>> admin can update meta data");
 			}
 
 			body = jsonNode.toString();
-			System.out.println(">> body " + body);
 			repository.insert(id, body);
 			data = "{\"url\":\"/" + id + "/" + uri + "\"}";
 		} catch (IOException e) {

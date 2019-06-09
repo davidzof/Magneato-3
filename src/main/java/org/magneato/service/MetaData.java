@@ -31,10 +31,11 @@ public class MetaData {
 		}
 	};
 
+	// TODO default perms from configuration file
 	public MetaData() {
 		createDate = System.currentTimeMillis();
 		groups.add("editors");
-		perms = 11275;
+		perms = 65472;
 		canonicalUrl = "";
 	}
 
@@ -118,6 +119,8 @@ public class MetaData {
 
 		return sb.toString();
 	}
+	
+	// TODO set real perms value
 
 	public String toJson() {
 		return "{ \"edit_template\": \"" + editTemplate + "\","

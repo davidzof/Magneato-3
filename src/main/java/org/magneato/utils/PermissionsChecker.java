@@ -62,7 +62,6 @@ public class PermissionsChecker {
 			if (security.isUserInRole(specialRole)) {
 				int rolePerms = entry.getValue();
 				int perms = rolePerms & allowedPerms & resourcePerms;
-				System.out.println("perms " + perms);
 				if (perms > 0) {
 					return true;
 				}
@@ -77,7 +76,6 @@ public class PermissionsChecker {
 			if (user.equals(owner)) {
 				// check perms
 				int perms = resourcePerms & OWNER & allowedPerms;
-				System.out.println("perms " + perms);
 				if (perms > 0) {
 					return true;
 				}

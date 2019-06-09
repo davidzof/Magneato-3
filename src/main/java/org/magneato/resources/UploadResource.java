@@ -127,7 +127,7 @@ public class UploadResource {
 		/* Permissions depend on the owner file. Note we don't trust the referer information, it can be forged. We only remove the real image files
 		 * if the user has delete permissions on the parent.
 		 */
-		String parent = pageUtils.getId(request.getHeader("referer"));
+		String parent = PageUtils.getId(request.getHeader("referer"));
 		if (parent != null) {
 			String parentJSON = repository.get(parent);
 			log.debug("parent " + parentJSON);
@@ -145,8 +145,6 @@ public class UploadResource {
 			for (int i = 0; i < groupNode.size(); i++) {
 				groups.add(groupNode.get(i).asText());
 			}
-			
-			System.out.println(">>> delete " + owner + " " + perms);
 
 			JsonNode files = jsonNode.get("files");
 			if (files != null) {
@@ -155,7 +153,7 @@ public class UploadResource {
 					if (name.equals(fileName)) {
 						// can delete real files if we have delete permissions
 						if (PermissionsChecker.canDelete(security, owner, groups, perms)) {
-							deleteImages(fileName);
+							deleteImage(fileName);
 						}
 						
 					}
@@ -167,12 +165,13 @@ public class UploadResource {
 		return "{\"files\": [{\"" + fileName + "\": true}]}";
 	}
 	
-	private boolean deleteImages(String fileName) {
+	private boolean deleteImage(String fileName) {
 		if (imageDir == null) {
 			log.warn("image directory not configured in config.yml");
 		}
 
 		String path = imageDir + fileName;
+
 		if (!(new File(path)).delete()) {
 			log.error("could not delete " + path);
 			return false;
@@ -357,7 +356,7 @@ public class UploadResource {
 	@Path("/gpxview")
 	@RolesAllowed({ "ADMIN", "EDITOR" })
 	public View uploadView(@Context HttpServletRequest request) {
-		String id = pageUtils.getId(request.getHeader("referer"));
+		String id = PageUtils.getId(request.getHeader("referer"));
 		if (id == null) {
 			id = ""; // no referrer
 		}

@@ -31,7 +31,6 @@ public class UploadHandler {
 		case "image/png":
 			// always create as jpg
 			thumbName = "thumb_" + FilenameUtils.getBaseName(fileName) + ".jpg";
-			System.out.println("thumbname " + thumbName);
 			BufferedImage img = new BufferedImage(100, 100,
 					BufferedImage.TYPE_INT_RGB);
 			img.createGraphics().drawImage(
@@ -92,8 +91,6 @@ public class UploadHandler {
 			int length = map.getLength();
 			for (int i = 0; i < length; i++) {
 				Node attr = map.item(i);
-				System.out.print(" " + attr.getNodeName() + "=\""
-						+ attr.getNodeValue() + "\"");
 			}
 		}
 

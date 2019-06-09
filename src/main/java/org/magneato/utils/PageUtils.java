@@ -2,8 +2,6 @@ package org.magneato.utils;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -12,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
 
 public class PageUtils {
 	private final ObjectMapper objectMapper = new ObjectMapper();
