@@ -163,15 +163,15 @@ public class PageResource {
 					// TODO don't allow file to be deleted with images attached
 					if (files != null && files.size() > 0) {
 						for (int i = 0; i < files.size(); i++) {
-							errMsg = "Delete attachments first " + uri;
+							errMsg = "Cannot Delete: Please edit and delete all attachments first";
 
 						}// for
 					} else {
 						if (repository.delete(id) != null) {
 							String message = "Page deleted " + uri;
-							// redirect to confirmation page
-							return "{\"url\":\"/" + id + "/" + uri
-									+ "\", \"message\":\"" + message + "\"}";
+							// redirect to Home Page
+							return "{\"url\":\"/" + "\", \"message\":\""
+									+ message + "\"}";
 						}
 					}
 				} else {
@@ -183,7 +183,7 @@ public class PageResource {
 				errMsg = e.getMessage();
 			}
 		} else {
-			errMsg = "no such page" + id + "/" + uri;
+			errMsg = "No such page" + id + "/" + uri;
 		}
 
 		return "{\"error\":\"" + errMsg + "\"}";
@@ -219,6 +219,7 @@ public class PageResource {
 				String body = repository.get(id); // get parent
 				if (body != null) {
 					// clone is always a child page
+					int perms = 0;
 					try {
 						// only clone edit/display template, and fields
 						// marked as clonable
@@ -227,6 +228,7 @@ public class PageResource {
 						editTemplate = metadata.get("edit_template").asText();
 						displayTemplate = metadata.get("display_template")
 								.asText();
+						perms = metadata.get("perms").asInt();
 
 					} catch (IOException e) {
 						log.error(e.getMessage());
@@ -240,6 +242,7 @@ public class PageResource {
 					MetaData metaData = new MetaData()
 							.setEditTemplate(editTemplate)
 							.setViewTemplate(displayTemplate)
+							.setPerms(perms)
 							.setIPAddr(request.getRemoteAddr()).addRelation(id)
 							.setOwner(security.getUserPrincipal().getName());
 

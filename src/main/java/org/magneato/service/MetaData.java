@@ -47,6 +47,15 @@ public class MetaData {
 	public String getEditTemplate() {
 		return this.editTemplate;
 	}
+	
+	public MetaData setPerms(int perms) {
+		this.perms = perms;
+		return this;
+	}
+
+	public int getPerms() {
+		return this.perms;
+	}
 
 	public MetaData setIPAddr(String ipAddr) {
 		this.ipAddr = ipAddr;
@@ -119,14 +128,12 @@ public class MetaData {
 
 		return sb.toString();
 	}
-	
-	// TODO set real perms value
 
 	public String toJson() {
 		return "{ \"edit_template\": \"" + editTemplate + "\","
 				+ "\"display_template\" : \"" + viewTemplate + "\","
 				+ "\"ip_addr\" : \"" + ipAddr + "\"," + "\"owner\" : \""
-				+ this.owner + "\"," + "\"perms\" : 11275,"
+				+ this.owner + "\"," + "\"perms\":" + this.perms + ","
 				+ "\"canonical_url\" : \"" + this.canonicalUrl + "\","
 				+ "\"create_date\": \""
 				+ sdf.get().format(new Date(createDate)) + "\","

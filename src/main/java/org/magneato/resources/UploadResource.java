@@ -300,7 +300,7 @@ public class UploadResource {
 			}
 
 			// Step.3 create meta data ???
-			// TODO edit/view template should be parameter
+			// TODO edit/view template should be parameter - or come from parent if cloning a parent page?
 			MetaData metaData = new MetaData().setEditTemplate("tripreport")
 					.setViewTemplate("tripreport")
 					.setIPAddr(request.getRemoteAddr())
@@ -324,6 +324,7 @@ public class UploadResource {
 				String parentJSON = repository.get(parent);
 				log.debug("parent " + parentJSON);
 				try {
+					// TODO inherit parent perms, view and edit template?
 					JsonNode root = mapper.readTree(parentJSON);
 					JsonNode contentTree = mapper.readTree(content);
 					HashMap<String, String> clonableItems = addKeys("", root,
@@ -342,9 +343,6 @@ public class UploadResource {
 				}
 
 			}
-
-			// Step.4 merge with parent data
-
 		} else {
 			return new FTLView("error", "Unable to process GPX file");
 		}
