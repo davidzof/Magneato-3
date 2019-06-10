@@ -10,14 +10,16 @@ public class UploadInfo {
 	private String name;
 
 	public UploadInfo(String fileName, long len, String url, String thumbUrl,
-			String mimeType, String subDir) {
+			String mimeType, String subDir, String path) {
 		super();
 		this.fileName = fileName;
+		this.name = fileName;
 		this.len = len;
 		this.url = url;
 		this.thumbUrl = thumbUrl;
 		this.mimeType = mimeType;
 		this.subDir = subDir;
+		this.name = path;
 	}
 
 	public String getName() {

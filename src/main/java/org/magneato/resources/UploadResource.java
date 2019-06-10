@@ -19,6 +19,8 @@ import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -248,7 +250,7 @@ public class UploadResource {
 			thumbUrl = IMAGEPATH + "/" + subDir + thumbName;
 		}
 		UploadInfo uploadInfo = new UploadInfo(fileName, len, url, thumbUrl,
-				mimeType, subDir);
+				mimeType, subDir, imageDir + subDir + fileName);
 
 		return uploadInfo;
 	}
@@ -262,11 +264,13 @@ public class UploadResource {
 	 * @return
 	 */
 	@POST
-	@Path("/uploadgpx/{parent}")
+	//@Path("/uploadgpx/{parent : .+}")
+	@Path("/uploadgpx/{parent : (.+)?}")
+	//@Path("/uploadgpx")
 	@RolesAllowed({ "ADMIN", "EDITOR" })
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.TEXT_HTML)
-	public View uploadGPX(@QueryParam("parent") String parent,
+	public View uploadGPX(@PathParam("parent") String parent,
 			@FormDataParam("file") final FormDataBodyPart body,
 			@FormDataParam("file") final InputStream fileInputStream,
 			@Context HttpServletRequest request,
@@ -287,7 +291,7 @@ public class UploadResource {
 		UploadInfo uploadInfo = saveFile(body, fileInputStream);
 		if (uploadInfo != null) {
 			// Step.2 parse gpx data
-			GpxParser gpxParser = new GpxParser();
+			GpxParser gpxParser = new GpxParser();			
 
 			File initialFile = new File(uploadInfo.getName());
 			InputStream gpxStream;
@@ -353,10 +357,10 @@ public class UploadResource {
 	@GET
 	@Path("/gpxview")
 	@RolesAllowed({ "ADMIN", "EDITOR" })
-	public View uploadView(@Context HttpServletRequest request) {
+	public View uploadView(@DefaultValue("false") @QueryParam("clone") boolean clone, @Context HttpServletRequest request) {
 		String id = PageUtils.getId(request.getHeader("referer"));
-		if (id == null) {
-			id = ""; // no referrer
+		if (id == null || clone == false) {
+			id = ""; // no parent
 		}
 		FTLView view = new FTLView("uploadgpx", id);
 
