@@ -5,13 +5,17 @@ import org.magneato.utils.StringHelper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import java.util.ResourceBundle;
+
 public class SearchView extends ContentView {
 	Pagination paginater;
+	ResourceBundle resourceBundle;
 
-	public SearchView(Pagination paginater) {
+	public SearchView(Pagination paginater, ResourceBundle resourceBundle) {
 		super("search.ftl");
 		
 		this.paginater = paginater;
+		this.resourceBundle = resourceBundle;
 	}
 	
 	public Pagination getPaginator() {
@@ -20,5 +24,11 @@ public class SearchView extends ContentView {
 	
 	public JsonNode toJsonNode(String json) {
 		return StringHelper.toJsonNode(json);
+	}
+
+	public String message(String key) {
+		System.out.println("key " + key);
+		System.out.println("rb " + resourceBundle);
+		return resourceBundle.getString(key);
 	}
 }

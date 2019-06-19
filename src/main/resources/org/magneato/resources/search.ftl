@@ -27,13 +27,13 @@
           <#list paginator.facetResults?keys as prop>
             <#assign facetList = paginator.facetResults[prop]>
             <#if facetList?size == 1>
-              <h2>${prop}</h2>
+              <h2>${message(prop)}</h2>
               <p>${facetList[0].key} (${facetList[0].value})</p>
             <#else>
               <div class="row" style="margin-top:15px;">
                 <div class="dropdown">
                   <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" ">
-                  ${prop}
+                  ${message(prop)}
                   </button>
                   <ul class="dropdown-menu">
                     <#list facetList as facet>

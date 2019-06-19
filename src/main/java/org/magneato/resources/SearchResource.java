@@ -1,6 +1,7 @@
 package org.magneato.resources;
 
 import java.io.IOException;
+import java.util.ResourceBundle;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -22,12 +23,14 @@ import org.slf4j.LoggerFactory;
  */
 @Path("/")
 public class SearchResource {
-	private ManagedElasticClient repository;
+	private final ManagedElasticClient repository;
+	private ResourceBundle resourceBundle;
 	private final Logger log = LoggerFactory.getLogger(this.getClass()
 			.getName());
 
 	public SearchResource(ManagedElasticClient repository) {
 		this.repository = repository;
+		this.resourceBundle = ResourceBundle.getBundle("common.searchbundle");
 	}
 
 	@GET
@@ -44,7 +47,7 @@ public class SearchResource {
 		}	
 		Pagination pagination = repository.generalSearch(page * size, size,
 				query);
-		return new SearchView(pagination);
+		return new SearchView(pagination, resourceBundle);
 	}
 
 	/*
@@ -66,7 +69,7 @@ public class SearchResource {
 			facets = null;
 		}
 		Pagination pagination = repository.search(page * size, size, query, facets);
-		return new SearchView(pagination);
+		return new SearchView(pagination, resourceBundle);
 	}
 
 	
@@ -79,7 +82,7 @@ public class SearchResource {
 			throws IOException {
 
 		Pagination pagination = repository.generalSearch(from, size, query);
-		return new SearchView(pagination);
+		return new SearchView(pagination, resourceBundle);
 	}
 
 }
