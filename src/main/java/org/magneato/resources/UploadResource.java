@@ -126,8 +126,10 @@ public class UploadResource {
 			@Context SecurityContext security) throws IOException {
 		log.debug("delete " + fileName + " imageDir " + imageDir);
 
-		/* Permissions depend on the owner file. Note we don't trust the referer information, it can be forged. We only remove the real image files
-		 * if the user has delete permissions on the parent.
+		/*
+		 * Permissions depend on the owner file. Note we don't trust the referer
+		 * information, it can be forged. We only remove the real image files if
+		 * the user has delete permissions on the parent.
 		 */
 		String parent = PageUtils.getId(request.getHeader("referer"));
 		if (parent != null) {
@@ -135,7 +137,7 @@ public class UploadResource {
 			log.debug("parent " + parentJSON);
 
 			JsonNode jsonNode = objectMapper.readTree(parentJSON);
-			
+
 			/*
 			 * Check, if ADMIN group - like superuser
 			 */
@@ -154,19 +156,19 @@ public class UploadResource {
 					String name = files.get(i).get("name").asText();
 					if (name.equals(fileName)) {
 						// can delete real files if we have delete permissions
-						if (PermissionsChecker.canDelete(security, owner, groups, perms)) {
+						if (PermissionsChecker.canDelete(security, owner,
+								groups, perms)) {
 							deleteImage(fileName);
 						}
-						
+
 					}
 				}// for
 			}
 		}
-	
 
 		return "{\"files\": [{\"" + fileName + "\": true}]}";
 	}
-	
+
 	private boolean deleteImage(String fileName) {
 		if (imageDir == null) {
 			log.warn("image directory not configured in config.yml");
@@ -225,7 +227,8 @@ public class UploadResource {
 				subDir = "";
 			}
 
-			outputPath = FileSystems.getDefault().getPath(imageDir + subDir + fileName);
+			outputPath = FileSystems.getDefault().getPath(
+					imageDir + subDir + fileName);
 		} while (outputPath != null && Files.exists(outputPath));
 
 		long len = 0;
@@ -264,9 +267,9 @@ public class UploadResource {
 	 * @return
 	 */
 	@POST
-	//@Path("/uploadgpx/{parent : .+}")
+	// @Path("/uploadgpx/{parent : .+}")
 	@Path("/uploadgpx/{parent : (.+)?}")
-	//@Path("/uploadgpx")
+	// @Path("/uploadgpx")
 	@RolesAllowed({ "ADMIN", "EDITOR" })
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.TEXT_HTML)
@@ -291,7 +294,7 @@ public class UploadResource {
 		UploadInfo uploadInfo = saveFile(body, fileInputStream);
 		if (uploadInfo != null) {
 			// Step.2 parse gpx data
-			GpxParser gpxParser = new GpxParser();			
+			GpxParser gpxParser = new GpxParser();
 
 			File initialFile = new File(uploadInfo.getName());
 			InputStream gpxStream;
@@ -304,7 +307,8 @@ public class UploadResource {
 			}
 
 			// Step.3 create meta data ???
-			// TODO edit/view template should be parameter - or come from parent if cloning a parent page?
+			// TODO edit/view template should be parameter - or come from parent
+			// if cloning a parent page?
 			MetaData metaData = new MetaData().setEditTemplate("tripreport")
 					.setViewTemplate("tripreport")
 					.setIPAddr(request.getRemoteAddr())
@@ -357,7 +361,9 @@ public class UploadResource {
 	@GET
 	@Path("/gpxview")
 	@RolesAllowed({ "ADMIN", "EDITOR" })
-	public View uploadView(@DefaultValue("false") @QueryParam("clone") boolean clone, @Context HttpServletRequest request) {
+	public View uploadView(
+			@DefaultValue("false") @QueryParam("clone") boolean clone,
+			@Context HttpServletRequest request) {
 		String id = PageUtils.getId(request.getHeader("referer"));
 		if (id == null || clone == false) {
 			id = ""; // no parent
@@ -369,8 +375,9 @@ public class UploadResource {
 
 	private void setTokenValue(JsonNode root, String path, String value) {
 		String[] keys = path.split("/");
+		String key = null;
 		for (int i = 1; i < keys.length; i++) {
-			String key = keys[i];
+			key = keys[i];
 			JsonNode nextToken = root.get(key);
 			if (nextToken == null) {
 				return;
@@ -382,8 +389,12 @@ public class UploadResource {
 				}
 			}
 			root = nextToken;
+
 		}// for
-		((ObjectNode) root).put(keys[keys.length - 1], value);
+		String oldValue = ((ObjectNode) root).get(key).asText();
+		if (oldValue == null || oldValue.isEmpty()) {
+			((ObjectNode) root).put(keys[keys.length - 1], value);
+		}
 	}
 
 	private HashMap<String, String> addKeys(String path, JsonNode jsonNode,
