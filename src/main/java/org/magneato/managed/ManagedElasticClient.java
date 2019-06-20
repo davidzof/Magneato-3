@@ -176,9 +176,9 @@ public class ManagedElasticClient implements Managed {
 
 		log.debug("search " + query + " facets " + facets);
 		Pagination pagination = new Pagination();
-		pagination.setQuery(query);
+		//pagination.setQuery(query);
 		pagination.setFacets(facets);
-		pagination.setSize(size);
+		//pagination.setSize(size);
 
 		SearchRequestBuilder searchBuilder = client
 				.prepareSearch(configuration.getIndexName())
@@ -198,7 +198,10 @@ public class ManagedElasticClient implements Managed {
 				if (index != -1) {
 					String field = token.substring(0, index);
 					String value = token.substring(index + 1);
-					log.debug(field + " : " + token);
+					if (field.equals("metadata.edit_template")) {
+						pagination.setEditTemplate(value);
+					}
+					log.debug(field + " : " + value);
 					qb.filter(QueryBuilders.matchQuery(field, value));
 
 				}

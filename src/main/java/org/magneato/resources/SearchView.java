@@ -27,8 +27,10 @@ public class SearchView extends ContentView {
 	}
 
 	public String message(String key) {
-		System.out.println("key " + key);
-		System.out.println("rb " + resourceBundle);
 		return resourceBundle.getString(key);
+	}
+	
+	public String message(String nameSpace, String key) {
+		return resourceBundle.getString(nameSpace + "." + key);
 	}
 }

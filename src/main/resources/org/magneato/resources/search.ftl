@@ -10,6 +10,7 @@
   </div>
 
   <#if paginator.total == 0>
+  <div class="row">
     <h2>Sorry, no matches for your search</h2>
     <b>Some tips:</b>
     <ul>
@@ -17,7 +18,7 @@
       <li>Try different keywords.
       <li>Try more general keywords.
     </ul>
-  
+  <div>
   <#else>
 
     <div class="row">
@@ -27,13 +28,14 @@
           <#list paginator.facetResults?keys as prop>
             <#assign facetList = paginator.facetResults[prop]>
             <#if facetList?size == 1>
-              <h2>${message(prop)}</h2>
+            
+              <h2>${message(paginator.editTemplate, prop)}</h2>
               <p>${facetList[0].key} (${facetList[0].value})</p>
-            <#else>
+            <#elseif (facetList?size > 1)>
               <div class="row" style="margin-top:15px;">
                 <div class="dropdown">
                   <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" ">
-                  ${message(prop)}
+                  ${message(paginator.editTemplate, prop)}
                   </button>
                   <ul class="dropdown-menu">
                     <#list facetList as facet>

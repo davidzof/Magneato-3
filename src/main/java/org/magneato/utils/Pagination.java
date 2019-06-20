@@ -9,13 +9,14 @@ import org.apache.commons.lang3.tuple.Pair;
  * Paging tool class
  */
 public class Pagination {
-	long total;
-	long current;
-	long size;
-	String query;
-	String facets;
-	List<String> results;
-	HashMap<String, List<Pair<String, Long>>> facetResults;
+	private long total;
+	private long current;
+	private long size;
+	private String query;
+	private String facets;
+	private String editTemplate;
+	private List<String> results;
+	private HashMap<String, List<Pair<String, Long>>> facetResults;
 
 	public String getQuery() {
 		return query;
@@ -23,6 +24,14 @@ public class Pagination {
 
 	public void setQuery(String query) {
 		this.query = query;
+	}
+	
+	public String getEditTemplate() {
+		return editTemplate;
+	}
+
+	public void setEditTemplate(String editTemplate) {
+		this.editTemplate = editTemplate;
 	}
 
 	public String getFacets() {
