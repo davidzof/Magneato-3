@@ -5,10 +5,15 @@
         "type": "text",
         "boost": 5,
         "index": true,
-        "analyzer": "english"
+        "analyzer": "custom_stopwords_analyzer"
       },
-      "files": {	
-        "properties": {	
+      "content": {
+        "type": "text",
+        "index": true,
+        "analyzer": "custom_stopwords_analyzer"
+      },
+      "files": {
+        "properties": {
           "name": {
             "type": "text",
             "index": false
@@ -24,7 +29,7 @@
           "thumbnailUrl": {
             "type": "text",
             "index": false
-          }	
+          }
         }
       },
       "metadata": {
@@ -43,7 +48,7 @@
           },
           "create_date": {
             "type": "date",
-	    "format": "yyyy-MM-dd HH:mm:ss"
+            "format": "yyyy-MM-dd HH:mm:ss"
           }
         }
       }

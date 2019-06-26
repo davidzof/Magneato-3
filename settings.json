@@ -1,0 +1,39 @@
+{
+  "settings": {
+    "analysis": {
+      "filter": {
+        "custom_stop": {
+          "type": "stop",
+          "stopwords": [
+            "croissant"
+          ]
+        },
+        "english_stop": {
+          "type": "stop",
+          "stopwords": "_english_"
+        },
+        "my_word_delimiter": {
+          "type": "word_delimiter",
+          "preserve_original": "false"
+        },
+        "my_length_filter": {
+          "type": "length",
+          "min": 3
+        }
+      },
+      "analyzer": {
+        "custom_stopwords_analyzer": {
+          "tokenizer": "standard",
+          "filter": [
+            "asciifolding",
+            "lowercase",
+            "my_word_delimiter",
+            "my_length_filter",
+            "custom_stop",
+            "english_stop"
+          ]
+        }
+      }
+    }
+  }
+}

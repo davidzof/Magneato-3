@@ -101,7 +101,44 @@ public class ManagedElasticClient implements Managed {
 	}
 
 	// http://localhost:9200/main-index/_mappings/_doc
-	public void createMapping() {
+	public void createSettings() {
+		File file;
+		BufferedReader reader = null;
+
+		try {
+
+			file = new File("settings.json");
+			reader = new BufferedReader(new FileReader(file));
+
+			StringBuilder settingsSource = new StringBuilder();
+			String line;
+			while ((line = reader.readLine()) != null) {
+				settingsSource.append(line);
+
+			}
+
+			log.debug("ES Json Settings " + settingsSource.toString());
+
+			AcknowledgedResponse response = client.admin().indices()
+					.prepareUpdateSettings(configuration.getIndexName()).setSettings(settingsSource.toString(),XContentType.JSON)
+					.execute().actionGet();
+		} catch (IOException e) {
+
+			e.printStackTrace();
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					log.error(e.getMessage());
+				}
+			}
+		}
+	}
+
+
+	// http://localhost:9200/main-index/_mappings/_doc
+	public void createMappings() {
 		File file;
 		BufferedReader reader = null;
 

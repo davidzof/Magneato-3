@@ -68,7 +68,8 @@ public class MagneatoApplication extends Application<org.magneato.MagneatoConfig
 					// create index if not already existing
 					managedClient.createIndex();
 				}
-				managedClient.createMapping();
+				managedClient.createSettings();
+				managedClient.createMappings();
 
 				// Enable the Jersey security annotations on resources
 				environment.jersey().getResourceConfig()
@@ -99,11 +100,9 @@ public class MagneatoApplication extends Application<org.magneato.MagneatoConfig
 				log.error("Elastic Search Not Found");
 				System.exit(1);
 			}
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage());
+			System.exit(1);
 		}
 
 	}
