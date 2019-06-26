@@ -1,6 +1,18 @@
 package org.magneato.managed;
 
 import io.dropwizard.lifecycle.Managed;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
@@ -126,46 +138,10 @@ public class ManagedElasticClient implements Managed {
         return response.isAcknowledged();
     }
 
-    // http://localhost:9200/main-index/_mappings/_doc
-    public void createSettings() {
-        File file;
-        BufferedReader reader = null;
-
-        try {
-
-            file = new File("settings.json");
-            reader = new BufferedReader(new FileReader(file));
-
-            StringBuilder settingsSource = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                settingsSource.append(line);
-
-            }
-
-            log.debug("ES Json Settings " + settingsSource.toString());
-
-            AcknowledgedResponse response = client.admin().indices()
-                    .prepareUpdateSettings(configuration.getIndexName()).setSettings(settingsSource.toString(), XContentType.JSON)
-                    .execute().actionGet();
-        } catch (IOException e) {
-
-            e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    log.error(e.getMessage());
-                }
-            }
-        }
-    }
-
-    // http://localhost:9200/main-index/_mappings/_doc
-    public void createMappings() {
-        File file;
-        BufferedReader reader = null;
+	// http://localhost:9200/main-index/_mappings/_doc
+	public void createMapping() {
+		File file;
+		BufferedReader reader = null;
 
         try {
 
@@ -234,6 +210,11 @@ public class ManagedElasticClient implements Managed {
         pagination.setQuery(query);
         pagination.setFacets(facets);
         pagination.setSize(size);
+		log.debug("search " + query + " facets " + facets);
+		Pagination pagination = new Pagination();
+		//pagination.setQuery(query);
+		pagination.setFacets(facets);
+		//pagination.setSize(size);
 
         SearchRequestBuilder searchBuilder = client
                 .prepareSearch(configuration.getIndexName())
@@ -255,6 +236,16 @@ public class ManagedElasticClient implements Managed {
                     String value = token.substring(index + 1);
                     log.debug(field + " : " + token);
                     qb.filter(QueryBuilders.matchQuery(field, value));
+			for (String token : tokens) {
+				int index = token.indexOf('=');
+				if (index != -1) {
+					String field = token.substring(0, index);
+					String value = token.substring(index + 1);
+					if (field.equals("metadata.edit_template")) {
+						pagination.setEditTemplate(value);
+					}
+					log.debug(field + " : " + value);
+					qb.filter(QueryBuilders.matchQuery(field, value));
 
                 }
             }
