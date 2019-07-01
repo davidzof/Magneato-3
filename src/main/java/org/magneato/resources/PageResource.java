@@ -3,12 +3,10 @@ package org.magneato.resources;
 import static org.magneato.utils.StringHelper.toSlug;
 import io.dropwizard.views.View;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
@@ -28,7 +26,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriBuilder;
 
-import org.apache.commons.io.FilenameUtils;
 import org.magneato.MagneatoConfiguration;
 import org.magneato.managed.ManagedElasticClient;
 import org.magneato.service.MetaData;

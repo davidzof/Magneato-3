@@ -8,8 +8,6 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
 
-import java.net.UnknownHostException;
-
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
@@ -18,7 +16,11 @@ import org.magneato.core.JettyAuthServerFactory;
 import org.magneato.health.EsClusterHealthCheck;
 import org.magneato.health.EsIndexExistHealthCheck;
 import org.magneato.managed.ManagedElasticClient;
-import org.magneato.resources.*;
+import org.magneato.resources.LoginResource;
+import org.magneato.resources.LogoutResource;
+import org.magneato.resources.PageResource;
+import org.magneato.resources.SearchResource;
+import org.magneato.resources.UploadResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

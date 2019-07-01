@@ -1,6 +1,18 @@
 package org.magneato.managed;
 
 import io.dropwizard.lifecycle.Managed;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
@@ -32,17 +44,6 @@ import org.magneato.service.ElasticSearch;
 import org.magneato.utils.Pagination;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 
 public class ManagedElasticClient implements Managed {
     private static final String INDEXTYPE = "_doc"; // from ES 6.* always _doc

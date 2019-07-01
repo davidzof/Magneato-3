@@ -1,11 +1,7 @@
 package org.magneato.resources;
 
-import io.dropwizard.bundles.assets.AssetsConfiguration;
-
 import java.io.IOException;
 import java.security.Principal;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.SecurityContext;

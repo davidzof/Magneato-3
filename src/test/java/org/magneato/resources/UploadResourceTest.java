@@ -2,7 +2,6 @@ package org.magneato.resources;
 
 import io.dropwizard.bundles.assets.AssetsConfiguration;
 
-import java.io.IOException;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +19,6 @@ import org.magneato.utils.PageUtils;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class UploadResourceTest {
