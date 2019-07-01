@@ -68,7 +68,6 @@ public class MagneatoApplication extends Application<org.magneato.MagneatoConfig
 					// create index if not already existing
 					managedClient.createIndex();
 				}
-				//managedClient.createSettings();
 				managedClient.createMappings();
 
 				// Enable the Jersey security annotations on resources
