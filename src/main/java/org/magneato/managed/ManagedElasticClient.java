@@ -190,9 +190,7 @@ public class ManagedElasticClient implements Managed {
         pagination.setFacets(facets);
         pagination.setSize(size);
         log.debug("search " + query + " facets " + facets);
-        //pagination.setQuery(query);
         pagination.setFacets(facets);
-        //pagination.setSize(size);
 
         SearchRequestBuilder searchBuilder = client
                 .prepareSearch(configuration.getIndexName())
@@ -292,8 +290,8 @@ public class ManagedElasticClient implements Managed {
 
         MultiMatchQueryBuilder multiMatchQueryBuilder = QueryBuilders
                 .multiMatchQuery(query, "title", "content");
-
-        multiMatchQueryBuilder.minimumShouldMatch("75%");
+        multiMatchQueryBuilder.minimumShouldMatch(configuration.getMinShouldMatch());
+        multiMatchQueryBuilder.slop(configuration.getSlop());
         searchBuilder.setQuery(multiMatchQueryBuilder);
 
         SearchResponse response = searchBuilder.get();

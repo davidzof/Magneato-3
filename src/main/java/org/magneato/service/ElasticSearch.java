@@ -6,23 +6,21 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 public class ElasticSearch {
-
     @NotNull
     @JsonProperty
-
     private String hostname;
 
     @NotNull
     @JsonProperty
     private int port;
+    
+    @NotNull
+    @JsonProperty
+    private int slop;
 
     @NotNull
     @JsonProperty
-    private String numberOfShards;
-
-    @NotNull
-    @JsonProperty
-    private String numberOfReplicas;
+    private String minShouldMatch;
 
     @JsonProperty
     private String clusterName;
@@ -47,11 +45,11 @@ public class ElasticSearch {
         return port;
     }
 
-    public String getNumberOfShards() {
-        return numberOfShards;
+    public int getSlop() {
+        return slop;
     }
 
-    public String getNumberOfReplicas() {
-        return numberOfReplicas;
+    public String getMinShouldMatch() {
+        return minShouldMatch;
     }
 }

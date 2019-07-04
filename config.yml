@@ -11,9 +11,10 @@ server:
       port: 9090
 
 #Uploader Configuration
-gpxuploader:
-  template: tripreport
-  contents:
+gpxUploader:
+  template:  "{\"title\":\"%1$s\",\"child\":false,\"activity_c\":\"\",\"trip_date\":\"%11$s\",\"difficulty_c\":{\"rating\":\"\"},\"ski_difficulty_c\":{\"rating\":\"\"},\"technical_c\":{\"imperial\":\"false\",\"orientation\":\"\",\"distance\":%2$.3f,\"climb\":%3$d,\"descent\":%4$d,\"min\":%5$d,\"max\":%6$d,\"location\":{\"lat\":%7$s,\"lon\":%8$s}},%9$s,\"metadata\":%10$s}";
+  editTemplate: tripreport
+  viewTemplate: tripreport
 
 # Default Administrator User, update the password before putting into production
 login: admin
@@ -44,6 +45,8 @@ templates:
       - mtb
 
 elasticSearch:
+  slop: 2
+  minShouldMatch: 75%
   clusterName: elastic-cluster
   indexName: my-index
   hostname: localhost
